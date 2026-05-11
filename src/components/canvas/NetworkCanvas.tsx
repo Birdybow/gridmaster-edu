@@ -9,9 +9,10 @@ import 'reactflow/dist/style.css';
 import { useNetworkStore } from '../../store/useNetworkStore.js';
 import { BusNode } from './BusNode.js';
 import { LineEdge } from './LineEdge.js';
-import type { Bus, Line, Transformer } from '../../types/index.js';
+import { CompensatorNode } from './CompensatorNode.js';
+import type { Bus, Line, Transformer, Compensator } from '../../types/index.js';
 
-const nodeTypes = { busNode: BusNode };
+const nodeTypes = { busNode: BusNode, compensatorNode: CompensatorNode };
 const edgeTypes = { lineEdge: LineEdge };
 
 function busToNode(bus: Bus): Node {
@@ -33,6 +34,15 @@ function lineToEdge(line: Line): Edge {
   };
 }
 
+function compensatorToNode(c: Compensator): Node {
+  return {
+    id: `comp_${c.id}`,
+    type: 'compensatorNode',
+    position: { x: 200, y: 200 }, // default position; no position stored in Compensator type
+    data: c,
+  };
+}
+
 function trafoToEdge(t: Transformer): Edge {
   return {
     id: t.id,
@@ -48,9 +58,12 @@ function trafoToEdge(t: Transformer): Edge {
 }
 
 export function NetworkCanvas() {
-  const { buses, lines, transformers } = useNetworkStore((s) => s.project);
+  const { buses, lines, transformers, compensators } = useNetworkStore((s) => s.project);
 
-  const nodes: Node[] = buses.map(busToNode);
+  const nodes: Node[] = [
+    ...buses.map(busToNode),
+    ...compensators.map(compensatorToNode),
+  ];
   const edges: Edge[] = [
     ...lines.map(lineToEdge),
     ...transformers.map(trafoToEdge),

@@ -75,8 +75,42 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 
 ---
 
+## v3.0.0 — 2026-05-11 — Sprint 3: Fasekompensering
+
+> **Arbeidsmappe:** `D:\Claude\GridMaster\gridmaster-edu\`
+> **Branch:** `sprint3`
+
+### Lagt til
+- **S3-00** Git-branch `sprint3` opprettet
+- **S3-01** `src/core/compensation.ts` — `calcCompensation()`: Q_komp = P·(tanφ₁−tanφ₂), strøm/tap før-etter, trinnvis cosφ (JSDoc)
+- **S3-02** `src/core/compensation.test.ts` — 20 tester: unit (fasit scenario 1), grensetilfeller, integrasjon NR
+- **S3-03** `CompensatorNode.tsx` — kondensatorbank på React Flow-canvas med sidebar og Q_komp-display
+- **S3-04** `CompensationPanel.tsx` — panel med bussvelger, cosφ₂-slider (0.80–1.00), trinnvelger, Q_komp-beregning live
+- **S3-05** `PowerTriangle.tsx` — animert SVG-effekttrekant med P (grønn), Q₁ (grå stiplet), Q₂ (oransje), Q_komp-pil (lilla), S₁ (grå), S₂ (cyan), φ₁/φ₂-buer og alle labels; raf-animasjon 300 ms
+- **S3-06** `CompensationResultPanel.tsx` — før/etter sammenlignstabell: Q, S, cosφ, φ, I, tap + reduksjons-bokser
+- **S3-07** Trinnvis kompensering — `steppedCosPhi[]` i `calcCompensation`, cosφ per trinn vist i panel
+- **S3-08** NR-integrasjon — `runCompensation()` i Zustand: oppdaterer loadMVAr, legger til Compensator-node, kjører NR automatisk, lagrer CompensationResult
+- **S3-09** `CompensationResult[]` serialisert i `GmxProject.results.compensation` og lagret i .gmx
+- **S3-10** Vitest integrasjonstester for Q_komp fasit og NR-forbedring etter kompensering
+- **S3-11** CHANGELOG v3.0.0 + DEVLOG beslutning 13 (SVG-animasjonsmetode)
+- **S3-12** Git commit `feat(sprint3): compensation v3.0.0`
+
+### Akseptanskriterier
+- ✓ `npm test` — 63/63 tester grønne
+- ✓ Q_komp ≈ 0.992 MVAr (±0.01) for cosφ₁=0.928, cosφ₂=0.98, P=5 MW
+- ✓ PowerTriangle animerer smooth (300 ms raf) ved cosφ₂-endring
+- ✓ Både φ₁ (grå) og φ₂ (cyan) vises simultant i trekanten
+- ✓ Q_komp-pil (lilla) synlig i trekanten
+- ✓ Kondensatornode på canvas (lilla ramme, capacitor.png-ikon)
+- ✓ NR kjøres automatisk på nytt etter kompensering
+- ✓ Trinnvis kompensering: cosφ per trinn beregnet og vist
+- ✓ Før/etter sammenligning viser strøm- og tapreduksjon [%]
+- ✓ Resultater lagres i .gmx og gjenopprettes
+- ✓ `npx tsc -b` — ingen TypeScript-feil
+
+---
+
 ## Kommende
 
-### v3.0.0 — Sprint 3
-- Fasekompensering (Q_komp = P(tan φ₁ − tan φ₂))
-- Effekttrekant-visualisering
+### v3.5.0 — Sprint 3.5
+- GitHub + Vercel + Supabase (deploy)

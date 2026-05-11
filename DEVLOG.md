@@ -71,6 +71,19 @@ Newton-Raphson konvergerer til nøyaktig samme verdier (verifisert numerisk). Fa
 
 Teststoleranser oppdatert i `newton-raphson.test.ts`. Newton-Raphson-implementasjonen er uendret og korrekt.
 
+---
+
+## 2026-05-11 — Sprint 3
+
+### BESLUTNING 13: SVG-animasjon via requestAnimationFrame (ikke CSS transitions på geometri)
+**Begrunnelse:** PowerTriangle.tsx krever smooth 300 ms-animasjon av SVG-koordinater (Q₂-linjen og S₂-hypotenusens endepunkt) når cosφ₂-slideren endres. To alternative tilnærminger ble vurdert:
+
+1. **CSS transitions på SVG geometry properties (SVG 2-spec)**: Setter x1/y1/x2/y2 som CSS-egenskaper via `style`-objektet (f.eks. `style={{ y2: s2Y } as unknown as React.CSSProperties}`). Virker i Chrome 77+/Firefox 72+ via SVG 2-spec, men krever `as unknown`-cast for TypeScript og er ikke garantert i alle miljøer.
+
+2. **requestAnimationFrame med ease-in-out interpolasjon** (valgt): En liten `useAnimated(target, ms)`-hook animerer verdien i JavaScript og setter React state. Ren TypeScript, fungerer i alle nettlesere, ingen external dependencies, og gir nøyaktig 300 ms ease-in-out som spesifisert. Overhead er ubetydelig for et pedagogisk verktøy med 1–3 animerte verdier.
+
+**How to apply:** `useAnimated()`-hook bor lokalt i `PowerTriangle.tsx`. Animerer `q2MVAr`-verdien; alle avledede SVG-posisjoner beregnes fra denne. Hvis mer avansert animasjon trengs i fremtidige sprints (f.eks. Framer Motion), er hook-grensesnittet lett å bytte ut.
+
 ### BESLUTNING 11: Fargeterskler for canvasfargekoding — REN 4100-basert
 **Begrunnelse:** Spenningsgrenser for fargekoding i `BusNode.tsx` og `ResultPanel.tsx`:
 - V > 1.05 p.u. → oransje (høy spenning, utenfor normaldrift iht. EN 50160)

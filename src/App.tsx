@@ -3,18 +3,46 @@ import { Toolbar } from './components/toolbar/Toolbar.js';
 import { NetworkCanvas } from './components/canvas/NetworkCanvas.js';
 import { ResultPanel } from './components/results/ResultPanel.js';
 import { IterationPanel } from './components/results/IterationPanel.js';
+import { CompensationPanel } from './components/compensation/CompensationPanel.js';
+import { CompensationResultPanel } from './components/compensation/CompensationResultPanel.js';
 import { useNetworkStore } from './store/useNetworkStore.js';
 
 export default function App() {
   const [showIterations, setShowIterations] = useState(false);
+  const [showCompensation, setShowCompensation] = useState(false);
+
   const powerFlow = useNetworkStore((s) => s.project.results.powerFlow);
+  const compensationResults = useNetworkStore(
+    (s) => s.project.results.compensation ?? [],
+  );
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#0D1B2A' }}>
-      <Toolbar />
-      <div style={{ flex: 1, overflow: 'hidden' }}>
+      <Toolbar onToggleCompensation={() => setShowCompensation((v) => !v)} />
+
+      <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
         <NetworkCanvas />
+
+        {/* Floating compensation panel */}
+        {showCompensation && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 12,
+              right: 12,
+              width: 380,
+              maxHeight: 'calc(100vh - 120px)',
+              overflowY: 'auto',
+              zIndex: 40,
+              borderRadius: 8,
+              boxShadow: '0 4px 32px rgba(0,0,0,0.6)',
+            }}
+          >
+            <CompensationPanel onClose={() => setShowCompensation(false)} />
+          </div>
+        )}
       </div>
+
       {powerFlow && (
         <>
           <ResultPanel
@@ -43,6 +71,10 @@ export default function App() {
             />
           )}
         </>
+      )}
+
+      {compensationResults.length > 0 && (
+        <CompensationResultPanel results={compensationResults} />
       )}
     </div>
   );

@@ -2,7 +2,11 @@ import { useRef } from 'react';
 import { useNetworkStore } from '../../store/useNetworkStore.js';
 import { saveProject, loadProject, importLegacyGmx } from '../../io/gmx.js';
 
-export function Toolbar() {
+interface ToolbarProps {
+  onToggleCompensation?: () => void;
+}
+
+export function Toolbar({ onToggleCompensation }: ToolbarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const legacyInputRef = useRef<HTMLInputElement>(null);
 
@@ -103,6 +107,20 @@ export function Toolbar() {
         }}
       >
         {powerFlowStatus === 'running' ? '…' : 'Beregn lastflyt'}
+      </button>
+
+      {/* Fasekompensering */}
+      <button
+        onClick={onToggleCompensation}
+        disabled={project.buses.length === 0}
+        style={{
+          ...btnStyle,
+          background: '#3A1A5C',
+          border: '1px solid #9C27B0',
+          opacity: project.buses.length === 0 ? 0.5 : 1,
+        }}
+      >
+        Fasekompensering
       </button>
 
       {/* Import legacy (Gemini scenario) */}
