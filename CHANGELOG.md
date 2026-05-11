@@ -110,7 +110,34 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 
 ---
 
-## Kommende
+## v3.5.0 — 2026-05-11 — Sprint 3.5: Infrastruktur og skylagring
 
-### v3.5.0 — Sprint 3.5
-- GitHub + Vercel + Supabase (deploy)
+> **Arbeidsmappe:** `D:\Claude\GridMaster\gridmaster-edu\`
+> **Branch:** `main` (omdøpt fra `master`)
+
+### Lagt til
+- **S3.5-00** Git-branch `master` omdøpt til `main`
+- **S3.5-01** GitHub-repository publisert: https://github.com/Birdybow/gridmaster-edu
+- **S3.5-02** `.env.local` med Supabase-nøkler (aldri committet, dekket av `*.local` i `.gitignore`)
+- **S3.5-03** Supabase-prosjekt satt opp manuelt: https://ynujbkdkapxzshbexazg.supabase.co — `projects`-tabell med RLS og `updated_at`-trigger
+- **S3.5-04** `src/lib/supabase.ts` — `createClient()` med `VITE_SUPABASE_URL` og `VITE_SUPABASE_ANON_KEY`
+- **S3.5-05** `CloudProjectSummary`-interface i `src/types/index.ts`
+- **S3.5-05** `saveToCloud()` — INSERT til Supabase `projects`, returnerer UUID
+- **S3.5-05** `loadFromCloud(id)` — SELECT + `validateProject()` på returnert `gmx_data`
+- **S3.5-05** `listCloudProjects()` — SELECT med `ORDER BY updated_at DESC`
+- **S3.5-06** Toolbar: **☁ Lagre til sky** — modal med studentnavn-input, bekreftelses-ID
+- **S3.5-06** Toolbar: **☁ Åpne fra sky** — modal med prosjektliste, klikk laster inn
+- **S3.5-07** Vercel Hobby-deploy: https://gridmaster-edu.vercel.app — automatisk deploy ved `git push origin main`
+- **S3.5-11** CHANGELOG v3.5.0 + DEVLOG beslutning 14–15
+- **S3.5-12** Git tag `v3.5.0`
+
+### Akseptanskriterier
+- ✓ `npm test` — 63/63 tester grønne
+- ✓ `npx tsc -b` — ingen TypeScript-feil
+- ✓ Kode synlig på GitHub `main`-branch
+- ✓ App live på Vercel
+- ✓ `saveToCloud()` lagrer prosjekt i Supabase og returnerer UUID
+- ✓ `listCloudProjects()` henter prosjektliste sortert på dato
+- ✓ `loadFromCloud(id)` laster og validerer prosjekt fra sky
+- ✓ Lokal `.gmx`-lagring uendret og fungerende
+- ✓ `.env.local` ikke committet til git

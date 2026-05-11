@@ -108,6 +108,20 @@ Teststoleranser oppdatert i `newton-raphson.test.ts`. Newton-Raphson-implementas
 
 **How to apply:** `useAnimated()`-hook bor lokalt i `PowerTriangle.tsx`. Animerer `q2MVAr`-verdien; alle avledede SVG-posisjoner beregnes fra denne. Hvis mer avansert animasjon trengs i fremtidige sprints (f.eks. Framer Motion), er hook-grensesnittet lett å bytte ut.
 
+---
+
+## 2026-05-11 — Sprint 3.5
+
+### BESLUTNING 14: Supabase anon-nøkkel er trygg i frontend — service_role er ikke det
+**Begrunnelse:** Supabase-klienten i `src/lib/supabase.ts` bruker kun `VITE_SUPABASE_ANON_KEY`. Denne nøkkelen er designet for offentlig bruk og respekterer RLS-policyer på `projects`-tabellen. `service_role`-nøkkelen omgår RLS og må aldri brukes i frontend-kode. Miljøvariabelen `VITE_SUPABASE_ANON_KEY` er trygg å eksponere i klient-bygget siden den ikke gir administratortilgang.
+
+**How to apply:** Aldri legg `service_role`-nøkkelen i `.env.local` eller noen frontend-fil. Den brukes kun i server-side Edge Functions eller backend.
+
+### BESLUTNING 15: `validateProject()` brukes for sky-lasting — samme pipeline som lokal .gmx
+**Begrunnelse:** `loadFromCloud()` kaller `validateProject(data.gmx_data)` på dataene fra Supabase. Dette gir identisk validering og null-koalescing av valgfrie arrays (`generators`, `compensators` osv.) som ved lokal filinnlasting. Alternativet (anta at sky-data alltid er korrekt) ville gitt skjult feil hvis et gammelt prosjekt manglet nye felt introdusert i en sprint.
+
+**How to apply:** Alle datakilder (lokal .gmx, sky, legacy-import) skal gjennom `validateProject()` før `storeLoad()` kalles.
+
 ### BESLUTNING 11: Fargeterskler for canvasfargekoding — REN 4100-basert
 **Begrunnelse:** Spenningsgrenser for fargekoding i `BusNode.tsx` og `ResultPanel.tsx`:
 - V > 1.05 p.u. → oransje (høy spenning, utenfor normaldrift iht. EN 50160)
