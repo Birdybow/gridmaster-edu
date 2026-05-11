@@ -50,6 +50,8 @@ interface NetworkState {
   project: GmxProject;
   powerFlowStatus: PowerFlowStatus;
   compensationStatus: CompensationStatus;
+  showResults: boolean;
+  setShowResults: (v: boolean) => void;
   runPowerFlow: () => void;
   runCompensation: (busId: string, cosPhi2: number, steps: number) => void;
 
@@ -89,6 +91,9 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
   project: emptyProject(),
   powerFlowStatus: 'idle',
   compensationStatus: 'idle',
+  showResults: false,
+
+  setShowResults: (v) => set({ showResults: v }),
 
   runPowerFlow: () => {
     set({ powerFlowStatus: 'running' });
@@ -96,6 +101,7 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
       const result = runNewtonRaphson(get().project);
       set((s) => ({
         powerFlowStatus: result.converged ? 'converged' : 'failed',
+        showResults: true,
         project: {
           ...s.project,
           results: { ...s.project.results, powerFlow: result },
@@ -199,6 +205,7 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
       set((s) => ({
         compensationStatus: 'done',
         powerFlowStatus: pfResult.converged ? 'converged' : 'failed',
+        showResults: true,
         project: {
           ...s.project,
           results: { ...s.project.results, powerFlow: pfResult },

@@ -12,9 +12,9 @@ export default function App() {
   const [showCompensation, setShowCompensation] = useState(false);
 
   const powerFlow = useNetworkStore((s) => s.project.results.powerFlow);
-  // ?? [] must be OUTSIDE the selector: useSyncExternalStore (Zustand v5 + React 18)
-  // calls getSnapshot() twice per render for tearing detection. Returning a new []
-  // instance every call makes Object.is() return false → React forces re-render → loop.
+  const showResults = useNetworkStore((s) => s.showResults);
+  const setShowResults = useNetworkStore((s) => s.setShowResults);
+  // ?? [] outside selector — see DEVLOG ARKITEKTURREGLER (commit 1f39734)
   const rawCompResults = useNetworkStore((s) => s.project.results.compensation);
   const compensationResults = rawCompResults ?? [];
 
@@ -45,11 +45,11 @@ export default function App() {
         )}
       </div>
 
-      {powerFlow && (
+      {powerFlow && showResults && (
         <>
           <ResultPanel
             result={powerFlow}
-            onClose={() => {/* cleared by new calculation */}}
+            onClose={() => setShowResults(false)}
           />
           <div style={{ borderTop: '1px solid #1565C0' }}>
             <button

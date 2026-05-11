@@ -11,11 +11,12 @@ import { useNetworkStore } from '../../store/useNetworkStore.js';
 import { BusNode } from './BusNode.js';
 import { LineEdge } from './LineEdge.js';
 import { CompensatorNode } from './CompensatorNode.js';
+import { CompensatorLinkEdge } from './CompensatorLinkEdge.js';
 import type { Bus, Line, Transformer, Compensator } from '../../types/index.js';
 
 // Defined at module level — never recreated, prevents React Flow nodeTypes warning
 const nodeTypes = { busNode: BusNode, compensatorNode: CompensatorNode };
-const edgeTypes = { lineEdge: LineEdge };
+const edgeTypes = { lineEdge: LineEdge, compensatorLink: CompensatorLinkEdge };
 
 function busToNode(bus: Bus): Node {
   return {
@@ -83,8 +84,20 @@ export function NetworkCanvas() {
   );
 
   const edges: Edge[] = useMemo(
-    () => [...lines.map(lineToEdge), ...transformers.map(trafoToEdge)],
-    [lines, transformers],
+    () => [
+      ...lines.map(lineToEdge),
+      ...transformers.map(trafoToEdge),
+      ...compensators.map((c) => ({
+        id: `comp-link-${c.id}`,
+        source: `comp_${c.id}`,
+        target: c.busId,
+        type: 'compensatorLink',
+        focusable: false,
+        selectable: false,
+        data: {},
+      })),
+    ],
+    [lines, transformers, compensators],
   );
 
   return (
