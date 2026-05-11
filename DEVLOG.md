@@ -4,6 +4,30 @@ Tekniske beslutninger og begrunnelser. Oppdateres ved hvert viktig valg.
 
 ---
 
+## ⚠ ARKITEKTURREGLER
+
+> Disse reglene er permanente og gjelder alle sprints.
+
+### REGEL: Zustand-selektorer må aldri returnere nye objekt- eller array-instanser direkte
+
+**Alltid:**
+```typescript
+const x = useStore((s) => s.x) ?? [];
+```
+
+**Aldri:**
+```typescript
+const x = useStore((s) => s.x ?? []);   // ← UENDELIG LØKKE
+```
+
+**Hvorfor:** Zustand v5 bruker `useSyncExternalStore` internt. React 18 kaller `getSnapshot()` (selektoren) **to ganger** per render for tearing detection. Hvis selektoren returnerer en ny `[]`- eller `{}`-instans ved hvert kall, vil `Object.is(arr1, arr2) === false` → React tolker dette som at state endret seg midt i render → tvinger ny render → ny tearing-sjekk → ny instans → uendelig løkke fra første mount.
+
+Dette gjelder alle inline-konstruksjoner: `?? []`, `?? {}`, `.map(...)`, `.filter(...)`, `[...spread]`. Flytt alltid slike operasjoner ut av selektoren og inn i komponent-kroppen etter kallet.
+
+**Ref:** commit `1f39734`, Sprint 3 `fix(app): stopp uendelig løkke ved mount`
+
+---
+
 ## 2026-05-11 — Sprint 1
 
 ### BESLUTNING 1: Complex = [number, number] tuple, ikke klasse/objekt
