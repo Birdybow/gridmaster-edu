@@ -288,6 +288,18 @@ export interface VoltageDropResult {
 }
 
 // ---------------------------------------------------------------------------
+// Cloud storage
+// ---------------------------------------------------------------------------
+
+export interface CloudProjectSummary {
+  id: string;
+  projectName: string;
+  studentName: string;
+  course: string;
+  updatedAt: string;
+}
+
+// ---------------------------------------------------------------------------
 // Root project file
 // ---------------------------------------------------------------------------
 

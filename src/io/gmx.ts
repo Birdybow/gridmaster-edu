@@ -6,7 +6,9 @@ import type {
   VoltageLevel,
   BusType,
   LineType,
+  CloudProjectSummary,
 } from '../types/index.js';
+import { supabase } from '../lib/supabase.js';
 
 // ---------------------------------------------------------------------------
 // Save
@@ -66,6 +68,56 @@ export function validateProject(data: unknown): GmxProject {
   if (!project.canvas) project.canvas = { zoom: 1, panX: 0, panY: 0 };
 
   return project;
+}
+
+// ---------------------------------------------------------------------------
+// Cloud storage (Supabase)
+// ---------------------------------------------------------------------------
+
+export async function saveToCloud(project: GmxProject): Promise<string> {
+  const { data, error } = await supabase
+    .from('projects')
+    .insert({
+      student_name: project.metadata.student,
+      project_name: project.metadata.projectName,
+      course: project.metadata.course,
+      gmx_data: project,
+    })
+    .select('id')
+    .single();
+
+  if (error) throw new Error(`Skylagring feilet: ${error.message}`);
+  return data.id as string;
+}
+
+export async function loadFromCloud(id: string): Promise<GmxProject> {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('gmx_data')
+    .eq('id', id)
+    .single();
+
+  if (error) throw new Error(`Lasting fra sky feilet: ${error.message}`);
+  if (!data) throw new Error(`Prosjekt ikke funnet: ${id}`);
+  return validateProject(data.gmx_data);
+}
+
+export async function listCloudProjects(): Promise<CloudProjectSummary[]> {
+  const { data, error } = await supabase
+    .from('projects')
+    .select('id, project_name, student_name, course, updated_at')
+    .order('updated_at', { ascending: false });
+
+  if (error) throw new Error(`Henting av prosjektliste feilet: ${error.message}`);
+  if (!data) return [];
+
+  return data.map((r) => ({
+    id: r.id as string,
+    projectName: r.project_name as string,
+    studentName: r.student_name as string,
+    course: r.course as string,
+    updatedAt: r.updated_at as string,
+  }));
 }
 
 // ---------------------------------------------------------------------------
