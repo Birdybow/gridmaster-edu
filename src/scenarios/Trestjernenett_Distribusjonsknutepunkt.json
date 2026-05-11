@@ -1,0 +1,43 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "name": "Trestjernenett",
+    "description": "Testscenario 2: Ett forsyningspunkt og tre radielle avganger",
+    "date": "2026-05-11"
+  },
+  "system": {
+    "base_MVA": 10.0,
+    "frequency": 50.0
+  },
+  "buses": [
+    { "id": "bus_center", "name": "Hovedstasjon", "type": "slack", "Vn_kV": 22.0, "V_pu": 1.0, "angle_deg": 0.0 },
+    { "id": "bus_north", "name": "Industri Nord", "type": "pq", "Vn_kV": 22.0, "P_load_MW": 2.0, "Q_load_MVAr": 1.0 },
+    { "id": "bus_east", "name": "Boligfelt Øst", "type": "pq", "Vn_kV": 22.0, "P_load_MW": 3.0, "Q_load_MVAr": 1.0 },
+    { "id": "bus_south", "name": "Gård Sør", "type": "pq", "Vn_kV": 22.0, "P_load_MW": 1.5, "Q_load_MVAr": 0.5 }
+  ],
+  "lines": [
+    { "id": "line_n", "from_bus": "bus_center", "to_bus": "bus_north", "length_km": 5.0, "R_ohm_per_km": 0.30, "X_ohm_per_km": 0.35, "I_max_A": 250.0 },
+    { "id": "line_e", "from_bus": "bus_center", "to_bus": "bus_east", "length_km": 8.0, "R_ohm_per_km": 0.30, "X_ohm_per_km": 0.35, "I_max_A": 250.0 },
+    { "id": "line_s", "from_bus": "bus_center", "to_bus": "bus_south", "length_km": 15.0, "R_ohm_per_km": 0.45, "X_ohm_per_km": 0.40, "I_max_A": 150.0 }
+  ],
+  "transformers": [],
+  "generators": [
+    { "id": "gen_center", "bus": "bus_center", "name": "Sentral Gen", "type": "synchronous" }
+  ],
+  "compensators": [],
+  "protections": [],
+  "results": {},
+  "canvas": {
+    "nodes": [
+      { "id": "bus_center", "position": { "x": 300, "y": 300 } },
+      { "id": "bus_north", "position": { "x": 300, "y": 100 } },
+      { "id": "bus_east", "position": { "x": 600, "y": 300 } },
+      { "id": "bus_south", "position": { "x": 300, "y": 600 } }
+    ],
+    "edges": [
+      { "id": "line_n", "source": "bus_center", "target": "bus_north" },
+      { "id": "line_e", "source": "bus_center", "target": "bus_east" },
+      { "id": "line_s", "source": "bus_center", "target": "bus_south" }
+    ]
+  }
+}

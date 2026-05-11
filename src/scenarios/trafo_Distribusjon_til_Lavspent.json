@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "name": "Nettstasjon til LS",
+    "description": "Testscenario 3: Transformering fra 22kV til 400V TN-nett",
+    "date": "2026-05-11"
+  },
+  "system": {
+    "base_MVA": 10.0,
+    "frequency": 50.0
+  },
+  "buses": [
+    { "id": "bus_hs", "name": "Nettstasjon HS", "type": "slack", "Vn_kV": 22.0, "V_pu": 1.0, "angle_deg": 0.0 },
+    { "id": "bus_ls_trafo", "name": "Nettstasjon LS (Skinne)", "type": "pq", "Vn_kV": 0.4, "P_load_MW": 0.0, "Q_load_MVAr": 0.0 },
+    { "id": "bus_ls_load", "name": "Forbruker", "type": "pq", "Vn_kV": 0.4, "P_load_MW": 0.1, "Q_load_MVAr": 0.03 }
+  ],
+  "lines": [
+    { "id": "line_ls", "name": "LS Kabel TFXP 240 Al", "from_bus": "bus_ls_trafo", "to_bus": "bus_ls_load", "length_km": 0.1, "R_ohm_per_km": 0.125, "X_ohm_per_km": 0.08, "I_max_A": 400.0 }
+  ],
+  "transformers": [
+    { "id": "trafo_1", "name": "Kiosk Trafo", "from_bus": "bus_hs", "to_bus": "bus_ls_trafo", "Sn_MVA": 0.315, "Vn_hv_kV": 22.0, "Vn_lv_kV": 0.4, "ek_percent": 4.0, "Pcu_kW": 3.2 }
+  ],
+  "generators": [
+    { "id": "gen_hs", "bus": "bus_hs", "name": "Kilde HS", "type": "synchronous" }
+  ],
+  "compensators": [],
+  "protections": [],
+  "results": {},
+  "canvas": {
+    "nodes": [
+      { "id": "bus_hs", "position": { "x": 100, "y": 200 } },
+      { "id": "bus_ls_trafo", "position": { "x": 400, "y": 200 } },
+      { "id": "bus_ls_load", "position": { "x": 700, "y": 200 } }
+    ],
+    "edges": [
+      { "id": "trafo_1", "source": "bus_hs", "target": "bus_ls_trafo" },
+      { "id": "line_ls", "source": "bus_ls_trafo", "target": "bus_ls_load" }
+    ]
+  }
+}

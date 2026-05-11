@@ -1,0 +1,40 @@
+{
+  "metadata": {
+    "version": "1.0",
+    "name": "Enkel radial",
+    "description": "Testscenario 1: Kilde Porsgrunn til Last Skien",
+    "date": "2026-05-11"
+  },
+  "system": {
+    "base_MVA": 10.0,
+    "frequency": 50.0
+  },
+  "buses": [
+    { "id": "bus_1", "name": "Kilde Porsgrunn", "type": "slack", "Vn_kV": 22.0, "V_pu": 1.0, "angle_deg": 0.0 },
+    { "id": "bus_2", "name": "Last Skien", "type": "pq", "Vn_kV": 22.0, "P_load_MW": 5.0, "Q_load_MVAr": 2.0 }
+  ],
+  "lines": [
+    { "id": "line_1", "name": "Linje Porsgrunn-Skien", "from_bus": "bus_1", "to_bus": "bus_2", "length_km": 10.0, "R_ohm_per_km": 0.30, "X_ohm_per_km": 0.35, "I_max_A": 250.0 }
+  ],
+  "transformers": [],
+  "generators": [
+    { "id": "gen_1", "bus": "bus_1", "name": "Porsgrunn Gen", "type": "synchronous" }
+  ],
+  "compensators": [],
+  "protections": [],
+  "results": {
+    "expected": {
+      "line_1": { "I_A": 133.0 },
+      "bus_2": { "dU_percent": 2.1 }
+    }
+  },
+  "canvas": {
+    "nodes": [
+      { "id": "bus_1", "position": { "x": 100, "y": 200 } },
+      { "id": "bus_2", "position": { "x": 500, "y": 200 } }
+    ],
+    "edges": [
+      { "id": "line_1", "source": "bus_1", "target": "bus_2" }
+    ]
+  }
+}
