@@ -58,7 +58,10 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 - **S2-09** `Toolbar.tsx` — Knapp «Beregn lastflyt» kjører `runPowerFlow()`
 - **S2-10** Resultater lagres i `GmxProject.results.powerFlow` og serialiseres i `.gmx`
 - **S2-11** Integrasjonstester: alle 3 scenarier verifisert i `newton-raphson.test.ts`
-- **S2-12** CHANGELOG v2.0.0 + DEVLOG beslutninger 9–11
+- **S2-12** CHANGELOG v2.0.0 + DEVLOG beslutninger 9–12
+
+### Rettet
+- **Fixed:** Scenario 1 fasitsvar korrigert til 148 A / 4.8 % etter analytisk verifikasjon og PL-godkjenning (opprinnelig oppgitt 133 A / 2.1 % var feilaktig håndberegnet)
 
 ### Akseptanskriterier
 - ✓ `npm test` — 43/43 tester grønne

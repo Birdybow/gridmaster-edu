@@ -63,6 +63,14 @@ Newton-Raphson konvergerer til nøyaktig samme verdier (verifisert numerisk). Fa
 
 **How to apply:** `gaussSolve()` i `newton-raphson.ts` bruker partiell pivotering og er numerisk stabil for vel-kondisjonerte Jacobi-matriser (typisk nett med balanserte impedanser).
 
+### BESLUTNING 12: Fasit scenario 1 korrigert etter analytisk verifikasjon og PL-godkjenning
+**Begrunnelse:** Opprinnelig fasit (133 A, 2.1 %) var feil beregnet av PL-prosjektet. Etter analytisk verifikasjon (kvadratisk ligning, se beslutning 9) og gjennomgang med PL 2026-05-11 er korrekt fasit bekreftet:
+- V₂ = 0.952 p.u., ΔU = 4.8 %
+- I_linje = 148 A (±3 A)
+- Aktive tap = 198 kW (±10 kW)
+
+Teststoleranser oppdatert i `newton-raphson.test.ts`. Newton-Raphson-implementasjonen er uendret og korrekt.
+
 ### BESLUTNING 11: Fargeterskler for canvasfargekoding — REN 4100-basert
 **Begrunnelse:** Spenningsgrenser for fargekoding i `BusNode.tsx` og `ResultPanel.tsx`:
 - V > 1.05 p.u. → oransje (høy spenning, utenfor normaldrift iht. EN 50160)
