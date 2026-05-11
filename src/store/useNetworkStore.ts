@@ -7,7 +7,13 @@ import type {
   Generator,
   Compensator,
   Protection,
+  CompensationResult,
 } from '../types/index.js';
+import { runNewtonRaphson } from '../core/newton-raphson.js';
+import { calcCompensation } from '../core/compensation.js';
+
+export type PowerFlowStatus = 'idle' | 'running' | 'converged' | 'failed';
+export type CompensationStatus = 'idle' | 'computing' | 'done' | 'failed';
 
 function now(): string {
   return new Date().toISOString();
@@ -42,6 +48,14 @@ function emptyProject(): GmxProject {
 
 interface NetworkState {
   project: GmxProject;
+  powerFlowStatus: PowerFlowStatus;
+  compensationStatus: CompensationStatus;
+  showResults: boolean;
+  showCompensationResults: boolean;
+  setShowResults: (v: boolean) => void;
+  setShowCompensationResults: (v: boolean) => void;
+  runPowerFlow: () => void;
+  runCompensation: (busId: string, cosPhi2: number, steps: number) => void;
 
   // Bus actions
   addBus: (bus: Bus) => void;
@@ -75,8 +89,138 @@ interface NetworkState {
   clearProject: () => void;
 }
 
-export const useNetworkStore = create<NetworkState>((set) => ({
+export const useNetworkStore = create<NetworkState>((set, get) => ({
   project: emptyProject(),
+  powerFlowStatus: 'idle',
+  compensationStatus: 'idle',
+  showResults: false,
+  showCompensationResults: false,
+
+  setShowResults: (v) => set({ showResults: v }),
+  setShowCompensationResults: (v) => set({ showCompensationResults: v }),
+
+  runPowerFlow: () => {
+    set({ powerFlowStatus: 'running' });
+    try {
+      const result = runNewtonRaphson(get().project);
+      set((s) => ({
+        powerFlowStatus: result.converged ? 'converged' : 'failed',
+        showResults: true,
+        project: {
+          ...s.project,
+          results: { ...s.project.results, powerFlow: result },
+          metadata: { ...s.project.metadata, modified: now() },
+        },
+      }));
+    } catch {
+      set({ powerFlowStatus: 'failed' });
+    }
+  },
+
+  runCompensation: (busId, cosPhi2, steps) => {
+    const { project } = get();
+    const bus = project.buses.find((b) => b.id === busId);
+    if (!bus) return;
+
+    const connectedLine = project.lines.find(
+      (l) => l.fromBusId === busId || l.toBusId === busId,
+    );
+    const rTotal = connectedLine
+      ? connectedLine.rOhmPerKm * connectedLine.lengthKm
+      : 0;
+
+    const pMW = bus.loadMW;
+    const q1MVAr = bus.loadMVAr;
+    const sMVA = Math.sqrt(pMW ** 2 + q1MVAr ** 2);
+    const cosPhi1 = sMVA > 0 ? pMW / sMVA : 1;
+
+    const calc = calcCompensation(pMW, cosPhi1, cosPhi2, bus.voltageKV, rTotal, steps);
+    const ts = now();
+
+    const compensatorId =
+      project.compensators.find((c) => c.busId === busId)?.id ??
+      crypto.randomUUID();
+
+    const compensator: Compensator = {
+      id: compensatorId,
+      name: `Q_komp ${bus.name}`,
+      busId,
+      type: 'capacitor',
+      totalMVAr: calc.qKompMVAr,
+      steps,
+      stepSizeMVAr: calc.qKompMVAr / steps,
+      stepsEnabled: steps,
+    };
+
+    const compResult: CompensationResult = {
+      timestamp: ts,
+      busId,
+      before: {
+        pMW,
+        qMVAr: q1MVAr,
+        sMVA,
+        cosPhi: cosPhi1,
+        phi1Deg: calc.phi1Deg,
+        lineCurrentA: calc.i1A,
+        lineLossesMW: calc.pLoss1W / 1e6,
+      },
+      after: {
+        qKompMVAr: calc.qKompMVAr,
+        qResidualMVAr: calc.q2MVAr,
+        sMVA: calc.s2MVA,
+        cosPhi: calc.cosPhi2Actual,
+        phi2Deg: calc.phi2Deg,
+        lineCurrentA: calc.i2A,
+        lineLossesMW: calc.pLoss2W / 1e6,
+      },
+      currentReductionPercent: calc.currentReductionPct,
+      lossReductionPercent: calc.lossReductionPct,
+    };
+
+    const updatedBuses = project.buses.map((b) =>
+      b.id === busId ? { ...b, loadMVAr: Math.max(0, calc.q2MVAr) } : b,
+    );
+    const updatedCompensators = project.compensators.find((c) => c.id === compensatorId)
+      ? project.compensators.map((c) => (c.id === compensatorId ? compensator : c))
+      : [...project.compensators, compensator];
+    const prevComp = project.results.compensation ?? [];
+    const updatedCompResults = [
+      ...prevComp.filter((r) => r.busId !== busId),
+      compResult,
+    ];
+
+    set((s) => ({
+      compensationStatus: 'computing',
+      powerFlowStatus: 'running',
+      project: {
+        ...s.project,
+        buses: updatedBuses,
+        compensators: updatedCompensators,
+        results: {
+          ...s.project.results,
+          compensation: updatedCompResults,
+        },
+        metadata: { ...s.project.metadata, modified: ts },
+      },
+    }));
+
+    try {
+      const pfResult = runNewtonRaphson(get().project);
+      set((s) => ({
+        compensationStatus: 'done',
+        powerFlowStatus: pfResult.converged ? 'converged' : 'failed',
+        showResults: true,
+        showCompensationResults: true,
+        project: {
+          ...s.project,
+          results: { ...s.project.results, powerFlow: pfResult },
+          metadata: { ...s.project.metadata, modified: ts },
+        },
+      }));
+    } catch {
+      set({ compensationStatus: 'failed', powerFlowStatus: 'failed' });
+    }
+  },
 
   addBus: (bus) =>
     set((s) => ({

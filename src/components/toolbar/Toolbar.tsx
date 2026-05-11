@@ -2,11 +2,16 @@ import { useRef } from 'react';
 import { useNetworkStore } from '../../store/useNetworkStore.js';
 import { saveProject, loadProject, importLegacyGmx } from '../../io/gmx.js';
 
-export function Toolbar() {
+interface ToolbarProps {
+  onToggleCompensation?: () => void;
+}
+
+export function Toolbar({ onToggleCompensation }: ToolbarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const legacyInputRef = useRef<HTMLInputElement>(null);
 
-  const { project, loadProject: storeLoad, clearProject } = useNetworkStore();
+  const { project, loadProject: storeLoad, clearProject, runPowerFlow, powerFlowStatus } =
+    useNetworkStore();
 
   function handleSave() {
     saveProject(project);
@@ -88,6 +93,35 @@ export function Toolbar() {
         style={{ display: 'none' }}
         onChange={handleLoad}
       />
+
+      {/* Beregn lastflyt */}
+      <button
+        onClick={runPowerFlow}
+        disabled={project.buses.length === 0 || powerFlowStatus === 'running'}
+        style={{
+          ...btnStyle,
+          background: powerFlowStatus === 'converged' ? '#1A5C3A'
+            : powerFlowStatus === 'failed' ? '#5C1A1A'
+            : '#0D3B66',
+          opacity: project.buses.length === 0 ? 0.5 : 1,
+        }}
+      >
+        {powerFlowStatus === 'running' ? '…' : 'Beregn lastflyt'}
+      </button>
+
+      {/* Fasekompensering */}
+      <button
+        onClick={onToggleCompensation}
+        disabled={project.buses.length === 0}
+        style={{
+          ...btnStyle,
+          background: '#3A1A5C',
+          border: '1px solid #9C27B0',
+          opacity: project.buses.length === 0 ? 0.5 : 1,
+        }}
+      >
+        Fasekompensering
+      </button>
 
       {/* Import legacy (Gemini scenario) */}
       <button

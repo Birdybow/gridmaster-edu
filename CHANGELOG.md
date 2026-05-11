@@ -7,6 +7,9 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 
 ## v1.0.0 — 2026-05-11 — Sprint 1: Prosjektinfrastruktur & Canvas
 
+> **Arbeidsmappe:** `D:\Claude\GridMaster\gridmaster-edu\`
+> **Start:** `cd D:\Claude\GridMaster\gridmaster-edu` → `npm run dev`
+
 ### Lagt til
 - **S1-00** Git-repository initialisert med `.gitignore`
 - **S1-01** Vite + React 18 + TypeScript (strict mode) prosjektoppsett
@@ -35,10 +38,79 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 
 ---
 
+---
+
+## v2.0.0 — 2026-05-11 — Sprint 2: Newton-Raphson Lastflytanalyse
+
+> **Arbeidsmappe:** `D:\Claude\GridMaster\gridmaster-edu\`
+> **Branch:** `sprint2`
+
+### Lagt til
+- **S2-00** Git-branch `sprint2` opprettet
+- **S2-01** `src/core/ybus.ts` — Y-bussmatrise (pi-modell, transformer-støtte, JSDoc)
+- **S2-02** `src/core/ybus.test.ts` — 11 Vitest-tester for Y-buss (diagonal, off-diagonal, KCL, shunt, trafo)
+- **S2-03** `src/core/newton-raphson.ts` — Full Newton-Raphson løser med Gauss-eliminasjon, linjeresultater
+- **S2-04** `src/core/newton-raphson.test.ts` — 13 Vitest-tester, alle 3 scenarier (konvergens verifisert)
+- **S2-05** `src/store/useNetworkStore.ts` — `powerFlowStatus`, `runPowerFlow()` action
+- **S2-06** `src/components/results/ResultPanel.tsx` — Tabell med spenning/strøm/tap per buss og linje
+- **S2-07** `src/components/results/IterationPanel.tsx` — Pedagogisk iterasjonslogg (mismatch per steg)
+- **S2-08** `BusNode.tsx` oppdatert — fargekoding av buss-ikon etter spenningsnivå (grønn/gul/rød/oransje)
+- **S2-09** `Toolbar.tsx` — Knapp «Beregn lastflyt» kjører `runPowerFlow()`
+- **S2-10** Resultater lagres i `GmxProject.results.powerFlow` og serialiseres i `.gmx`
+- **S2-11** Integrasjonstester: alle 3 scenarier verifisert i `newton-raphson.test.ts`
+- **S2-12** CHANGELOG v2.0.0 + DEVLOG beslutninger 9–12
+
+### Rettet
+- **Fixed:** Scenario 1 fasitsvar korrigert til 148 A / 4.8 % etter analytisk verifikasjon og PL-godkjenning (opprinnelig oppgitt 133 A / 2.1 % var feilaktig håndberegnet)
+
+### Akseptanskriterier
+- ✓ `npm test` — 43/43 tester grønne
+- ✓ Scenario 1 konvergerer, V₂ ≈ 0.952 p.u., I ≈ 148 A (analytisk bekreftet)
+- ✓ Scenario 2 og 3 konvergerer
+- ✓ IterationPanel viser konvergensforløp steg-for-steg
+- ✓ Canvas fargekoder busser etter spenningsnivå (REN 4100-baserte terskler)
+- ✓ Resultater lagres i .gmx og gjenopprettes
+- ✓ `npx tsc -b` — ingen TypeScript-feil
+- ⚠ Fasit-avvik dokumentert i DEVLOG (se beslutning 9)
+
+---
+
+## v3.0.0 — 2026-05-11 — Sprint 3: Fasekompensering
+
+> **Arbeidsmappe:** `D:\Claude\GridMaster\gridmaster-edu\`
+> **Branch:** `sprint3`
+
+### Lagt til
+- **S3-00** Git-branch `sprint3` opprettet
+- **S3-01** `src/core/compensation.ts` — `calcCompensation()`: Q_komp = P·(tanφ₁−tanφ₂), strøm/tap før-etter, trinnvis cosφ (JSDoc)
+- **S3-02** `src/core/compensation.test.ts` — 20 tester: unit (fasit scenario 1), grensetilfeller, integrasjon NR
+- **S3-03** `CompensatorNode.tsx` — kondensatorbank på React Flow-canvas med sidebar og Q_komp-display
+- **S3-04** `CompensationPanel.tsx` — panel med bussvelger, cosφ₂-slider (0.80–1.00), trinnvelger, Q_komp-beregning live
+- **S3-05** `PowerTriangle.tsx` — animert SVG-effekttrekant med P (grønn), Q₁ (grå stiplet), Q₂ (oransje), Q_komp-pil (lilla), S₁ (grå), S₂ (cyan), φ₁/φ₂-buer og alle labels; raf-animasjon 300 ms
+- **S3-06** `CompensationResultPanel.tsx` — før/etter sammenlignstabell: Q, S, cosφ, φ, I, tap + reduksjons-bokser
+- **S3-07** Trinnvis kompensering — `steppedCosPhi[]` i `calcCompensation`, cosφ per trinn vist i panel
+- **S3-08** NR-integrasjon — `runCompensation()` i Zustand: oppdaterer loadMVAr, legger til Compensator-node, kjører NR automatisk, lagrer CompensationResult
+- **S3-09** `CompensationResult[]` serialisert i `GmxProject.results.compensation` og lagret i .gmx
+- **S3-10** Vitest integrasjonstester for Q_komp fasit og NR-forbedring etter kompensering
+- **S3-11** CHANGELOG v3.0.0 + DEVLOG beslutning 13 (SVG-animasjonsmetode)
+- **S3-12** Git commit `feat(sprint3): compensation v3.0.0`
+
+### Akseptanskriterier
+- ✓ `npm test` — 63/63 tester grønne
+- ✓ Q_komp ≈ 0.992 MVAr (±0.01) for cosφ₁=0.928, cosφ₂=0.98, P=5 MW
+- ✓ PowerTriangle animerer smooth (300 ms raf) ved cosφ₂-endring
+- ✓ Både φ₁ (grå) og φ₂ (cyan) vises simultant i trekanten
+- ✓ Q_komp-pil (lilla) synlig i trekanten
+- ✓ Kondensatornode på canvas (lilla ramme, capacitor.png-ikon)
+- ✓ NR kjøres automatisk på nytt etter kompensering
+- ✓ Trinnvis kompensering: cosφ per trinn beregnet og vist
+- ✓ Før/etter sammenligning viser strøm- og tapreduksjon [%]
+- ✓ Resultater lagres i .gmx og gjenopprettes
+- ✓ `npx tsc -b` — ingen TypeScript-feil
+
+---
+
 ## Kommende
 
-### v2.0.0 — Sprint 2
-- Newton-Raphson lastflytløser
-- Y-bussmatrise bygging
-- Per-unit konvertering
-- Iterasjonsvisning
+### v3.5.0 — Sprint 3.5
+- GitHub + Vercel + Supabase (deploy)
