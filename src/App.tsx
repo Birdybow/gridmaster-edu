@@ -12,9 +12,11 @@ export default function App() {
   const [showCompensation, setShowCompensation] = useState(false);
 
   const powerFlow = useNetworkStore((s) => s.project.results.powerFlow);
-  const compensationResults = useNetworkStore(
-    (s) => s.project.results.compensation ?? [],
-  );
+  // ?? [] must be OUTSIDE the selector: useSyncExternalStore (Zustand v5 + React 18)
+  // calls getSnapshot() twice per render for tearing detection. Returning a new []
+  // instance every call makes Object.is() return false → React forces re-render → loop.
+  const rawCompResults = useNetworkStore((s) => s.project.results.compensation);
+  const compensationResults = rawCompResults ?? [];
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#0D1B2A' }}>
