@@ -15,6 +15,19 @@ Tekniske beslutninger og begrunnelser. Oppdateres ved hvert viktig valg.
 ### BESLUTNING 3: Vitest temp-dir overkjøres via $env:TEMP
 **Begrunnelse:** Vitest v4 forsøker å skrive til `C:\Windows\Temp\` som er begrenset av UAC på Windows 10. Løst ved å sette `$env:TEMP` til lokal prosjektmappe og legge `cache.dir` i `node_modules/.vitest`. Alternativet (kjøre som admin) ble avvist — aldri kjør devtools som admin uten behov.
 
+Korrekt kommando for å kjøre tester på dette systemet:
+```powershell
+$env:TEMP = "D:\Claude\GridMaster\gridmaster-edu\node_modules\.tmp"
+npm test
+```
+
+### BESLUTNING 8: Arbeidsmappe og PowerShell-syntaks
+**Begrunnelse:** Prosjektet kjøres fra `D:\Claude\GridMaster\gridmaster-edu\` på Windows 10. I PowerShell brukes `;` eller separate kommandoer for sekvensielle operasjoner — `&&` er ikke tilgjengelig i Windows PowerShell (kun i PowerShell 7+ / pwsh). Korrekt start-sekvens:
+```powershell
+cd D:\Claude\GridMaster\gridmaster-edu
+npm run dev
+```
+
 ### BESLUTNING 4: importLegacyGmx() kaster eksplisitt feil ved manglende påkrevde felt
 **Begrunnelse:** Scenario-filer fra Gemini mangler sporadisk felt. `requireField<T>()` helper kaster `Error('importLegacyGmx: required field "<navn>" is missing in <context>')`. Dette gjør det umiddelbart synlig HVILKE felt som mangler, uten at brukeren ser en kryptisk undefined-feil i konsollen. Kritisk for pedagogisk bruk.
 
@@ -26,3 +39,35 @@ Tekniske beslutninger og begrunnelser. Oppdateres ved hvert viktig valg.
 
 ### BESLUTNING 7: @tailwindcss/vite brukt istedenfor PostCSS-plugin
 **Begrunnelse:** Tailwind CSS v4 anbefaler `@tailwindcss/vite` som Vite-plugin fremfor den tradisjonelle PostCSS-tilnærmingen. Dette eliminerer behov for `tailwind.config.js` og `postcss.config.js` — konfigurasjonen skjer direkte i CSS via `@import "tailwindcss"`.
+
+---
+
+## 2026-05-11 — Sprint 2
+
+### BESLUTNING 9: Fasit-avvik — 133 A / 2.1 % er feil for gitte parametere
+**Begrunnelse:** Sprint 2-dokumentet og scenario 1-JSON oppgir fasitsvar I ≈ 133 A og ΔU ≈ 2.1 % for 2-buss-radialnett (22 kV, S_base=10 MVA, P=5 MW, Q=2 MVAr, R=3.0 Ω, X=3.5 Ω). Analytisk verifikasjon via lukket-form kvadratisk ligning gir:
+
+```
+|y|²·u² − (|y|² + 2·(P·G + Q·B))·u + |S|² = 0
+G=6.832, B=7.972 pu (Z_base=48.4 Ω)
+u = 0.9062  →  V₂ = 0.9520 p.u.  →  ΔU = 4.80 %
+I_pu = 0.5645  →  I = 148.1 A  (I_base = 262.4 A)
+```
+
+Newton-Raphson konvergerer til nøyaktig samme verdier (verifisert numerisk). Fasit-verdiene 133 A / 2.1 % samsvarer ikke med noen rimelig tolkning av parameterne og er sannsynligvis produsert med en forenklende håndformel av PL-prosjektet.
+
+**How to apply:** Bruk de korrekte fysiske verdiene i tester (V₂≈0.952, ΔU≈4.8 %, I≈148 A ±5). Rapporter avviket til PL og Gemini-review for Sprint 2.
+
+### BESLUTNING 10: Gauss-eliminasjon (ikke ren LU-dekomposisjon) for Jacobi-inversjon
+**Begrunnelse:** Newton-Raphson-løseren i GridMaster Edu bruker Gauss-eliminasjon med partiell pivotering for å løse J·x = b i hvert NR-steg. Rask LU-dekomposisjon (f.eks. LAPACK-stil) er mer effektiv for store matriser (n > 100), men for pedagogiske nett på 2–20 busser er O(n³) Gauss-kost ubetydelig (< 1 ms). Gauss er enklere å forstå og debugge — dette er et undervisningsverktøy, ikke et produksjons-kraftsystemsimuleringsprogram. Bytte til LU kan gjøres i Sprint 8+ ved behov for større nett.
+
+**How to apply:** `gaussSolve()` i `newton-raphson.ts` bruker partiell pivotering og er numerisk stabil for vel-kondisjonerte Jacobi-matriser (typisk nett med balanserte impedanser).
+
+### BESLUTNING 11: Fargeterskler for canvasfargekoding — REN 4100-basert
+**Begrunnelse:** Spenningsgrenser for fargekoding i `BusNode.tsx` og `ResultPanel.tsx`:
+- V > 1.05 p.u. → oransje (høy spenning, utenfor normaldrift iht. EN 50160)
+- 0.95–1.05 p.u. → grønn (normal driftssone)
+- 0.90–0.95 p.u. → gul (lav spenning, varsel)
+- < 0.90 p.u. → rød (kritisk — brudd på REN 4100 §5.3 krav)
+
+Disse grensene tilsvarer EN 50160 ±10 % og REN 4100-retningslinjene for distribusjonsnett i Norge.

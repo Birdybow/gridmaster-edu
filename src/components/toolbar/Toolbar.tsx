@@ -6,7 +6,8 @@ export function Toolbar() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const legacyInputRef = useRef<HTMLInputElement>(null);
 
-  const { project, loadProject: storeLoad, clearProject } = useNetworkStore();
+  const { project, loadProject: storeLoad, clearProject, runPowerFlow, powerFlowStatus } =
+    useNetworkStore();
 
   function handleSave() {
     saveProject(project);
@@ -88,6 +89,21 @@ export function Toolbar() {
         style={{ display: 'none' }}
         onChange={handleLoad}
       />
+
+      {/* Beregn lastflyt */}
+      <button
+        onClick={runPowerFlow}
+        disabled={project.buses.length === 0 || powerFlowStatus === 'running'}
+        style={{
+          ...btnStyle,
+          background: powerFlowStatus === 'converged' ? '#1A5C3A'
+            : powerFlowStatus === 'failed' ? '#5C1A1A'
+            : '#0D3B66',
+          opacity: project.buses.length === 0 ? 0.5 : 1,
+        }}
+      >
+        {powerFlowStatus === 'running' ? '…' : 'Beregn lastflyt'}
+      </button>
 
       {/* Import legacy (Gemini scenario) */}
       <button

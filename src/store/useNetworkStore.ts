@@ -8,6 +8,9 @@ import type {
   Compensator,
   Protection,
 } from '../types/index.js';
+import { runNewtonRaphson } from '../core/newton-raphson.js';
+
+export type PowerFlowStatus = 'idle' | 'running' | 'converged' | 'failed';
 
 function now(): string {
   return new Date().toISOString();
@@ -42,6 +45,8 @@ function emptyProject(): GmxProject {
 
 interface NetworkState {
   project: GmxProject;
+  powerFlowStatus: PowerFlowStatus;
+  runPowerFlow: () => void;
 
   // Bus actions
   addBus: (bus: Bus) => void;
@@ -75,8 +80,26 @@ interface NetworkState {
   clearProject: () => void;
 }
 
-export const useNetworkStore = create<NetworkState>((set) => ({
+export const useNetworkStore = create<NetworkState>((set, get) => ({
   project: emptyProject(),
+  powerFlowStatus: 'idle',
+
+  runPowerFlow: () => {
+    set({ powerFlowStatus: 'running' });
+    try {
+      const result = runNewtonRaphson(get().project);
+      set((s) => ({
+        powerFlowStatus: result.converged ? 'converged' : 'failed',
+        project: {
+          ...s.project,
+          results: { ...s.project.results, powerFlow: result },
+          metadata: { ...s.project.metadata, modified: now() },
+        },
+      }));
+    } catch {
+      set({ powerFlowStatus: 'failed' });
+    }
+  },
 
   addBus: (bus) =>
     set((s) => ({

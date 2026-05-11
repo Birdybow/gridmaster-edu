@@ -2,6 +2,7 @@ import { memo, useState } from 'react';
 import { Handle, Position } from 'reactflow';
 import type { NodeProps } from 'reactflow';
 import type { Bus } from '../../types/index.js';
+import { useNetworkStore } from '../../store/useNetworkStore.js';
 
 const TYPE_LABELS: Record<string, string> = {
   slack: 'SLACK',
@@ -61,11 +62,23 @@ function BusSidebar({ bus, onClose }: SidebarProps) {
   );
 }
 
+function voltageRingColor(vMagPU: number | undefined): string {
+  if (vMagPU === undefined) return '#1565C0';
+  if (vMagPU > 1.05) return '#FF9800';
+  if (vMagPU >= 0.95) return '#4CAF50';
+  if (vMagPU >= 0.90) return '#FFEB3B';
+  return '#F44336';
+}
+
 function BusNodeComponent({ data }: NodeProps<BusNodeData>) {
   const [showPanel, setShowPanel] = useState(false);
+  const powerFlow = useNetworkStore((s) => s.project.results.powerFlow);
+  const busResult = powerFlow?.buses.find((b) => b.busId === data.id);
+
   const icon = ICON_MAP[data.type] ?? '/icons/bus-pq.png';
   const badge = TYPE_LABELS[data.type] ?? data.type;
   const badgeColor = TYPE_COLORS[data.type] ?? TYPE_COLORS['PQ'];
+  const borderColor = voltageRingColor(busResult?.vMagPU);
 
   return (
     <>
@@ -76,8 +89,8 @@ function BusNodeComponent({ data }: NodeProps<BusNodeData>) {
       >
         {/* Icon */}
         <div
-          className="rounded-lg overflow-hidden border-2 border-cyan-700"
-          style={{ width: 56, height: 56, background: '#0D3B66' }}
+          className="rounded-lg overflow-hidden border-2"
+          style={{ width: 56, height: 56, background: '#0D3B66', borderColor }}
         >
           <img
             src={icon}
@@ -102,10 +115,16 @@ function BusNodeComponent({ data }: NodeProps<BusNodeData>) {
           {data.name}
         </span>
 
-        {/* kV label */}
-        <span className="text-xs" style={{ color: '#4FC3F7' }}>
-          {data.voltageKV} kV
-        </span>
+        {/* kV label / result voltage */}
+        {busResult ? (
+          <span className="text-xs font-bold" style={{ color: voltageRingColor(busResult.vMagPU) }}>
+            {busResult.vMagPU.toFixed(4)} p.u.
+          </span>
+        ) : (
+          <span className="text-xs" style={{ color: '#4FC3F7' }}>
+            {data.voltageKV} kV
+          </span>
+        )}
 
         <Handle type="source" position={Position.Right} style={{ background: '#4FC3F7' }} />
         <Handle type="target" position={Position.Left} style={{ background: '#4FC3F7' }} />

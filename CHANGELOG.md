@@ -7,6 +7,9 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 
 ## v1.0.0 — 2026-05-11 — Sprint 1: Prosjektinfrastruktur & Canvas
 
+> **Arbeidsmappe:** `D:\Claude\GridMaster\gridmaster-edu\`
+> **Start:** `cd D:\Claude\GridMaster\gridmaster-edu` → `npm run dev`
+
 ### Lagt til
 - **S1-00** Git-repository initialisert med `.gitignore`
 - **S1-01** Vite + React 18 + TypeScript (strict mode) prosjektoppsett
@@ -35,10 +38,42 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 
 ---
 
+---
+
+## v2.0.0 — 2026-05-11 — Sprint 2: Newton-Raphson Lastflytanalyse
+
+> **Arbeidsmappe:** `D:\Claude\GridMaster\gridmaster-edu\`
+> **Branch:** `sprint2`
+
+### Lagt til
+- **S2-00** Git-branch `sprint2` opprettet
+- **S2-01** `src/core/ybus.ts` — Y-bussmatrise (pi-modell, transformer-støtte, JSDoc)
+- **S2-02** `src/core/ybus.test.ts` — 11 Vitest-tester for Y-buss (diagonal, off-diagonal, KCL, shunt, trafo)
+- **S2-03** `src/core/newton-raphson.ts` — Full Newton-Raphson løser med Gauss-eliminasjon, linjeresultater
+- **S2-04** `src/core/newton-raphson.test.ts` — 13 Vitest-tester, alle 3 scenarier (konvergens verifisert)
+- **S2-05** `src/store/useNetworkStore.ts` — `powerFlowStatus`, `runPowerFlow()` action
+- **S2-06** `src/components/results/ResultPanel.tsx` — Tabell med spenning/strøm/tap per buss og linje
+- **S2-07** `src/components/results/IterationPanel.tsx` — Pedagogisk iterasjonslogg (mismatch per steg)
+- **S2-08** `BusNode.tsx` oppdatert — fargekoding av buss-ikon etter spenningsnivå (grønn/gul/rød/oransje)
+- **S2-09** `Toolbar.tsx` — Knapp «Beregn lastflyt» kjører `runPowerFlow()`
+- **S2-10** Resultater lagres i `GmxProject.results.powerFlow` og serialiseres i `.gmx`
+- **S2-11** Integrasjonstester: alle 3 scenarier verifisert i `newton-raphson.test.ts`
+- **S2-12** CHANGELOG v2.0.0 + DEVLOG beslutninger 9–11
+
+### Akseptanskriterier
+- ✓ `npm test` — 43/43 tester grønne
+- ✓ Scenario 1 konvergerer, V₂ ≈ 0.952 p.u., I ≈ 148 A (analytisk bekreftet)
+- ✓ Scenario 2 og 3 konvergerer
+- ✓ IterationPanel viser konvergensforløp steg-for-steg
+- ✓ Canvas fargekoder busser etter spenningsnivå (REN 4100-baserte terskler)
+- ✓ Resultater lagres i .gmx og gjenopprettes
+- ✓ `npx tsc -b` — ingen TypeScript-feil
+- ⚠ Fasit-avvik dokumentert i DEVLOG (se beslutning 9)
+
+---
+
 ## Kommende
 
-### v2.0.0 — Sprint 2
-- Newton-Raphson lastflytløser
-- Y-bussmatrise bygging
-- Per-unit konvertering
-- Iterasjonsvisning
+### v3.0.0 — Sprint 3
+- Fasekompensering (Q_komp = P(tan φ₁ − tan φ₂))
+- Effekttrekant-visualisering
