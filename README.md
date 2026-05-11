@@ -1,73 +1,116 @@
-# React + TypeScript + Vite
+# GridMaster Edu
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Interaktiv læringsarena for fagskolestudenter innen elektrisk kraft.
+Fagkode: 00TE13I — Elektrisk kraftproduksjon og distribusjon
+Skole: Malakoff Videregående skole
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Kom i gang
 
-## React Compiler
+**Arbeidsmappe:** `D:\Claude\GridMaster\gridmaster-edu\`
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```powershell
+cd D:\Claude\GridMaster\gridmaster-edu
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Åpne nettleseren på `http://localhost:5173`
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+---
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## Tilgjengelige kommandoer
+
+```powershell
+# Start utviklingsserver (hot-reload)
+npm run dev
+
+# Kjør Vitest-tester
+$env:TEMP = "D:\Claude\GridMaster\gridmaster-edu\node_modules\.tmp"
+npm test
+
+# TypeScript type-sjekk
+npx tsc -b
+
+# Produksjonsbygg
+npm run build
 ```
+
+> **NB om npm test på Windows 10:** Vitest v4 forsøker å skrive til `C:\Windows\Temp\`
+> som er UAC-begrenset. Sett `$env:TEMP` til lokal mappe før `npm test` (se over).
+
+---
+
+## Teknisk stack
+
+| Teknologi | Versjon | Bruk |
+|-----------|---------|------|
+| Vite | 8+ | Build og dev-server |
+| React | 19 | UI-rammeverk |
+| TypeScript | 6 (strict) | Typesikkerhet |
+| React Flow | 11 | Enlinjeskjema-canvas |
+| Zustand | 5 | Global state |
+| Tailwind CSS | 4 | Mørkt tema (navy/cyan) |
+| Vitest | 4 | Unit-testing av beregningskjerne |
+| sharp | 0.34 | Bildebehandling (vannmerke-fjerning) |
+
+---
+
+## Mappestruktur
+
+```
+gridmaster-edu/
+├── public/
+│   ├── logo.png
+│   ├── splash.png
+│   └── icons/          # bus-slack, bus-pq, transformer, generator, capacitor, overhead-line, cable
+├── src/
+│   ├── types/
+│   │   └── index.ts    # Alle GmxProject-typer (enkelt eksportpunkt)
+│   ├── core/
+│   │   ├── math.ts     # Komplekse talloperasjoner (cadd/csub/cmul/cdiv/cabs/carg/cconj/cpolar)
+│   │   └── math.test.ts
+│   ├── store/
+│   │   └── useNetworkStore.ts  # Zustand store
+│   ├── components/
+│   │   ├── canvas/     # NetworkCanvas, BusNode, LineEdge
+│   │   └── toolbar/    # Toolbar (lagre/laste/importer)
+│   ├── io/
+│   │   └── gmx.ts      # saveProject, loadProject, validateProject, importLegacyGmx
+│   └── scenarios/      # 3 Gemini-testscenarier (Gemini-feltformat)
+├── CHANGELOG.md
+├── DEVLOG.md
+└── README.md           # denne filen
+```
+
+---
+
+## Prosjektfil (.gmx)
+
+Prosjekter lagres som `.gmx`-filer (ren UTF-8 JSON). Bruk **Lagre .gmx** i toolbar.
+For å laste inn Gemini-scenarier (feltformat avviker), bruk **Importer scenario**.
+
+---
+
+## Fargepalett
+
+| Token | Hex | Bruk |
+|-------|-----|------|
+| navy | `#0D3B66` | Bakgrunn for ikoner, knapperammer |
+| blue | `#1565C0` | Kantkant for linjer, knapper |
+| cyan | `#4FC3F7` | Aksentfarge, spenningsetiketter |
+| green | `#1A5C3A` | Import-knapp |
+| surface | `#1A2A3A` | Panel-bakgrunn |
+| text | `#E8F0FE` | Brødtekst |
+
+---
+
+## Sprintplan
+
+| Sprint | Innhold | Status |
+|--------|---------|--------|
+| 1 | Infrastruktur, canvas, .gmx I/O | ✓ v1.0.0 |
+| 2 | Newton-Raphson, Y-bussmatrise | Neste |
+| 3 | Fasekompensering, effekttrekant | — |
+| 4–12 | Se GridMaster_Edu_Spec_v1.0.docx | — |

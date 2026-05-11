@@ -50,11 +50,11 @@ function BusSidebar({ bus, onClose }: SidebarProps) {
         <tbody>
           <tr><td className="text-gray-400 pr-2">Type</td><td>{bus.type}</td></tr>
           <tr><td className="text-gray-400 pr-2">Spenning</td><td>{bus.voltageKV} kV</td></tr>
-          <tr><td className="text-gray-400 pr-2">Last P</td><td>{bus.loadMW} MW</td></tr>
-          <tr><td className="text-gray-400 pr-2">Last Q</td><td>{bus.loadMVAr} MVAr</td></tr>
-          <tr><td className="text-gray-400 pr-2">V set</td><td>{bus.vSetPU} p.u.</td></tr>
+          <tr><td className="text-gray-400 pr-2">Last P</td><td>{bus.loadMW.toFixed(3)} MW</td></tr>
+          <tr><td className="text-gray-400 pr-2">Last Q</td><td>{bus.loadMVAr.toFixed(3)} MVAr</td></tr>
+          <tr><td className="text-gray-400 pr-2">V set</td><td>{bus.vSetPU.toFixed(4)} p.u.</td></tr>
           {bus.genMW !== undefined && (
-            <tr><td className="text-gray-400 pr-2">Gen P</td><td>{bus.genMW} MW</td></tr>
+            <tr><td className="text-gray-400 pr-2">Gen P</td><td>{bus.genMW.toFixed(3)} MW</td></tr>
           )}
         </tbody>
       </table>

@@ -51,7 +51,9 @@ interface NetworkState {
   powerFlowStatus: PowerFlowStatus;
   compensationStatus: CompensationStatus;
   showResults: boolean;
+  showCompensationResults: boolean;
   setShowResults: (v: boolean) => void;
+  setShowCompensationResults: (v: boolean) => void;
   runPowerFlow: () => void;
   runCompensation: (busId: string, cosPhi2: number, steps: number) => void;
 
@@ -92,8 +94,10 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
   powerFlowStatus: 'idle',
   compensationStatus: 'idle',
   showResults: false,
+  showCompensationResults: false,
 
   setShowResults: (v) => set({ showResults: v }),
+  setShowCompensationResults: (v) => set({ showCompensationResults: v }),
 
   runPowerFlow: () => {
     set({ powerFlowStatus: 'running' });
@@ -206,6 +210,7 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
         compensationStatus: 'done',
         powerFlowStatus: pfResult.converged ? 'converged' : 'failed',
         showResults: true,
+        showCompensationResults: true,
         project: {
           ...s.project,
           results: { ...s.project.results, powerFlow: pfResult },

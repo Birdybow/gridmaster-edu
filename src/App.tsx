@@ -10,13 +10,27 @@ import { useNetworkStore } from './store/useNetworkStore.js';
 export default function App() {
   const [showIterations, setShowIterations] = useState(false);
   const [showCompensation, setShowCompensation] = useState(false);
+  const [activeTab, setActiveTab] = useState<'powerflow' | 'compensation'>('powerflow');
 
   const powerFlow = useNetworkStore((s) => s.project.results.powerFlow);
   const showResults = useNetworkStore((s) => s.showResults);
   const setShowResults = useNetworkStore((s) => s.setShowResults);
+  const showCompensationResults = useNetworkStore((s) => s.showCompensationResults);
+  const setShowCompensationResults = useNetworkStore((s) => s.setShowCompensationResults);
   // ?? [] outside selector — see DEVLOG ARKITEKTURREGLER (commit 1f39734)
   const rawCompResults = useNetworkStore((s) => s.project.results.compensation);
   const compensationResults = rawCompResults ?? [];
+
+  const hasPF = !!(powerFlow && showResults);
+  const hasComp = compensationResults.length > 0 && showCompensationResults;
+  const showBottom = hasPF || hasComp;
+
+  // Resolve which tab to display — fall back gracefully if the active tab has no data
+  const resolvedTab =
+    activeTab === 'compensation' && hasComp ? 'compensation'
+    : activeTab === 'powerflow' && hasPF ? 'powerflow'
+    : hasComp ? 'compensation'
+    : 'powerflow';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#0D1B2A' }}>
@@ -25,7 +39,7 @@ export default function App() {
       <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
         <NetworkCanvas />
 
-        {/* Floating compensation panel */}
+        {/* Floating compensation input panel */}
         {showCompensation && (
           <div
             style={{
@@ -45,38 +59,87 @@ export default function App() {
         )}
       </div>
 
-      {powerFlow && showResults && (
-        <>
-          <ResultPanel
-            result={powerFlow}
-            onClose={() => setShowResults(false)}
-          />
-          <div style={{ borderTop: '1px solid #1565C0' }}>
-            <button
-              onClick={() => setShowIterations((v) => !v)}
-              style={{
-                background: 'none',
-                border: 'none',
-                color: '#4FC3F7',
-                cursor: 'pointer',
-                padding: '4px 12px',
-                fontSize: 12,
-              }}
-            >
-              {showIterations ? '▲ Skjul iterasjonslogg' : '▼ Vis iterasjonslogg'}
-            </button>
+      {/* Tabbed bottom panel */}
+      {showBottom && (
+        <div>
+          {/* Tab strip */}
+          <div style={{ display: 'flex', borderTop: '1px solid #1565C0', background: '#0D1B2A' }}>
+            {hasPF && (
+              <button
+                onClick={() => setActiveTab('powerflow')}
+                style={{
+                  background: resolvedTab === 'powerflow' ? '#0F2A45' : 'none',
+                  border: 'none',
+                  borderRight: '1px solid #1565C0',
+                  borderBottom: resolvedTab === 'powerflow' ? '2px solid #4FC3F7' : '2px solid transparent',
+                  color: resolvedTab === 'powerflow' ? '#4FC3F7' : '#607D8B',
+                  cursor: 'pointer',
+                  padding: '6px 16px',
+                  fontSize: 12,
+                  fontWeight: resolvedTab === 'powerflow' ? 600 : 400,
+                }}
+              >
+                Lastflyt
+              </button>
+            )}
+            {hasComp && (
+              <button
+                onClick={() => setActiveTab('compensation')}
+                style={{
+                  background: resolvedTab === 'compensation' ? '#0F1F30' : 'none',
+                  border: 'none',
+                  borderRight: '1px solid #1565C0',
+                  borderBottom: resolvedTab === 'compensation' ? '2px solid #CE93D8' : '2px solid transparent',
+                  color: resolvedTab === 'compensation' ? '#CE93D8' : '#607D8B',
+                  cursor: 'pointer',
+                  padding: '6px 16px',
+                  fontSize: 12,
+                  fontWeight: resolvedTab === 'compensation' ? 600 : 400,
+                }}
+              >
+                Kompensering
+              </button>
+            )}
           </div>
-          {showIterations && (
-            <IterationPanel
-              steps={powerFlow.iterationLog}
-              converged={powerFlow.converged}
+
+          {/* Tab content */}
+          {resolvedTab === 'powerflow' && hasPF && (
+            <>
+              <ResultPanel
+                result={powerFlow!}
+                onClose={() => setShowResults(false)}
+              />
+              <div style={{ borderTop: '1px solid #1565C0' }}>
+                <button
+                  onClick={() => setShowIterations((v) => !v)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#4FC3F7',
+                    cursor: 'pointer',
+                    padding: '4px 12px',
+                    fontSize: 12,
+                  }}
+                >
+                  {showIterations ? '▲ Skjul iterasjonslogg' : '▼ Vis iterasjonslogg'}
+                </button>
+              </div>
+              {showIterations && (
+                <IterationPanel
+                  steps={powerFlow!.iterationLog}
+                  converged={powerFlow!.converged}
+                />
+              )}
+            </>
+          )}
+
+          {resolvedTab === 'compensation' && hasComp && (
+            <CompensationResultPanel
+              results={compensationResults}
+              onClose={() => setShowCompensationResults(false)}
             />
           )}
-        </>
-      )}
-
-      {compensationResults.length > 0 && (
-        <CompensationResultPanel results={compensationResults} />
+        </div>
       )}
     </div>
   );

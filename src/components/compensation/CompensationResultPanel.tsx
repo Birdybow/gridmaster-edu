@@ -2,6 +2,7 @@ import type { CompensationResult } from '../../types/index.js';
 
 interface CompensationResultPanelProps {
   results: CompensationResult[];
+  onClose: () => void;
 }
 
 function Row({ label, before, after, unit, digits = 2, lowerIsBetter = true }: {
@@ -28,7 +29,7 @@ function Row({ label, before, after, unit, digits = 2, lowerIsBetter = true }: {
   );
 }
 
-export function CompensationResultPanel({ results }: CompensationResultPanelProps) {
+export function CompensationResultPanel({ results, onClose }: CompensationResultPanelProps) {
   if (results.length === 0) return null;
 
   const tableHeader: React.CSSProperties = {
@@ -49,8 +50,16 @@ export function CompensationResultPanel({ results }: CompensationResultPanelProp
         overflowY: 'auto',
       }}
     >
-      <div style={{ fontWeight: 700, color: '#CE93D8', fontSize: 13, marginBottom: 10 }}>
-        Kompenserings-resultat — Sammenligning før / etter
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+        <div style={{ fontWeight: 700, color: '#CE93D8', fontSize: 13 }}>
+          Kompenserings-resultat — Sammenligning før / etter
+        </div>
+        <button
+          onClick={onClose}
+          style={{ background: 'none', border: 'none', color: '#9E9E9E', cursor: 'pointer', fontSize: 16, lineHeight: 1 }}
+        >
+          ✕
+        </button>
       </div>
 
       {results.map((r) => (

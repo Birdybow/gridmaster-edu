@@ -87,7 +87,7 @@ export function CompensationPanel({ onClose }: CompensationPanelProps) {
         >
           {pqBuses.map((b) => (
             <option key={b.id} value={b.id}>
-              {b.name} (P={b.loadMW} MW, Q={b.loadMVAr} MVAr)
+              {b.name} (P={b.loadMW} MW, Q={b.loadMVAr.toFixed(3)} MVAr)
             </option>
           ))}
           {pqBuses.length === 0 && <option value="">Ingen PQ-busser med last</option>}
