@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNetworkStore } from '../../store/useNetworkStore.js';
 import { generateReport } from '../../report/generateReport.js';
 import type { ReportSections } from '../../report/generateReport.js';
+import { HelpIcon } from '../common/HelpIcon.js';
 
 interface ReportPanelProps {
   onClose: () => void;
@@ -75,7 +76,10 @@ export function ReportPanel({ onClose }: ReportPanelProps) {
     }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-        <span style={{ fontWeight: 700, color: '#4FC3F7', fontSize: 13 }}>📄 Generer PDF-rapport</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontWeight: 700, color: '#4FC3F7', fontSize: 13 }}>📄 Generer PDF-rapport</span>
+          <HelpIcon title="PDF-rapport" text={"A4-format, jsPDF+html2canvas\nVelg seksjoner, sett studentnavn\nKlar til innlevering"} />
+        </div>
         <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#607D8B', cursor: 'pointer', fontSize: 15 }}>✕</button>
       </div>
 

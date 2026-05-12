@@ -1,14 +1,37 @@
-# GridMaster Edu
+# GridMaster Edu v1.0.0
 
-Interaktiv læringsarena for fagskolestudenter innen elektrisk kraft.
-Fagkode: 00TE13I — Elektrisk kraftproduksjon og distribusjon
-Skole: Malakoff Videregående skole
+**Interaktiv læringsarena for nettberegning i elektrofaget**  
+Fagkode: 00TE13I — Elektrisk kraftproduksjon og distribusjon  
+Skole: Malakoff Videregående skole  
+Versjon: v1.0.0 / v13.0.0 (produksjonsklar)
+
+**Live demo:** [gridmaster-edu.vercel.app](https://gridmaster-edu.vercel.app)
+
+---
+
+## Funksjoner
+
+| Modul | Beskrivelse |
+|---|---|
+| **Nettbygger** | Bygg kraftnett med busser, linjer og transformatorer på canvas |
+| **Lastflyt** | Newton-Raphson (NR) med iterasjonslogg |
+| **Spenningsfall** | Enkel formel (< 50 km) og pi-modell (≥ 50 km) |
+| **Kortslutning** | IEC 60909 — Ik3p, Ik2p, ip (støtfaktor) |
+| **Fasekompensering** | Qkomp-beregning med effekttriangel |
+| **Ringnett** | Symmetrisk og asymmetrisk strømdeling, tapsammenligning |
+| **Vernkoordinering** | Reléinnstilling, selektivitetssjekk, OC-kurver |
+| **Jordfeil** | IT-nett, TN-nett, Petersen-spole |
+| **Kraftproduksjon** | Vannkraft (Francis/Pelton/Kaplan), vind, sol, kjernekraft |
+| **Tidsserie** | Lastprofil og produksjonsprofil over 24 timer |
+| **Per-unit** | Normalisering mot valgbar S_base/U_base |
+| **REN-advarsler** | Automatisk sjekk mot REN blad 4004/6002/7002/9001 |
+| **PDF-rapport** | A4-rapport med alle beregningsseksjoner (jsPDF) |
+| **CSV-eksport** | Semikolonseparert, UTF-8 BOM — Excel-klar |
+| **Skylagring** | Supabase-backend for deling mellom enheter |
 
 ---
 
 ## Kom i gang
-
-**Arbeidsmappe:** `D:\Claude\GridMaster\gridmaster-edu\`
 
 ```powershell
 cd D:\Claude\GridMaster\gridmaster-edu
@@ -20,97 +43,74 @@ npm run dev
 
 ---
 
-## Tilgjengelige kommandoer
+## Faglig bakgrunn
+
+Beregningene er basert på:
+- **IEC 60909** — Kortslutningsstrøm i trefasede vekselspenningssystemer
+- **IEC 60255-151** — Invers-tid overstrømsrelé (standard/very/extremely inverse)
+- **NEK IEC 60038** — Standardspenninger 0.23–420 kV
+- **REN blad 4004/6002/7002/9001** — Norsk Elektroteknisk Norm
+- Newton-Raphson-metoden for lastflyt (iterativ, polar koordinater)
+
+### Fasitsvar (verifisert i Vitest)
+
+| Beregning | Resultat |
+|---|---|
+| NR lastflyt | I = 148 A, ΔU = 4.76% |
+| Fasekompensering | Qkomp ≈ 0.991 MVAr |
+| Vannkraft Francis | P = 90.252 MW (H=200, Q=50, η=0.92) |
+| Kortslutning I''k3p | 1.252 kA |
+| Kortslutning I''k2p | 1.084 kA |
+| Støtfaktor ip | 2.557 kA |
+| Ringnett IA = IB | 83 A (symmetrisk) |
+| Vernkoordinering SI | t = 0.429 s |
+| Vernkoordinering VI | t = 0.338 s |
+| Tidsserie kl.12 | −1.552 MW (overskudd) |
+| Tidsserie kl.03 | +2.2 MW (underskudd) |
+
+---
+
+## Testing
 
 ```powershell
-# Start utviklingsserver (hot-reload)
-npm run dev
-
-# Kjør Vitest-tester
-$env:TEMP = "D:\Claude\GridMaster\gridmaster-edu\node_modules\.tmp"
+# Unit-tester (Vitest)
 npm test
+# 260 tester, 16 testfiler
 
-# TypeScript type-sjekk
-npx tsc -b
-
-# Produksjonsbygg
-npm run build
+# E2E-tester (Playwright)
+npm run test:e2e
 ```
-
-> **NB om npm test på Windows 10:** Vitest v4 forsøker å skrive til `C:\Windows\Temp\`
-> som er UAC-begrenset. Sett `$env:TEMP` til lokal mappe før `npm test` (se over).
 
 ---
 
 ## Teknisk stack
 
-| Teknologi | Versjon | Bruk |
-|-----------|---------|------|
-| Vite | 8+ | Build og dev-server |
-| React | 19 | UI-rammeverk |
-| TypeScript | 6 (strict) | Typesikkerhet |
-| React Flow | 11 | Enlinjeskjema-canvas |
-| Zustand | 5 | Global state |
-| Tailwind CSS | 4 | Mørkt tema (navy/cyan) |
-| Vitest | 4 | Unit-testing av beregningskjerne |
-| sharp | 0.34 | Bildebehandling (vannmerke-fjerning) |
+| Lag | Teknologi |
+|---|---|
+| UI | React 19 + TypeScript + Vite |
+| Canvas | React Flow (reactflow) |
+| State | Zustand |
+| Styling | Tailwind CSS v4 |
+| Backend | Supabase (skylagring) |
+| PDF | jsPDF + jspdf-autotable + html2canvas |
+| Tester | Vitest + Playwright |
+| Deploy | Vercel (kontinuerlig fra main) |
 
 ---
 
-## Mappestruktur
+## Bygg og deploy
 
-```
-gridmaster-edu/
-├── public/
-│   ├── logo.png
-│   ├── splash.png
-│   └── icons/          # bus-slack, bus-pq, transformer, generator, capacitor, overhead-line, cable
-├── src/
-│   ├── types/
-│   │   └── index.ts    # Alle GmxProject-typer (enkelt eksportpunkt)
-│   ├── core/
-│   │   ├── math.ts     # Komplekse talloperasjoner (cadd/csub/cmul/cdiv/cabs/carg/cconj/cpolar)
-│   │   └── math.test.ts
-│   ├── store/
-│   │   └── useNetworkStore.ts  # Zustand store
-│   ├── components/
-│   │   ├── canvas/     # NetworkCanvas, BusNode, LineEdge
-│   │   └── toolbar/    # Toolbar (lagre/laste/importer)
-│   ├── io/
-│   │   └── gmx.ts      # saveProject, loadProject, validateProject, importLegacyGmx
-│   └── scenarios/      # 3 Gemini-testscenarier (Gemini-feltformat)
-├── CHANGELOG.md
-├── DEVLOG.md
-└── README.md           # denne filen
+```powershell
+npx tsc -b    # TypeScript-sjekk (matcher Vercels gate)
+npm run build # Produksjonsbygg
 ```
 
----
-
-## Prosjektfil (.gmx)
-
-Prosjekter lagres som `.gmx`-filer (ren UTF-8 JSON). Bruk **Lagre .gmx** i toolbar.
-For å laste inn Gemini-scenarier (feltformat avviker), bruk **Importer scenario**.
+Push til `main` → automatisk Vercel-deploy.
 
 ---
 
-## Fargepalett
+## Lisens og opphavsrett
 
-| Token | Hex | Bruk |
-|-------|-----|------|
-| navy | `#0D3B66` | Bakgrunn for ikoner, knapperammer |
-| blue | `#1565C0` | Kantkant for linjer, knapper |
-| cyan | `#4FC3F7` | Aksentfarge, spenningsetiketter |
-| green | `#1A5C3A` | Import-knapp |
-| surface | `#1A2A3A` | Panel-bakgrunn |
-| text | `#E8F0FE` | Brødtekst |
-
----
-
-## Sprintplan
-
-| Sprint | Innhold | Status |
-|--------|---------|--------|
-| 1 | Infrastruktur, canvas, .gmx I/O | ✓ v1.0.0 |
-| 2 | Newton-Raphson, Y-bussmatrise | Neste |
-| 3 | Fasekompensering, effekttrekant | — |
-| 4–12 | Se GridMaster_Edu_Spec_v1.0.docx | — |
+© 2026 Bård Reinton-Kjellhov  
+Malakoff Videregående skole — 00TE13I  
+Utviklet med Claude Code (Anthropic)

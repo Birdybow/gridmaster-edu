@@ -26,6 +26,8 @@ import { calcTripTime } from '../core/protection.js';
 import { calcEarthFaultIT, calcEarthFaultTN, calcPetersen } from '../core/earth-fault.js';
 import type { ShortCircuitResult, RingNetworkResult, SelectivityResult, EarthFaultResult, NetworkType } from '../types/index.js';
 import type { OcCurve } from '../types/index.js';
+import { validateRen } from '../validation/ren-rules.js';
+import type { RenResult } from '../validation/ren-rules.js';
 
 export type PowerFlowStatus = 'idle' | 'running' | 'converged' | 'failed';
 export type CompensationStatus = 'idle' | 'computing' | 'done' | 'failed';
@@ -159,6 +161,10 @@ interface NetworkState {
   ringNetworkResults: RingNetworkResult | null;
   selectivityResults: SelectivityResult[];
   showProtectionResults: boolean;
+  renResults: RenResult[];
+  showWarningPanel: boolean;
+  runRenValidation: () => void;
+  setShowWarningPanel: (v: boolean) => void;
 
   // Builder state
   selectedNodeId: string | null;
@@ -268,6 +274,8 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
   ringNetworkResults: null,
   selectivityResults: [],
   showProtectionResults: false,
+  renResults: [],
+  showWarningPanel: false,
 
   selectedNodeId: null,
   selectedEdgeId: null,
@@ -340,6 +348,15 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
   toggleFlowDirections: () => set((s) => ({ showFlowDirections: !s.showFlowDirections })),
   setRingNetworkResults: (r) => set({ ringNetworkResults: r }),
   setShowProtectionResults: (v) => set({ showProtectionResults: v }),
+  setShowWarningPanel: (v) => set({ showWarningPanel: v }),
+  runRenValidation: () => {
+    const { project } = get();
+    const vdResults = project.results.voltageDrop ?? [];
+    const scResults = project.results.shortCircuit ?? [];
+    const selResults = get().selectivityResults;
+    const renResults = validateRen(project, vdResults, scResults, selResults);
+    set({ renResults });
+  },
 
   runSelectivityCheck: () => {
     const { project } = get();

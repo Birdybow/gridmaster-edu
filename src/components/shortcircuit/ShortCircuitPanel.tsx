@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNetworkStore } from '../../store/useNetworkStore.js';
+import { HelpIcon } from '../common/HelpIcon.js';
 
 interface Props {
   onClose: () => void;
@@ -38,9 +39,12 @@ export function ShortCircuitPanel({ onClose }: Props) {
           borderRadius: '8px 8px 0 0',
         }}
       >
-        <span style={{ fontSize: 13, fontWeight: 700, color: '#EF5350' }}>
-          ⚡ Kortslutningsberegning (IEC 60909)
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#EF5350' }}>
+            ⚡ Kortslutningsberegning (IEC 60909)
+          </span>
+          <HelpIcon title="Kortslutning" text={"I''k3p = c·Un/(√3·|Zk|)\nIk3p_fasit = 1.252 kA | Ik2p = 1.084 kA\nREN krav: Ik3p ≥ 2×Ia for vern"} />
+        </div>
         <button
           onClick={() => { clearShortCircuit(); onClose(); }}
           style={{ background: 'none', border: 'none', color: '#607D8B', cursor: 'pointer', fontSize: 14 }}

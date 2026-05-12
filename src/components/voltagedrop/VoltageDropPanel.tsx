@@ -1,5 +1,6 @@
 import { useNetworkStore } from '../../store/useNetworkStore.js';
 import type { VoltageDropModel } from '../../store/useNetworkStore.js';
+import { HelpIcon } from '../common/HelpIcon.js';
 
 const MODEL_OPTIONS: { value: VoltageDropModel; label: string; desc: string }[] = [
   { value: 'auto', label: 'Auto', desc: '< 50 km → enkel, ≥ 50 km → pi' },
@@ -38,7 +39,10 @@ export function VoltageDropPanel({ onClose }: Props) {
     <div style={{ background: '#0D1B2A', border: '1px solid #1E3A5F', borderRadius: 8, overflow: 'hidden', minWidth: 320 }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 14px', background: '#0F2A45', borderBottom: '1px solid #1E3A5F' }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: '#4FC3F7' }}>Spenningsfall</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#4FC3F7' }}>Spenningsfall</span>
+          <HelpIcon title="Spenningsfall" text={"ΔU% = (I·(R·cosφ+X·sinφ)/Uₙ)×100\n< 4%: OK | 4–10%: advarsel | ≥10%: feil\nRef: REN blad 6002 §4.1"} />
+        </div>
         <button
           onClick={onClose}
           style={{ background: 'none', border: 'none', color: '#607D8B', cursor: 'pointer', fontSize: 14 }}

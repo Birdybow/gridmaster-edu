@@ -5,6 +5,50 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 
 ---
 
+## v13.0.0 / v1.0.0 — 2026-05-12 — Sprint 13: PRODUKSJONSKLAR (siste sprint)
+
+### Lagt til
+- **S13-00** Git branch `sprint13` opprettet
+- **S13-01** `package.json` bumped til `13.0.0`
+- **S13-02** `src/validation/ren-rules.ts` — `RenRule`-grensesnitt med `RenSeverity`, `RenArea`, `RenResult`
+- **S13-03** Kabel-regler: `checkCable(ib, in_, iz)` — Ib ≤ In ≤ Iz (REN blad 4004 §3.3)
+- **S13-04** Spenningsfall-regler: `checkVoltageDrop(ΔU%)` — <4% OK, 4–10% advarsel, ≥10% feil
+- **S13-05** Kortslutning-regler: `checkShortCircuit(ik3pA, iaA)` — Ik3p ≥ 2×Ia (5s-krav)
+- **S13-06** Vern-regler: `checkProtectionSelectivity(t_opp, t_ned)` — Δt ≥ 200 ms
+- **S13-07** Jordings-regler: `checkEarthing(rOhm, netType)` — IT ≤ 100Ω, TN ≤ 50Ω
+- **S13-08** `validateRen(project, vdResults, scResults, selResults)` — prosjektnivå-validering
+- **S13-09** `src/components/warnings/WarningBadge.tsx` — badge (rød/gul) for canvas-komponenter
+- **S13-10** `src/components/warnings/WarningPanel.tsx` — flytende REN-advarselspanel med område/alvorlighetsgrad
+- **S13-11** `runRenValidation()` og `renResults`/`showWarningPanel` lagt til Zustand-store
+- **S13-12** `react-joyride` installert (^3.1.0)
+- **S13-13** 7 onboarding-steg: velkomst, toolbar-rad1, toolbar-rad2, komponentpanel, canvas, beregninger, eksport
+- **S13-14** `src/components/onboarding/OnboardingTour.tsx` — auto-start første besøk (localStorage-flagg)
+- **S13-15** Restart-knapp "Vis omvisning" i toolbar-rad1
+- **S13-16** `src/components/common/HelpIcon.tsx` — hover-tooltip-komponent
+- **S13-17** HelpIcon på 10 paneler: VoltageDropPanel, ShortCircuitPanel, RingNetworkPanel, ProtectionHierarchyPanel, PerUnitPanel, CompensationPanel, EarthFaultPanel, ReportPanel, ExportPanel + mer
+- **S13-18** `src/components/help/HelpPage.tsx` — fullskjerms hjelpeside (/help) med formler, REN-regler, fasitsvar
+- **S13-19** UI-konsistensgjennomgang: `data-tour`-attributter på toolbar og canvas
+- **S13-20** Responsivt testet 1280–2560 px
+- **S13-21** Lastetilstand: eksisterende `powerFlowStatus`-indikator
+- **S13-22** `vitest.config.ts` ekskluderer `tests/`-katalog (Playwright-separasjon)
+- **S13-23** `@playwright/test` installert som devDependency
+- **S13-24** `playwright.config.ts` — Chromium, localhost:5173, webServer-integrasjon
+- **S13-25** `tests/e2e-build-network.spec.ts` — app laster, toolbar og canvas synlig
+- **S13-26** `tests/e2e-migration.spec.ts` — v3.5-fil migreres og viser banner
+- **S13-27** `tests/e2e-ren-warnings.spec.ts` — REN-panel åpner, hjelp-knapp fungerer
+- **S13-28** `src/docs/intro-video-manus.md` — 30-sceners manus tilpasset XTTS v2, 5–7 min
+- **S13-29** `npm test:e2e`-script lagt til package.json
+- **S13-30** Vitest: 260 tester (38 nye, alle grønne)
+
+### Fasitsvar (bekreftet i ren-rules.test.ts)
+- Kabel: Ib=18, In=20, Iz=22 → advarsel | Ib=21, In=20, Iz=27 → feil
+- ΔU: 4.76% → advarsel | 11% → feil
+- Kortslutning: 1252A mot 160A → OK | mot 630A → feil
+- Selektivitet: Δt=291ms → OK | Δt=91ms → feil
+- Jording: R=80Ω IT → OK | R=120Ω IT → feil | R=60Ω TN → feil
+
+---
+
 ## v12.0.0 — 2026-05-12 — Sprint 12: Rapport, eksport, per-unit, migrasjon
 
 ### Lagt til

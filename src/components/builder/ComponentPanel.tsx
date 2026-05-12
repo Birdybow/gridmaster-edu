@@ -107,6 +107,7 @@ export function ComponentPanel() {
 
   return (
     <div
+      data-tour="component-panel"
       style={{
         width: collapsed ? 32 : 200,
         minWidth: collapsed ? 32 : 200,

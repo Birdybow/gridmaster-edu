@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNetworkStore } from '../../store/useNetworkStore.js';
 import type { NetworkType } from '../../types/index.js';
+import { HelpIcon } from '../common/HelpIcon.js';
 
 interface Props {
   onClose: () => void;
@@ -53,9 +54,10 @@ export function EarthFaultPanel({ onClose }: Props) {
           borderRadius: '8px 8px 0 0',
         }}
       >
-        <span style={{ fontSize: 13, fontWeight: 700, color: '#66BB6A' }}>
-          ⏚ Jordfeilberegning
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontSize: 13, fontWeight: 700, color: '#66BB6A' }}>⏚ Jordfeilberegning</span>
+          <HelpIcon title="Jordfeil" text={"IT-nett: Rjord ≤ 100 Ω\nTN-nett: Rjord ≤ 50 Ω\nREN blad 9001 §3.2"} />
+        </div>
         <button
           onClick={() => { clearEarthFault(); onClose(); }}
           style={{ background: 'none', border: 'none', color: '#607D8B', cursor: 'pointer', fontSize: 14 }}

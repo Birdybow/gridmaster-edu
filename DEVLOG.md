@@ -4,6 +4,36 @@ Tekniske beslutninger og begrunnelser. Oppdateres ved hvert viktig valg.
 
 ---
 
+## Sprint 13 — 2026-05-12 (SISTE SPRINT — v1.0.0 PRODUKSJONSKLAR)
+
+### BESLUTNING 43: REN-regler — rene funksjoner + prosjektnivå-validator
+
+**Problem:** REN-avvik (spenningsfall, kabelkapasitet, vern, jording) skal sjekkes automatisk etter beregninger og vises på canvas. Regelbasis er Norsk Elektroteknisk Norm (REN blad 4004/6002/7002/9001).
+
+**Løsning:** `ren-rules.ts` eksponerer rene funksjoner (`checkCable`, `checkVoltageDrop`, `checkShortCircuit`, `checkProtectionSelectivity`, `checkEarthing`) som kan testes isolert i Vitest. `validateRen(project, ...)` er prosjektnivå-orchestrator. `RenResult[]` lagres i Zustand-store og brukes av `WarningBadge` og `WarningPanel`.
+
+**Regel for kortslutningsvern:** `Ik3p ≥ 2 × Ia` (sikkerhetsfaktor 2). Grunnen er at REN blad 7002 §2.2 krever at feil kobles fra innen 5 sekunder, og norsk praksis bruker 2× som nedre grense for sikker utløsning med riktig brytertype (type C = 10×In).
+
+### BESLUTNING 44: Onboarding — react-joyride v5 (ny API)
+
+**Problem:** react-joyride v3 (gammel) vs v5 (ny). Ny versjon har endret API: `callback` → `onEvent`, `showProgress`/`showSkipButton` er nå i `options`-prop, `Joyride` er named export (ikke default).
+
+**Løsning:** Migrert direkte til react-joyride v5 API. `onEvent: EventHandler` kalles ved alle hendelser. STATUS.FINISHED/SKIPPED trigger localStorage-flagg og avslutter turen.
+
+**Valg:** Ingen custom tooltip-komponent — bruker innebygd tooltip med tilpasset styling via `styles`-prop (tooltip, tooltipTitle, buttonPrimary, osv.).
+
+### BESLUTNING 45: Playwright ekskluderes fra Vitest
+
+**Problem:** Vitest plukket opp `tests/*.spec.ts` (Playwright-filer) og forsøkte å kjøre dem som unit-tester.
+
+**Løsning:** `vitest.config.ts` eksplisitt `exclude: ['tests/**', 'node_modules/**']`. Playwright kjøres separat via `npm run test:e2e`. Denne separasjonen er nødvendig fordi Playwright bruker `@playwright/test` ikke Vitest runner.
+
+### BESLUTNING 46: v1.0.0 = v13.0.0 — dobbelt-tagging
+
+**Begrunnelse:** Sprint 13 er siste utviklingssprint. Produktet er produksjonsklar for undervisning i 00TE13I. `v13.0.0` følger intern sprint-konvensjon. `v1.0.0` er semantisk versjonering for den første stabile produksjonsversjonen. Begge tagges på samme commit.
+
+---
+
 ## Sprint 12 — 2026-05-12
 
 ### BESLUTNING 40: PDF-bibliotek — jsPDF + jspdf-autotable + html2canvas

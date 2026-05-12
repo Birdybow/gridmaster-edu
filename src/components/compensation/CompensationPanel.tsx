@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNetworkStore } from '../../store/useNetworkStore.js';
 import { calcCompensation } from '../../core/compensation.js';
 import { PowerTriangle } from './PowerTriangle.js';
+import { HelpIcon } from '../common/HelpIcon.js';
 
 interface CompensationPanelProps {
   onClose: () => void;
@@ -60,9 +61,10 @@ export function CompensationPanel({ onClose }: CompensationPanelProps) {
   return (
     <div style={panelStyle}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-        <span style={{ fontWeight: 700, color: '#CE93D8', fontSize: 15 }}>
-          Fasekompensering
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontWeight: 700, color: '#CE93D8', fontSize: 15 }}>Fasekompensering</span>
+          <HelpIcon title="Fasekompensering" text={"Qkomp = P·(tanφ₁−tanφ₂)\nFasit: Qkomp ≈ 0.991 MVAr\n(cosφ 0.85 → 0.95)"} />
+        </div>
         <button
           onClick={onClose}
           style={{ background: 'none', border: 'none', color: '#757575', cursor: 'pointer', fontSize: 16 }}

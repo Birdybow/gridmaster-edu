@@ -8,6 +8,9 @@ interface ToolbarProps {
   onToggleReport?: () => void;
   onToggleExport?: () => void;
   onTogglePerUnit?: () => void;
+  onToggleWarnings?: () => void;
+  onToggleHelp?: () => void;
+  onRestartTour?: () => void;
   onToggleCompensation?: () => void;
   onToggleProduction?: () => void;
   onToggleVoltageDrop?: () => void;
@@ -28,7 +31,7 @@ type MigrationBanner = { fromVersion: string; toVersion: string } | null;
 type CloudSaveState = 'idle' | 'input' | 'saving' | 'done' | 'error';
 type CloudLoadState = 'idle' | 'loading' | 'list' | 'error';
 
-export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVoltageDrop, onToggleShortCircuit, onToggleRingNetwork, onToggleProtection, onToggleEarthFault, onToggleNeutralTreatment, onToggleProductionDashboard, onToggleTimeSeries, onToggleFormulaSheet, onToggleScenarioLibrary, onToggleGlossary, onToggleLearningObjectives, onToggleReport, onToggleExport, onTogglePerUnit }: ToolbarProps) {
+export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVoltageDrop, onToggleShortCircuit, onToggleRingNetwork, onToggleProtection, onToggleEarthFault, onToggleNeutralTreatment, onToggleProductionDashboard, onToggleTimeSeries, onToggleFormulaSheet, onToggleScenarioLibrary, onToggleGlossary, onToggleLearningObjectives, onToggleReport, onToggleExport, onTogglePerUnit, onToggleWarnings, onToggleHelp, onRestartTour }: ToolbarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const legacyInputRef = useRef<HTMLInputElement>(null);
 
@@ -154,7 +157,7 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
 
       <div style={{ background: '#0D1B2A', borderBottom: '1px solid #0E3A5F' }}>
         {/* Rad 1: Fil og prosjekt */}
-        <div className="flex items-center gap-2 px-4" style={{ color: '#E8F0FE', height: 46 }}>
+        <div data-tour="toolbar-row1" className="flex items-center gap-2 px-4" style={{ color: '#E8F0FE', height: 46 }}>
           <img src="/logo.png" alt="GridMaster Edu" style={{ height: 30, objectFit: 'contain' }} />
           <span className="font-bold tracking-wide" style={{ color: '#4FC3F7', fontSize: 14, whiteSpace: 'nowrap' }}>
             GridMaster Edu
@@ -219,10 +222,22 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
             style={{ display: 'none' }}
             onChange={handleImportLegacy}
           />
+
+          <div style={{ width: 1, height: 20, background: '#1E3A5F', margin: '0 4px' }} />
+
+          <button onClick={onToggleWarnings} style={{ ...btnStyle, background: '#1A2800', border: '1px solid #F9A825' }}>
+            ⚠ REN
+          </button>
+          <button onClick={onToggleHelp} style={{ ...btnStyle, background: '#0F2A45', border: '1px solid #4FC3F7' }}>
+            ? Hjelp
+          </button>
+          <button onClick={onRestartTour} style={{ ...btnStyle, background: '#0F2A45' }}>
+            Vis omvisning
+          </button>
         </div>
 
         {/* Rad 2: Analyse-verktøy */}
-        <div style={{ overflowX: 'auto', borderTop: '1px solid #0E3A5F' }}>
+        <div data-tour="toolbar-row2" style={{ overflowX: 'auto', borderTop: '1px solid #0E3A5F' }}>
           <div className="flex items-center gap-2 px-4" style={{ color: '#E8F0FE', height: 38, minWidth: 'max-content' }}>
             <button
               onClick={runPowerFlow}
