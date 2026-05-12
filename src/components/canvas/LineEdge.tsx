@@ -10,6 +10,7 @@ interface LineEdgeData extends Partial<Line> {
   loadingPercent?: number;
   showFlow?: boolean;
   protectionStatus?: 'ok' | 'warning' | 'error' | 'present';
+  protTripTimeS?: number;
 }
 
 function voltageDropColor(pct: number | undefined, lineType: string): string {
@@ -51,11 +52,12 @@ function LineEdgeComponent({
   const label = data?.label ?? data?.name;
 
   const protStatus = data?.protectionStatus;
+  const protTripTimeS = data?.protTripTimeS;
   const shieldColor =
     protStatus === 'ok' ? '#4CAF50' :
     protStatus === 'warning' ? '#FFB74D' :
     protStatus === 'error' ? '#EF5350' :
-    protStatus === 'present' ? '#4FC3F7' : null;
+    protStatus === 'present' ? '#607D8B' : null;
 
   const showFlow = data?.showFlow && data?.flowCurrentA !== undefined;
   const currentA = data?.flowCurrentA ?? 0;
@@ -127,16 +129,28 @@ function LineEdgeComponent({
           <div
             style={{
               position: 'absolute',
-              transform: `translate(-50%, -50%) translate(${labelX + 28}px,${labelY}px)`,
+              transform: `translate(-50%, -50%) translate(${labelX + 36}px,${labelY}px)`,
               pointerEvents: 'none',
-              fontSize: 12,
-              color: shieldColor,
-              textShadow: `0 0 4px ${shieldColor}`,
               userSelect: 'none',
+              zIndex: 10,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              lineHeight: 1,
             }}
             title="Overstrømsvern"
           >
-            🛡
+            <span style={{ fontSize: 12, color: shieldColor, textShadow: `0 0 4px ${shieldColor}` }}>🛡</span>
+            {(protStatus === 'ok' || protStatus === 'warning') && protTripTimeS !== undefined && (
+              <span style={{ fontSize: 8, color: shieldColor, fontWeight: 700, marginTop: 1 }}>
+                {protTripTimeS.toFixed(2)}s
+              </span>
+            )}
+            {protStatus === 'error' && (
+              <span style={{ fontSize: 8, color: '#EF5350', fontWeight: 700, marginTop: 1 }}>
+                ⚠ ut!
+              </span>
+            )}
           </div>
         )}
       </EdgeLabelRenderer>

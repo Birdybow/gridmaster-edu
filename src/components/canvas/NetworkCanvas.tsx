@@ -12,7 +12,8 @@ import { BusNode } from './BusNode.js';
 import { LineEdge } from './LineEdge.js';
 import { CompensatorNode } from './CompensatorNode.js';
 import { CompensatorLinkEdge } from './CompensatorLinkEdge.js';
-import type { Bus, Line, Transformer, Compensator } from '../../types/index.js';
+import type { Bus, Line, Transformer, Compensator, OcCurve } from '../../types/index.js';
+import { calcTripTime } from '../../core/protection.js';
 import { PALETTE, DRAG_TYPE } from '../builder/ComponentPalette.js';
 
 // Module-level constants — never recreated
@@ -37,13 +38,14 @@ function lineToEdge(
   loadingPercent?: number,
   showFlow?: boolean,
   protectionStatus?: 'ok' | 'warning' | 'error' | 'present',
+  protTripTimeS?: number,
 ): Edge {
   return {
     id: line.id,
     source: line.fromBusId,
     target: line.toBusId,
     type: 'lineEdge',
-    data: { ...line, label: line.name, voltageDropPct, flowCurrentA, loadingPercent, showFlow, protectionStatus },
+    data: { ...line, label: line.name, voltageDropPct, flowCurrentA, loadingPercent, showFlow, protectionStatus, protTripTimeS },
     selected: line.id === selectedEdgeId,
   };
 }
@@ -89,7 +91,7 @@ export function NetworkCanvas() {
   const voltageDropResults = useNetworkStore((s) => s.project.results.voltageDrop);
   const powerFlowResult = useNetworkStore((s) => s.project.results.powerFlow);
   const showFlowDirections = useNetworkStore((s) => s.showFlowDirections);
-  const selectivityResults = useNetworkStore((s) => s.selectivityResults);
+  const scResults = useNetworkStore((s) => s.project.results.shortCircuit);
   const selectedNodeId = useNetworkStore((s) => s.selectedNodeId);
   const selectedEdgeId = useNetworkStore((s) => s.selectedEdgeId);
   const lineDrawingMode = useNetworkStore((s) => s.lineDrawingMode);
@@ -134,20 +136,29 @@ export function NetworkCanvas() {
         const vdr = voltageDropResults?.find((r) => r.lineId === l.id);
         const flr = powerFlowResult?.lines.find((r) => r.lineId === l.id);
         const flowA = flr ? flr.currentKA * 1000 : undefined;
-        // Protection status for shield icon
+        // Protection status for shield icon — based on SC sensitivity
         const prot = protections.find((p) => p.protectedLineId === l.id);
         let protStatus: 'ok' | 'warning' | 'error' | 'present' | undefined;
+        let protTripTimeS: number | undefined;
         if (prot) {
-          const sel = selectivityResults.find((r) => r.prot1Id === prot.id || r.prot2Id === prot.id);
-          if (sel) {
-            protStatus = sel.selective && (sel.marginS >= 0.3 || !isFinite(sel.marginS)) ? 'ok'
-              : sel.selective ? 'warning'
-              : 'error';
+          const scResult = scResults?.find((r) => r.busId === l.toBusId);
+          if (scResult) {
+            const ikA = scResult.ik3pMinKA * 1000;
+            const sensitive = prot.pickupCurrentA < ikA;
+            if (sensitive) {
+              const tms = prot.tms ?? 0.1;
+              const curve = (prot.curve ?? 'standard_inverse') as OcCurve;
+              const t = calcTripTime(tms, prot.pickupCurrentA, ikA, curve);
+              protTripTimeS = isFinite(t) ? t : undefined;
+              protStatus = (protTripTimeS !== undefined && protTripTimeS > 1.0) ? 'warning' : 'ok';
+            } else {
+              protStatus = 'error';
+            }
           } else {
             protStatus = 'present';
           }
         }
-        return lineToEdge(l, selectedEdgeId, vdr?.deltaUPercent, flowA, flr?.loadingPercent, showFlowDirections && powerFlowResult?.converged, protStatus);
+        return lineToEdge(l, selectedEdgeId, vdr?.deltaUPercent, flowA, flr?.loadingPercent, showFlowDirections && powerFlowResult?.converged, protStatus, protTripTimeS);
       }),
       ...transformers.map((t) => trafoToEdge(t, selectedEdgeId)),
       ...compensators.map((c) => ({
@@ -160,7 +171,7 @@ export function NetworkCanvas() {
         data: {},
       })),
     ],
-    [lines, transformers, compensators, protections, selectedEdgeId, voltageDropResults, powerFlowResult, showFlowDirections, selectivityResults],
+    [lines, transformers, compensators, protections, selectedEdgeId, voltageDropResults, powerFlowResult, showFlowDirections, scResults],
   );
 
   // Handle keyboard: Delete key, Escape
