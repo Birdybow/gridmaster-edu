@@ -253,7 +253,7 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
         >
           {powerFlowStatus === 'running' ? '…'
             : validationResult && !validationResult.valid ? `✗ ${validationResult.errors.length} feil`
-            : 'Beregn lastflyt'}
+            : 'Lastflyt'}
         </button>
 
         {/* Fasekompensering */}
@@ -267,7 +267,7 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
             opacity: project.buses.length === 0 ? 0.5 : 1,
           }}
         >
-          Fasekompensering
+          Kompensering
         </button>
 
         {/* Produksjon */}
@@ -295,7 +295,7 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
             opacity: project.lines.length === 0 ? 0.5 : 1,
           }}
         >
-          ΔU Spenningsfall
+          ΔU Spenning
         </button>
 
         {/* Kortslutning */}
@@ -333,7 +333,7 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
           onClick={() => legacyInputRef.current?.click()}
           style={{ ...btnStyle, background: '#1A5C3A' }}
         >
-          Importer scenario
+          Importer
         </button>
         <input
           ref={legacyInputRef}
