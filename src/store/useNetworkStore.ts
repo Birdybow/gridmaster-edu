@@ -1079,6 +1079,9 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
     selectedEarthFaultBusId: null,
     powerFlowStatus: 'idle',
     compensationStatus: 'idle',
+    timeSeriesLoad: [],
+    timeSeriesProduction: [],
+    timeSeriesBalance: [],
   }),
 
   loadProject: (p) => {

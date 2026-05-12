@@ -14,12 +14,16 @@ interface ToolbarProps {
   onToggleNeutralTreatment?: () => void;
   onToggleProductionDashboard?: () => void;
   onToggleTimeSeries?: () => void;
+  onToggleFormulaSheet?: () => void;
+  onToggleScenarioLibrary?: () => void;
+  onToggleGlossary?: () => void;
+  onToggleLearningObjectives?: () => void;
 }
 
 type CloudSaveState = 'idle' | 'input' | 'saving' | 'done' | 'error';
 type CloudLoadState = 'idle' | 'loading' | 'list' | 'error';
 
-export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVoltageDrop, onToggleShortCircuit, onToggleRingNetwork, onToggleProtection, onToggleEarthFault, onToggleNeutralTreatment, onToggleProductionDashboard, onToggleTimeSeries }: ToolbarProps) {
+export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVoltageDrop, onToggleShortCircuit, onToggleRingNetwork, onToggleProtection, onToggleEarthFault, onToggleNeutralTreatment, onToggleProductionDashboard, onToggleTimeSeries, onToggleFormulaSheet, onToggleScenarioLibrary, onToggleGlossary, onToggleLearningObjectives }: ToolbarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const legacyInputRef = useRef<HTMLInputElement>(null);
 
@@ -282,6 +286,40 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
               style={{ ...anaBtnStyle, background: '#0D1520', color: '#4FC3F7', border: '1px solid #1565C0' }}
             >
               ∿ Nøytral
+            </button>
+
+            <div style={{ width: 1, height: 20, background: '#1E3A5F', margin: '0 4px' }} />
+
+            <button
+              onClick={onToggleScenarioLibrary}
+              title="Scenariobibliotek — last inn ferdigbygde nett"
+              style={{ ...anaBtnStyle, background: '#1A0D2E', color: '#CE93D8', border: '1px solid #7B1FA2' }}
+            >
+              📚 Scenarioer
+            </button>
+
+            <button
+              onClick={onToggleFormulaSheet}
+              title="Formelark — alle nøkkelformler gruppert per tema"
+              style={{ ...anaBtnStyle, background: '#1A1200', color: '#FFE082', border: '1px solid #F9A825' }}
+            >
+              📐 Formelark
+            </button>
+
+            <button
+              onClick={onToggleGlossary}
+              title="Fagordliste — søkbar liste med 20+ fagtermer"
+              style={{ ...anaBtnStyle, background: '#001A1A', color: '#80CBC4', border: '1px solid #00796B' }}
+            >
+              📖 Ordliste
+            </button>
+
+            <button
+              onClick={onToggleLearningObjectives}
+              title="Læringsmål — hva du lærer av hver funksjon"
+              style={{ ...anaBtnStyle, background: '#001A0A', color: '#A5D6A7', border: '1px solid #2E7D32' }}
+            >
+              🎓 Læringsmål
             </button>
           </div>
         </div>

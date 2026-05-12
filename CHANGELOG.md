@@ -5,6 +5,36 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 
 ---
 
+## v11.0.0 — 2026-05-12 — Sprint 11: Pedagogisk lag + UI-rydding
+
+### Lagt til
+- **S11-00** Git branch `sprint11` opprettet
+- **S11-01** `package.json` bumped til `11.0.0`
+- **S11-02** To-rads toolbar (ferdig fra forrige session): Rad 1 = fil/prosjekt (h=46px), Rad 2 = analyse + pedagogikk (h=38px, overflow-x: auto)
+- **S11-03** `LearningObjectivesPanel.tsx` — flytende panel med læringsmål per funksjon (11 funksjoner, tabulator-navigasjon, nøkkelformel + standard per funksjon)
+- **S11-04** `FormulaSheet.tsx` — formelark-modal med 8 temagrupper (Lastflyt, Spenningsfall, Kortslutning, Vern, Vannkraft, Vindkraft, Solkraft, Jordfeil), 40+ formler
+- **S11-05** `HintSystem.tsx` — kontekstsensitive hints: ingen slack-buss, ΔU > 5%, Ik > 25 kA
+- **S11-06** `ScenarioLibraryPanel.tsx` + `src/data/scenarios.ts` — 4 scenarioer (Enkel radial, Ringnett 3-buss, Trafo+lavspent, Vannkraft+vind), hvert med læringsmål og forventet resultat
+- **S11-07** `GlossaryPanel.tsx` — søkbar fagordliste med 23 termer på norsk og engelsk, filtrerbar per kategori
+- **S11-08** `clearAllResults()` i store nullstiller tidsserie-data ved nytt prosjekt/import
+- **S11-09** Vitest: `npm test`-script setter korrekt TEMP-sti (Windows Temp EPERM fix via cross-env), 195/195 tester grønne
+- **S11-10** Toolbar rad 2: 4 nye pedagogiske knapper (📚 Scenarioer, 📐 Formelark, 📖 Ordliste, 🎓 Læringsmål)
+- **S11-11** `vitest.config.ts` forenklet (fjernet utdatert cache.dir-advarsel)
+
+### Akseptanskriterier
+- ✓ 195/195 Vitest-tester grønne
+- ✓ Toolbar går ikke ut over siden (to-rads layout)
+- ✓ Nytt prosjekt nullstiller alle paneler (clearAllResults + timeseries)
+- ✓ Læringsmål tilgjengelig per funksjon (LearningObjectivesPanel)
+- ✓ Formelark tilgjengelig (FormulaSheet)
+- ✓ Hint vises ved vanlige feil (HintSystem)
+- ✓ 4 scenarioer i biblioteket
+- ✓ 23 fagtermer i ordliste
+- ✓ v11.0.0 i UI
+- ✓ npx tsc -b — ingen feil
+
+---
+
 ## v10.0.0 — 2026-05-12 — Sprint 10: Tidsserie-simulering 24t
 
 ### Lagt til
