@@ -34,6 +34,9 @@ import { FormulaSheet } from './components/pedagogy/FormulaSheet.js';
 import { HintSystem } from './components/pedagogy/HintSystem.js';
 import { ScenarioLibraryPanel } from './components/pedagogy/ScenarioLibraryPanel.js';
 import { GlossaryPanel } from './components/pedagogy/GlossaryPanel.js';
+import { ReportPanel } from './components/report/ReportPanel.js';
+import { ExportPanel } from './components/export/ExportPanel.js';
+import { PerUnitPanel } from './components/perunit/PerUnitPanel.js';
 import { useNetworkStore } from './store/useNetworkStore.js';
 
 function EditorPanel() {
@@ -142,6 +145,9 @@ export default function App() {
   const [showScenarioLibrary, setShowScenarioLibrary] = useState(false);
   const [showGlossary, setShowGlossary] = useState(false);
   const [showLearningObjectives, setShowLearningObjectives] = useState(false);
+  const [showReport, setShowReport] = useState(false);
+  const [showExport, setShowExport] = useState(false);
+  const [showPerUnit, setShowPerUnit] = useState(false);
   const [protectionHint, setProtectionHint] = useState(false);
   const [activeTab, setActiveTab] = useState<'powerflow' | 'compensation' | 'production' | 'voltagedrop' | 'shortcircuit' | 'ringnetwork' | 'protection'>('powerflow');
 
@@ -219,6 +225,9 @@ export default function App() {
         onToggleScenarioLibrary={() => setShowScenarioLibrary((v) => !v)}
         onToggleGlossary={() => setShowGlossary((v) => !v)}
         onToggleLearningObjectives={() => setShowLearningObjectives((v) => !v)}
+        onToggleReport={() => setShowReport((v) => !v)}
+        onToggleExport={() => setShowExport((v) => !v)}
+        onTogglePerUnit={() => setShowPerUnit((v) => !v)}
       />
 
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', position: 'relative' }}>
@@ -337,6 +346,27 @@ export default function App() {
           {showLearningObjectives && (
             <div style={{ position: 'absolute', top: 12, left: 350, zIndex: 50 }}>
               <LearningObjectivesPanel onClose={() => setShowLearningObjectives(false)} />
+            </div>
+          )}
+
+          {/* Report panel */}
+          {showReport && (
+            <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 52 }}>
+              <ReportPanel onClose={() => setShowReport(false)} />
+            </div>
+          )}
+
+          {/* Export panel */}
+          {showExport && (
+            <div style={{ position: 'absolute', top: 12, right: showReport ? 356 : 12, zIndex: 51 }}>
+              <ExportPanel onClose={() => setShowExport(false)} />
+            </div>
+          )}
+
+          {/* Per-unit panel */}
+          {showPerUnit && (
+            <div style={{ position: 'absolute', top: 12, left: 350, zIndex: 51 }}>
+              <PerUnitPanel onClose={() => setShowPerUnit(false)} />
             </div>
           )}
 

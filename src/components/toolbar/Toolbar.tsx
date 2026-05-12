@@ -2,8 +2,12 @@ import { useRef, useState } from 'react';
 import { useNetworkStore } from '../../store/useNetworkStore.js';
 import { saveProject, loadProject, importLegacyGmx, saveToCloud, loadFromCloud, listCloudProjects } from '../../io/gmx.js';
 import type { CloudProjectSummary } from '../../types/index.js';
+import { migrateProject } from '../../io/migration.js';
 
 interface ToolbarProps {
+  onToggleReport?: () => void;
+  onToggleExport?: () => void;
+  onTogglePerUnit?: () => void;
   onToggleCompensation?: () => void;
   onToggleProduction?: () => void;
   onToggleVoltageDrop?: () => void;
@@ -20,10 +24,11 @@ interface ToolbarProps {
   onToggleLearningObjectives?: () => void;
 }
 
+type MigrationBanner = { fromVersion: string; toVersion: string } | null;
 type CloudSaveState = 'idle' | 'input' | 'saving' | 'done' | 'error';
 type CloudLoadState = 'idle' | 'loading' | 'list' | 'error';
 
-export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVoltageDrop, onToggleShortCircuit, onToggleRingNetwork, onToggleProtection, onToggleEarthFault, onToggleNeutralTreatment, onToggleProductionDashboard, onToggleTimeSeries, onToggleFormulaSheet, onToggleScenarioLibrary, onToggleGlossary, onToggleLearningObjectives }: ToolbarProps) {
+export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVoltageDrop, onToggleShortCircuit, onToggleRingNetwork, onToggleProtection, onToggleEarthFault, onToggleNeutralTreatment, onToggleProductionDashboard, onToggleTimeSeries, onToggleFormulaSheet, onToggleScenarioLibrary, onToggleGlossary, onToggleLearningObjectives, onToggleReport, onToggleExport, onTogglePerUnit }: ToolbarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const legacyInputRef = useRef<HTMLInputElement>(null);
 
@@ -42,6 +47,9 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
   const [cloudProjects, setCloudProjects] = useState<CloudProjectSummary[]>([]);
   const [cloudLoadError, setCloudLoadError] = useState('');
 
+  // Migration banner
+  const [migrationBanner, setMigrationBanner] = useState<MigrationBanner>(null);
+
   function handleSave() {
     saveProject(project);
   }
@@ -50,8 +58,12 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
     const file = e.target.files?.[0];
     if (!file) return;
     try {
-      const p = await loadProject(file);
-      storeLoad(p);
+      const result = await loadProject(file);
+      storeLoad(result.project);
+      if (result.migrated) {
+        setMigrationBanner({ fromVersion: result.fromVersion, toVersion: result.toVersion });
+        setTimeout(() => setMigrationBanner(null), 8000);
+      }
     } catch (err) {
       alert(`Feil ved innlasting: ${String(err)}`);
     }
@@ -105,7 +117,12 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
   async function handleLoadCloudProject(id: string) {
     try {
       const p = await loadFromCloud(id);
-      storeLoad(p);
+      const migResult = migrateProject(p);
+      storeLoad(migResult.project);
+      if (migResult.migrated) {
+        setMigrationBanner({ fromVersion: migResult.fromVersion, toVersion: migResult.toVersion });
+        setTimeout(() => setMigrationBanner(null), 8000);
+      }
       setCloudLoadState('idle');
     } catch (err) {
       alert(`Feil ved lasting: ${String(err)}`);
@@ -114,6 +131,27 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
 
   return (
     <>
+      {/* Migrasjonsbanner */}
+      {migrationBanner && (
+        <div style={{
+          background: '#1A2800', border: '1px solid #689F38', borderRadius: 0,
+          padding: '7px 20px', fontSize: 12, color: '#CCFF90',
+          display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          zIndex: 200,
+        }}>
+          <span>
+            🔄 Prosjektet ble migrert fra v{migrationBanner.fromVersion} til v{migrationBanner.toVersion}.
+            Lagre på nytt for å beholde endringene.
+          </span>
+          <button
+            onClick={() => setMigrationBanner(null)}
+            style={{ background: 'none', border: 'none', color: '#8BC34A', cursor: 'pointer', fontSize: 14 }}
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       <div style={{ background: '#0D1B2A', borderBottom: '1px solid #0E3A5F' }}>
         {/* Rad 1: Fil og prosjekt */}
         <div className="flex items-center gap-2 px-4" style={{ color: '#E8F0FE', height: 46 }}>
@@ -320,6 +358,32 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
               style={{ ...anaBtnStyle, background: '#001A0A', color: '#A5D6A7', border: '1px solid #2E7D32' }}
             >
               🎓 Læringsmål
+            </button>
+
+            <div style={{ width: 1, height: 20, background: '#1E3A5F', margin: '0 4px' }} />
+
+            <button
+              onClick={onTogglePerUnit}
+              title="Per-unit visning — normaliser alle verdier mot valgt base"
+              style={{ ...anaBtnStyle, background: '#001A1A', color: '#80CBC4', border: '1px solid #00796B' }}
+            >
+              ∿ Per-unit
+            </button>
+
+            <button
+              onClick={onToggleExport}
+              title="CSV-eksport — last ned resultater som regneark"
+              style={{ ...anaBtnStyle, background: '#0A1A0A', color: '#A5D6A7', border: '1px solid #388E3C' }}
+            >
+              📊 CSV
+            </button>
+
+            <button
+              onClick={onToggleReport}
+              title="Generer PDF-rapport"
+              style={{ ...anaBtnStyle, background: '#0D2040', color: '#90CAF9', border: '1px solid #1565C0' }}
+            >
+              📄 Rapport
             </button>
           </div>
         </div>

@@ -9,6 +9,9 @@ import type {
   CloudProjectSummary,
 } from '../types/index.js';
 import { supabase } from '../lib/supabase.js';
+import { migrateProject } from './migration.js';
+export type { MigrationResult } from './migration.js';
+export { needsMigration } from './migration.js';
 
 // ---------------------------------------------------------------------------
 // Save
@@ -30,8 +33,29 @@ export function saveProject(project: GmxProject): void {
 // Load
 // ---------------------------------------------------------------------------
 
-/** Read a .gmx file chosen by the user and return a validated GmxProject. */
-export async function loadProject(file: File): Promise<GmxProject> {
+export interface LoadResult {
+  project: GmxProject;
+  migrated: boolean;
+  fromVersion: string;
+  toVersion: string;
+}
+
+/** Read a .gmx file chosen by the user, migrate if needed, and return result. */
+export async function loadProject(file: File): Promise<LoadResult> {
+  const text = await file.text();
+  const raw: unknown = JSON.parse(text);
+  const validated = validateProject(raw);
+  const migResult = migrateProject(validated);
+  return {
+    project: migResult.project,
+    migrated: migResult.migrated,
+    fromVersion: migResult.fromVersion,
+    toVersion: migResult.toVersion,
+  };
+}
+
+/** Load without migration (backwards compat for cloud) */
+export async function loadProjectRaw(file: File): Promise<GmxProject> {
   const text = await file.text();
   const raw: unknown = JSON.parse(text);
   return validateProject(raw);

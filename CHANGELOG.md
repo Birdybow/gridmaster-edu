@@ -5,6 +5,52 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 
 ---
 
+## v12.0.0 — 2026-05-12 — Sprint 12: Rapport, eksport, per-unit, migrasjon
+
+### Lagt til
+- **S12-00** Git branch `sprint12` opprettet
+- **S12-01** `package.json` bumped til `12.0.0`
+- **S12-02** `jspdf-autotable` installert (jsPDF + html2canvas allerede i avh.)
+- **S12-03** `src/report/generateReport.ts` — `generateReport(project, opts, canvasEl)` med A4-portrett, 1 tomme marg
+- **S12-04** PDF-forside: tittel, prosjektnavn, dato, studentnavn-felt, grå logo-placeholder (100×100 px)
+- **S12-05** Enlinjeskjema-seksjon via html2canvas + `.react-flow__viewport`
+- **S12-06** Y-bussmatrise-seksjon (konduktans G, reell del) generert fra prosjekt-topologi
+- **S12-07** Lastflyt-seksjon (busser + linjer, konvergensstatus, totale tap)
+- **S12-08** Fasekompensering-seksjon (Q_komp ≈ 0.991 MVAr fasit)
+- **S12-09** Kortslutning-seksjon (Ik3p=1.252 kA, Ik2p=1.084 kA, ip=2.557 kA)
+- **S12-10** Ringnett-seksjon (75 % tap-reduksjon)
+- **S12-11** Vernkoordinering-seksjon (SI t=0.429 s, VI t=0.338 s)
+- **S12-12** Spenningsfall-seksjon (ΔU=4.76 %, fasit NR)
+- **S12-13** Header side 2+: prosjektnavn (venstre), dato (høyre) + footer "Side X av Y"
+- **S12-14** `ReportPanel.tsx` — seksjon-toggles, studentnavn-felt, generer-knapp
+- **S12-15** `src/export/csv.ts` — `exportYBusCsv(project)` med semikolon + UTF-8 BOM
+- **S12-16** `exportLoadFlowCsv`, `exportShortCircuitCsv`, `exportRingNetworkCsv`, `exportVoltageDropCsv`
+- **S12-17** `ExportPanel.tsx` — knapper per resultattype, disabled-tilstand hvis ingen data
+- **S12-18** `src/core/per-unit.ts` — `zBase`, `zToPU/From`, `vToPU/From`, `pToPU`, `qToPU`, `iToPU`
+- **S12-19** `PerUnitPanel.tsx` — flytende panel med justerbar S_base/U_base
+- **S12-20** Per-unit buss- og linjeresultater med fargekodet spenningsnivå (rød > 1.05 pu, oransje < 0.95 pu)
+- **S12-21** Pedagogisk hint ved første visning: Z_pu-formel, overspennings-definisjon
+- **S12-22** `src/io/migration.ts` — kjedet migrasjon v1→v12, ett steg per major-versjon
+- **S12-23** `loadProject()` i `gmx.ts` returnerer `LoadResult` med `migrated/fromVersion/toVersion`, migrasjonsbanner vises 8 sek
+- **S12-24** `saveProject()` inkluderer `results`-feltet (var allerede i `GmxProject`)
+- **S12-25** 222/222 Vitest grønne (195 fra S11 + 27 nye: per-unit, migrasjon, CSV-logikk, BOM)
+- **S12-26** `npx tsc -b` ren — ingen feil
+- **S12-27** CHANGELOG v12.0.0 ✓
+- **S12-28** DEVLOG beslutninger 40–42 ✓
+- **S12-29** `git commit + tag v12.0.0 + push` ✓
+- **S12-30** Vercel-deploy verifisert ✓
+
+### Akseptanskriterier
+- ✓ 222/222 Vitest-tester grønne
+- ✓ `npx tsc -b` ren
+- ✓ PDF genereres med valgte seksjoner
+- ✓ CSV åpnes i Excel norsk (BOM + semikolon)
+- ✓ Per-unit toggle med pedagogisk hint
+- ✓ Eldre .gmx (v3.5) migreres til v12.0 med banner
+- ✓ CHANGELOG og DEVLOG oppdatert
+
+---
+
 ## v11.0.0 — 2026-05-12 — Sprint 11: Pedagogisk lag + UI-rydding
 
 ### Lagt til
