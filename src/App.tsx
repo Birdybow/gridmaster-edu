@@ -37,7 +37,11 @@ import { GlossaryPanel } from './components/pedagogy/GlossaryPanel.js';
 import { ReportPanel } from './components/report/ReportPanel.js';
 import { ExportPanel } from './components/export/ExportPanel.js';
 import { PerUnitPanel } from './components/perunit/PerUnitPanel.js';
+import { WarningPanel } from './components/warnings/WarningPanel.js';
+import { HelpPage } from './components/help/HelpPage.js';
+import { OnboardingTour, shouldStartTour, resetTour } from './components/onboarding/OnboardingTour.js';
 import { useNetworkStore } from './store/useNetworkStore.js';
+import { useEffect } from 'react';
 
 function EditorPanel() {
   const selectedNodeId = useNetworkStore((s) => s.selectedNodeId);
@@ -148,6 +152,9 @@ export default function App() {
   const [showReport, setShowReport] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [showPerUnit, setShowPerUnit] = useState(false);
+  const [showWarnings, setShowWarnings] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
+  const [tourRun, setTourRun] = useState(false);
   const [protectionHint, setProtectionHint] = useState(false);
   const [activeTab, setActiveTab] = useState<'powerflow' | 'compensation' | 'production' | 'voltagedrop' | 'shortcircuit' | 'ringnetwork' | 'protection'>('powerflow');
 
@@ -171,6 +178,10 @@ export default function App() {
   const selectedEdgeId = useNetworkStore((s) => s.selectedEdgeId);
   const appLines = useNetworkStore((s) => s.project.lines);
   const isLineSelected = selectedEdgeId ? appLines.some((l) => l.id === selectedEdgeId) : false;
+
+  useEffect(() => {
+    if (shouldStartTour()) setTourRun(true);
+  }, []);
 
   const hasPF = !!(powerFlow && showResults);
   const hasComp = compensationResults.length > 0 && showCompensationResults;
@@ -228,6 +239,9 @@ export default function App() {
         onToggleReport={() => setShowReport((v) => !v)}
         onToggleExport={() => setShowExport((v) => !v)}
         onTogglePerUnit={() => setShowPerUnit((v) => !v)}
+        onToggleWarnings={() => setShowWarnings((v) => !v)}
+        onToggleHelp={() => setShowHelp((v) => !v)}
+        onRestartTour={() => { resetTour(); setTourRun(true); }}
       />
 
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', position: 'relative' }}>
@@ -235,7 +249,7 @@ export default function App() {
         <ComponentPanel />
 
         {/* Center: Canvas */}
-        <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
+        <div data-tour="network-canvas" style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
           <NetworkCanvas />
 
           {/* Floating voltage drop panel */}
@@ -635,6 +649,19 @@ export default function App() {
           )}
         </div>
       )}
+
+      {/* Warning panel */}
+      {showWarnings && (
+        <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 53 }}>
+          <WarningPanel onClose={() => setShowWarnings(false)} />
+        </div>
+      )}
+
+      {/* Help page */}
+      {showHelp && <HelpPage onClose={() => setShowHelp(false)} />}
+
+      {/* Onboarding tour */}
+      <OnboardingTour run={tourRun} onFinish={() => setTourRun(false)} />
 
       {/* Contextual hint system */}
       <HintSystem />

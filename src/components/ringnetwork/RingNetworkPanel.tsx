@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNetworkStore } from '../../store/useNetworkStore.js';
 import { getBusName } from '../../utils/display.js';
+import { HelpIcon } from '../common/HelpIcon.js';
 
 interface Props {
   onClose: () => void;
@@ -63,7 +64,10 @@ export function RingNetworkPanel({ onClose }: Props) {
       }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-        <span style={{ fontWeight: 700, color: '#4CAF50', fontSize: 13 }}>⭕ Ringnett</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontWeight: 700, color: '#4CAF50', fontSize: 13 }}>⭕ Ringnett</span>
+          <HelpIcon title="Ringnett" text={"IA = Σ(P·d_B) / L_tot\nFasit: IA=IB=83A (symmetrisk)\nTapsreduksjon 75% vs. radial"} />
+        </div>
         <button
           onClick={onClose}
           style={{ background: 'none', border: 'none', color: '#7FA8C9', cursor: 'pointer', fontSize: 16 }}

@@ -2,6 +2,7 @@ import { useNetworkStore } from '../../store/useNetworkStore.js';
 import { getBusName } from '../../utils/display.js';
 import { calcTripTime } from '../../core/protection.js';
 import type { OcCurve } from '../../types/index.js';
+import { HelpIcon } from '../common/HelpIcon.js';
 
 interface HNode {
   lineId: string;
@@ -114,7 +115,10 @@ export function ProtectionHierarchyPanel({ onClose }: { onClose: () => void }) {
           borderBottom: '1px solid #1E3A5F',
         }}
       >
-        <span style={{ color: '#4FC3F7', fontWeight: 700, fontSize: 13 }}>🛡 Vernhierarki</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ color: '#4FC3F7', fontWeight: 700, fontSize: 13 }}>🛡 Vernhierarki</span>
+          <HelpIcon title="Vernhierarki" text={"Selektivitet: Δt ≥ 200 ms mellom nivåer\nSI: t = 0.429s (TMS=0.1, Is=100A)\nREN blad 7002 §5.1"} />
+        </div>
         <button
           onClick={onClose}
           style={{ background: 'none', border: 'none', color: '#607D8B', cursor: 'pointer', fontSize: 14 }}

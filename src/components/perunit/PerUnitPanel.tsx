@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNetworkStore } from '../../store/useNetworkStore.js';
 import { vToPU, pToPU, qToPU, iToPU } from '../../core/per-unit.js';
+import { HelpIcon } from '../common/HelpIcon.js';
 
 interface PerUnitPanelProps {
   onClose: () => void;
@@ -35,7 +36,10 @@ export function PerUnitPanel({ onClose }: PerUnitPanelProps) {
       boxShadow: '0 4px 32px rgba(0,0,0,0.6)',
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-        <span style={{ fontWeight: 700, color: '#80CBC4', fontSize: 13 }}>∿ Per-unit visning</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontWeight: 700, color: '#80CBC4', fontSize: 13 }}>∿ Per-unit visning</span>
+          <HelpIcon title="Per-unit" text={"Z_base = U_base² / S_base\nZ_pu = Z_ohm / Z_base\nStandard: S=100 MVA, U=22 kV"} />
+        </div>
         <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#607D8B', cursor: 'pointer', fontSize: 15 }}>✕</button>
       </div>
 

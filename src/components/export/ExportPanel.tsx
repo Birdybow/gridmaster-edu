@@ -6,6 +6,7 @@ import {
   exportRingNetworkCsv,
   exportVoltageDropCsv,
 } from '../../export/csv.js';
+import { HelpIcon } from '../common/HelpIcon.js';
 
 interface ExportPanelProps {
   onClose: () => void;
@@ -44,7 +45,10 @@ export function ExportPanel({ onClose }: ExportPanelProps) {
       boxShadow: '0 4px 32px rgba(0,0,0,0.6)',
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-        <span style={{ fontWeight: 700, color: '#4FC3F7', fontSize: 13 }}>📊 CSV-eksport</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{ fontWeight: 700, color: '#4FC3F7', fontSize: 13 }}>📊 CSV-eksport</span>
+          <HelpIcon title="CSV-eksport" text={"Semikolonseparator (;) + UTF-8 BOM\nKlar for import i Excel\nEksporter YBus, lastflyt, kortslutning m.m."} />
+        </div>
         <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#607D8B', cursor: 'pointer', fontSize: 15 }}>✕</button>
       </div>
 
