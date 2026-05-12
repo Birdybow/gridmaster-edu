@@ -1,14 +1,14 @@
 import { useNetworkStore } from '../../store/useNetworkStore.js';
 import { calcGeneratorP } from './ProductionPanel.js';
 
-const TYPE_CONFIG: Record<string, { color: string; icon: string; label: string }> = {
-  hydro_francis: { color: '#1565C0', icon: '💧', label: 'Francis' },
-  hydro_pelton: { color: '#1565C0', icon: '💧', label: 'Pelton' },
-  hydro_kaplan: { color: '#1565C0', icon: '💧', label: 'Kaplan' },
-  wind: { color: '#2E7D32', icon: '💨', label: 'Vind' },
-  solar: { color: '#F57F17', icon: '☀', label: 'Sol' },
-  nuclear: { color: '#B71C1C', icon: '⚛', label: 'Atom' },
-  thermal: { color: '#E65100', icon: '🔥', label: 'Termisk' },
+const TYPE_CONFIG: Record<string, { color: string; imgSrc: string; label: string }> = {
+  hydro_francis: { color: '#1565C0', imgSrc: '/icons/hydro.png',    label: 'Francis' },
+  hydro_pelton:  { color: '#1565C0', imgSrc: '/icons/hydro.png',    label: 'Pelton' },
+  hydro_kaplan:  { color: '#1565C0', imgSrc: '/icons/hydro.png',    label: 'Kaplan' },
+  wind:          { color: '#2E7D32', imgSrc: '/icons/wind.png',     label: 'Vind' },
+  solar:         { color: '#F57F17', imgSrc: '/icons/solar.png',    label: 'Sol' },
+  nuclear:       { color: '#B71C1C', imgSrc: '/icons/nuclear.png',  label: 'Atom' },
+  thermal:       { color: '#E65100', imgSrc: '/icons/nuclear.png',  label: 'Termisk' },
 };
 
 interface Props {
@@ -98,8 +98,9 @@ export function ProductionSummaryPanel({ onClose }: Props) {
                   <td style={{ padding: '5px 8px', color: '#E8F0FE' }}>{gen.name}</td>
                   <td style={{ padding: '5px 8px', color: '#9E9E9E' }}>{bus?.name ?? '—'}</td>
                   <td style={{ padding: '5px 8px' }}>
-                    <span style={{ background: cfg.color, color: '#FFF', borderRadius: 3, padding: '1px 6px', fontSize: 10, fontWeight: 600 }}>
-                      {cfg.icon} {cfg.label}
+                    <span style={{ background: cfg.color, color: '#FFF', borderRadius: 3, padding: '2px 6px', fontSize: 10, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                      <img src={cfg.imgSrc} alt={cfg.label} style={{ width: 10, height: 10, objectFit: 'cover', borderRadius: 1 }} />
+                      {cfg.label}
                     </span>
                   </td>
                   <td style={{ padding: '5px 8px', color: '#4FC3F7', fontWeight: 600 }}>

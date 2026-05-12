@@ -81,8 +81,9 @@ export function HydroEditor({ gen }: { gen: Generator }) {
   return (
     <div style={{ padding: '12px 14px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-        <span style={{ background: '#1565C0', color: '#FFF', borderRadius: 4, padding: '2px 8px', fontSize: 11, fontWeight: 700 }}>
-          💧 {TURBINE_LABELS[gen.generatorType]}
+        <span style={{ background: '#1565C0', color: '#FFF', borderRadius: 4, padding: '2px 8px', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
+          <img src="/icons/hydro.png" alt="Vannkraft" style={{ width: 14, height: 14, objectFit: 'cover', borderRadius: 2 }} />
+          {TURBINE_LABELS[gen.generatorType]}
         </span>
         <span style={{ fontSize: 10, color: '#607D8B' }}>{TURBINE_RANGES[gen.generatorType]}</span>
       </div>

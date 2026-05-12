@@ -71,8 +71,9 @@ export function NuclearEditor({ gen }: { gen: Generator }) {
   return (
     <div style={{ padding: '12px 14px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-        <span style={{ background: color, color: '#FFF', borderRadius: 4, padding: '2px 8px', fontSize: 11, fontWeight: 700 }}>
-          {icon} {label}
+        <span style={{ background: color, color: '#FFF', borderRadius: 4, padding: '2px 8px', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
+          <img src="/icons/nuclear.png" alt={label} style={{ width: 14, height: 14, objectFit: 'cover', borderRadius: 2 }} />
+          {label}
         </span>
         <span style={{ fontSize: 10, color: '#607D8B' }}>Baselast — konstant effekt</span>
       </div>

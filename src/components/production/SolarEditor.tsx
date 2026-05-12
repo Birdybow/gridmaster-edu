@@ -68,8 +68,9 @@ export function SolarEditor({ gen }: { gen: Generator }) {
   return (
     <div style={{ padding: '12px 14px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-        <span style={{ background: '#F57F17', color: '#FFF', borderRadius: 4, padding: '2px 8px', fontSize: 11, fontWeight: 700 }}>
-          ☀ Solkraft
+        <span style={{ background: '#F57F17', color: '#FFF', borderRadius: 4, padding: '2px 8px', fontSize: 11, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 4 }}>
+          <img src="/icons/solar.png" alt="Solkraft" style={{ width: 14, height: 14, objectFit: 'cover', borderRadius: 2 }} />
+          Solkraft
         </span>
       </div>
 

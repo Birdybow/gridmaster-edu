@@ -5,6 +5,56 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 
 ---
 
+## v3.7.0 — 2026-05-12 — Sprint 3.7: Kraftproduksjon Nivå 1
+
+### Lagt til
+- **S3.7-00** Git branch `sprint3.7` opprettet
+- **S3.7-01** Versjonsnummer `v3.7.0` i UI (allerede innført i Sprint 3.6, bumped til 3.7.0)
+- **S3.7-02** `GeneratorType` komplett i `src/types/index.ts` — bekreftet: hydro_francis, hydro_pelton, hydro_kaplan, wind, nuclear, thermal, solar
+- **S3.7-03** `src/core/production.ts` — fire beregningsfunksjoner:
+  - `calcHydro(H, Q, eta)` — P = η·ρ·g·H·Q / 10⁶ [MW]
+  - `calcWind(v, vci, vr, vco, Pn, n)` — kubisk P(v)-kurve for n turbiner
+  - `calcSolar(Ppeak, t, trise, tset)` — sinusdagsprofil
+  - `calcNuclear(Pn)` — konstant baselast
+- **S3.7-04** `src/core/production.test.ts` — 12 Vitest-tester med fasitsvar:
+  - Francis H=200, Q=50, η=0.92 → 90.252 MW (±0.01)
+  - Pelton H=600, Q=10, η=0.90 → 52.974 MW (±0.01)
+  - Vind v=10, vci=3, vr=13, Pn=3.0, n=1 → 1.029 MW (±0.001)
+  - Grensebetingelser: v<vci=0, v>vco=0, v=vr=Pn, n-skalering
+  - Sol: t<soloppgang=0, t>solnedgang=0, t=middag≈Ppeak
+  - Atom: P=Pn alltid
+- **S3.7-05** `src/components/production/HydroEditor.tsx` — H, Q, η-felt med standardverdier per turbintype (Francis/Pelton/Kaplan), beregnet P vist med formel
+- **S3.7-06** `src/components/production/WindEditor.tsx` — v_ci, v_r, v_co, Pn per turbin, antall turbiner, P ved merkevindhastighet vist
+- **S3.7-07** `src/components/production/SolarEditor.tsx` — P_peak, simuleringstidspunkt (0–24 t), trise/tset, P(t) live
+- **S3.7-08** `src/components/production/NuclearEditor.tsx` — P_n, utnyttelsesgrad (0–100%), driftseffekt vist
+- **S3.7-09** `src/components/production/ProductionPanel.tsx` — wrapper i høyre sidebar: viser riktig editor basert på `generatorType`, "Beregn produksjon + kjør lastflyt"-knapp
+- **S3.7-10** Fargekodede kildetype-badges på canvas (BusNode.tsx): 💧blå (#1565C0) / 💨grønn (#2E7D32) / ☀gul (#F57F17) / ⚛rød (#B71C1C) / 🔥oransje (#E65100) — nå med PNG-ikoner
+- **S3.7-11** NR-integrasjon — `runProduction()` i Zustand: beregner P for alle generatorer, oppdaterer `pSetMW` + tilhørende `bus.genMW`, kaller deretter `runPowerFlow()` automatisk
+- **S3.7-12** `src/components/production/ProductionSummaryPanel.tsx` — bunntabell-panel: alle generatorer med kildetype, beregnet P, P satt, diff; "Beregn alle"-knapp
+- **S3.7-13** PNG-ikoner fra Gemini prosessert (sharp, 60px vannmerke-crop) og plassert i `public/icons/`: hydro.png, wind.png, solar.png, nuclear.png
+- **S3.7-14** CHANGELOG v3.7.0 + DEVLOG beslutninger 16–18
+- **S3.7-15** Toolbar: "⚡ Produksjon"-knapp, aktiv når generatorer finnes; ny "Produksjon"-fane i bunntabellen
+
+### Endret
+- `src/types/index.ts` — Generator: nye valgfrie felt: `numTurbines`, `windRatedMW`, `solarPeakMW`, `solarHour`, `utilizationPct`
+- `src/store/useNetworkStore.ts` — ny action `runProduction()` + import av `calcHydro/calcWind/calcSolar/calcNuclear`
+- `src/components/canvas/BusNode.tsx` — kildetype-badge bruker nå PNG-ikoner (`/icons/hydro.png` osv.) i stedet for emoji
+- `src/App.tsx` — ProductionPanel i høyre sidebar (under GeneratorEditor), ProductionSummaryPanel som bunntabell-fane
+- `src/components/toolbar/Toolbar.tsx` — ⚡ Produksjon-knapp lagt til
+- `package.json` — versjon bumped til 3.7.0
+
+### Akseptanskriterier
+- ✓ `npm test` — alle produksjonstester grønne: Francis 90.252 MW, Pelton 52.974 MW, Vind 1.029 MW
+- ✓ Alle 4 kildetyper har dedikert editor i høyre sidebar
+- ✓ PNG-ikoner fra Gemini synlig som badges på canvas-noder
+- ✓ NR kjøres automatisk etter `runProduction()`
+- ✓ ProductionSummaryPanel viser alle kilder med beregnet vs. satt P
+- ✓ Versjonsnummer v3.7.0 synlig i UI
+- ✓ `npx tsc --noEmit` — ingen TypeScript-feil
+- ✓ Vercel deployer etter push til main
+
+---
+
 ## v3.6.0 — 2026-05-12 — Sprint 3.6: Nettbygger
 
 ### Lagt til

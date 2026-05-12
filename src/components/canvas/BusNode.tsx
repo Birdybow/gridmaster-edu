@@ -12,14 +12,14 @@ const ICON_MAP: Record<string, string> = {
   PQ: '/icons/bus-pq.png',
 };
 
-const GEN_BADGE: Record<string, { color: string; icon: string; label: string }> = {
-  hydro_francis: { color: '#1565C0', icon: '💧', label: 'Francis' },
-  hydro_pelton: { color: '#1565C0', icon: '💧', label: 'Pelton' },
-  hydro_kaplan: { color: '#1565C0', icon: '💧', label: 'Kaplan' },
-  wind: { color: '#2E7D32', icon: '💨', label: 'Vind' },
-  solar: { color: '#F57F17', icon: '☀', label: 'Sol' },
-  nuclear: { color: '#B71C1C', icon: '⚛', label: 'Atom' },
-  thermal: { color: '#E65100', icon: '🔥', label: 'Termisk' },
+const GEN_BADGE: Record<string, { color: string; imgSrc: string; label: string }> = {
+  hydro_francis: { color: '#1565C0', imgSrc: '/icons/hydro.png', label: 'Francis' },
+  hydro_pelton:  { color: '#1565C0', imgSrc: '/icons/hydro.png', label: 'Pelton' },
+  hydro_kaplan:  { color: '#1565C0', imgSrc: '/icons/hydro.png', label: 'Kaplan' },
+  wind:          { color: '#2E7D32', imgSrc: '/icons/wind.png',  label: 'Vind' },
+  solar:         { color: '#F57F17', imgSrc: '/icons/solar.png', label: 'Sol' },
+  nuclear:       { color: '#B71C1C', imgSrc: '/icons/nuclear.png', label: 'Atom' },
+  thermal:       { color: '#E65100', imgSrc: '/icons/nuclear.png', label: 'Termisk' },
 };
 
 function voltageRingColor(vMagPU: number | undefined): string {
@@ -83,20 +83,26 @@ function BusNodeComponent({ data, selected }: NodeProps<Bus>) {
       )}
 
       {genBadge && (
-        <span
+        <div
           style={{
-            marginTop: 2,
+            marginTop: 3,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 3,
             background: genBadge.color,
-            color: '#FFF',
-            borderRadius: 3,
-            padding: '1px 5px',
-            fontSize: 9,
-            fontWeight: 700,
-            letterSpacing: '0.04em',
+            borderRadius: 4,
+            padding: '2px 5px',
           }}
         >
-          {genBadge.icon} {genBadge.label}
-        </span>
+          <img
+            src={genBadge.imgSrc}
+            alt={genBadge.label}
+            style={{ width: 12, height: 12, objectFit: 'cover', borderRadius: 2 }}
+          />
+          <span style={{ fontSize: 9, color: '#FFF', fontWeight: 700, letterSpacing: '0.04em' }}>
+            {genBadge.label}
+          </span>
+        </div>
       )}
 
       <Handle type="source" position={Position.Right} style={{ background: '#4FC3F7', width: 10, height: 10 }} />

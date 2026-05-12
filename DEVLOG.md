@@ -4,6 +4,49 @@ Tekniske beslutninger og begrunnelser. Oppdateres ved hvert viktig valg.
 
 ---
 
+## Sprint 3.7 — 2026-05-12
+
+### BESLUTNING 16: Kubisk P(v)-kurve for vindkraft
+
+Tre modellalternativer ble vurdert for vindturbinens effektkurve:
+
+1. **Lineær modell** (`P = Pn · (v - vci) / (vr - vci)`): Enklest å forstå, men unøyaktig — reelle turbiner produserer mye mindre enn lineær ved lave vindhastigheter.
+2. **Kubisk modell** (`P = Pn · ((v-vci)/(vr-vci))³`) (valgt): Basert på vindeffektens proporsjonalitet med v³ (fra Betz-loven). Korrekt for den kinetiske energien i vindstrømmen. Godt kjent i faglitteraturen og brukt i IEC 61400-standarden. Enkelt å implementere og pedagogisk verdifullt siden elever kan se sammenhengen mellom kubikk-kurven og v³-avhengigheten direkte.
+3. **Tabellinterpolasjon** (reell P(v)-kurve per turbinmodell): Mest presis, men krever turbinspesifikke datatabeller som ikke er tilgjengelige i en pedagogisk kontekst.
+
+**Fasit-test** (v=10 m/s, vci=3, vr=13, Pn=3.0 MW): P = 3.0 × (7/10)³ = 3.0 × 0.343 = 1.029 MW.
+
+**How to apply:** `calcWind()` bruker kubisk interpolasjon. For fremtidige turbinmodeller kan `pvCurve`-feltet i Generator-typen brukes til tabellinterpolasjon.
+
+---
+
+### BESLUTNING 17: Sinusdagsprofil for solkraft
+
+Tre alternativer for solprofil:
+
+1. **Konstant P_peak · 0.5** (statisk snittmodell): Enklest, brukes som fallback, men realistisk bare for dagsgjennomsnittsberegninger.
+2. **Sinusprofil** `P = P_peak · sin(π·(t-trise)/(tset-trise))` (valgt): Gir P=0 ved soloppgang og solnedgang, maksimum midt på dagen. Matematisk korrekt nok for pedagogisk bruk og intuitivt riktig — elever kjenner sinusbølgen fra matematikken og kan knytte den til solens bane over himmelen. Ingen parametre krever kalibrering.
+3. **Clearsky-modell** (astronomisk beregning med Perez-modell): Presis, men krever geografiske koordinater, skydekke og atmosfæriske parametre — for komplekst for Sprint 3.7.
+
+`t_rise = 6.0`, `t_set = 20.0` er hardkodet som standardverdier (14 timers dagslys, typisk norsk sommer).
+
+**How to apply:** `calcSolar(Ppeak, t, trise, tset)` returnerer 0 utenfor [trise, tset]. For statisk lastflytanalyse: bruk `P_peak · 0.5` som representativ dagsgjennomsnittsverdi (vist i SolarEditor som hjelpetekst).
+
+---
+
+### BESLUTNING 18: runProduction() — integrasjon med Newton-Raphson
+
+To integrasjonsstrategier ble vurdert:
+
+1. **Live-oppdatering** (auto-kjør NR ved hver parameterendring i editor): Responsivt, men NR er computasjonelt tung for store nett og ville forstyrre parameterinntasting (re-render under skriving).
+2. **Eksplisitt "Beregn"-knapp** (valgt): Brukeren redigerer produksjonsparametere fritt, bekrefter med "Beregn produksjon + kjør lastflyt". `runProduction()` i storen: (a) kalkulerer P for alle generatorer basert på feltene deres, (b) oppdaterer `generator.pSetMW` og `bus.genMW` for alle PV/slack-busser, (c) kaller `runPowerFlow()` som kjører NR. Pedagogisk fordel: eleven ser eksplisitt at produksjonsberegning og lastflyt er to separate steg.
+
+`runProduction()` er implementert som én atomisk store-action som setter all state i én `set()`-kall før NR starter, for å unngå mellomtilstander som kan trigge unødvendige re-renders.
+
+**How to apply:** "Beregn produksjon"-knappen i ProductionPanel og "Beregn alle"-knappen i ProductionSummaryPanel kaller begge `runProduction()`. Enkeltvis parameteroppdatering (H, Q, etc.) bruker `updateGenerator()` og oppdaterer kun produksjons-parametre uten å kjøre NR.
+
+---
+
 ## Sprint 3.6 — 2026-05-12
 
 ### Nettbygger: arkitektur og designvalg
