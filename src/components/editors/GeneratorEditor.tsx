@@ -193,7 +193,7 @@ export function GeneratorEditor() {
       />
 
       <Field
-        label="x\"d subtransient"
+        label={'x"d subtransient'}
         unit="p.u."
         hint="Subtransient reaktans — brukes ved kortslutningsberegning (typisk 0.10–0.20)"
         value={gen.xdSubtransientPU}
