@@ -194,6 +194,7 @@ interface NetworkState {
   addLineFromConnect: (fromId: string, toId: string, lineType: LineType) => string;
   addTransformerFromConnect: (fromId: string, toId: string) => string;
   addGeneratorToBus: (busId: string) => string;
+  addCompensatorToBus: (busId: string) => string;
   deleteNode: (id: string) => void;
   deleteEdge: (id: string) => void;
   validateNetwork: () => ValidationResult;
@@ -569,6 +570,31 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
       },
     }));
     return g.id;
+  },
+
+  addCompensatorToBus: (busId) => {
+    const { project } = get();
+    const c: Compensator = {
+      id: crypto.randomUUID(),
+      name: `Kondensator ${project.compensators.length + 1}`,
+      busId,
+      type: 'capacitor',
+      totalMVAr: 1.0,
+      steps: 3,
+      stepSizeMVAr: 1.0 / 3,
+      stepsEnabled: 3,
+    };
+    set((s) => ({
+      project: {
+        ...s.project,
+        compensators: [...s.project.compensators, c],
+        metadata: { ...s.project.metadata, modified: now() },
+      },
+      selectedNodeId: `comp_${c.id}`,
+      selectedEdgeId: null,
+      placingMode: null,
+    }));
+    return c.id;
   },
 
   deleteNode: (id) => {

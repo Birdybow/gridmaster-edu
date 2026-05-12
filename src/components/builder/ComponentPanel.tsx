@@ -103,6 +103,7 @@ function PaletteItem({ def }: { def: ComponentDef }) {
 export function ComponentPanel() {
   const [collapsed, setCollapsed] = useState(false);
   const lineDrawingMode = useNetworkStore((s) => s.lineDrawingMode);
+  const placingMode = useNetworkStore((s) => s.placingMode);
 
   return (
     <div
@@ -143,8 +144,8 @@ export function ComponentPanel() {
 
       {!collapsed && (
         <div style={{ overflowY: 'auto', padding: '8px 8px 8px', paddingTop: 36, flex: 1 }}>
-          {/* Line drawing mode indicator */}
-          {lineDrawingMode && (
+          {/* Mode indicator */}
+          {(lineDrawingMode || (placingMode && placingMode.kind !== 'bus')) && (
             <div
               style={{
                 background: '#0F3B55',
@@ -155,9 +156,16 @@ export function ComponentPanel() {
                 color: '#4FC3F7',
                 marginBottom: 8,
                 textAlign: 'center',
+                lineHeight: 1.5,
               }}
             >
-              Klikk buss 1 → buss 2
+              {lineDrawingMode
+                ? <>Klikk buss 1 → buss 2</>
+                : placingMode?.kind === 'transformer'
+                ? <>Klikk buss 1 → buss 2<br />(for transformator)</>
+                : placingMode?.kind === 'generator'
+                ? <>Klikk på en buss<br />(koble til generator)</>
+                : <>Klikk på en buss<br />(koble til kondensator)</>}
               <br />
               <span style={{ color: '#9E9E9E' }}>ESC for å avbryte</span>
             </div>

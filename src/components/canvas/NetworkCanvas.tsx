@@ -91,6 +91,8 @@ export function NetworkCanvas() {
   const addBusAtPosition = useNetworkStore((s) => s.addBusAtPosition);
   const addLineFromConnect = useNetworkStore((s) => s.addLineFromConnect);
   const addTransformerFromConnect = useNetworkStore((s) => s.addTransformerFromConnect);
+  const addGeneratorToBus = useNetworkStore((s) => s.addGeneratorToBus);
+  const addCompensatorToBus = useNetworkStore((s) => s.addCompensatorToBus);
   const deleteNode = useNetworkStore((s) => s.deleteNode);
   const deleteEdge = useNetworkStore((s) => s.deleteEdge);
   const updateBus = useNetworkStore((s) => s.updateBus);
@@ -225,15 +227,29 @@ export function NetworkCanvas() {
       }
 
       if (placingMode) {
-        // Transformer/generator/compensator attached to a node
         if (placingMode.kind === 'transformer') {
-          // Need two clicks: store first node, then second
           if (!lineDrawingFromId) {
             setLineDrawingFromId(node.id);
           } else if (lineDrawingFromId !== node.id) {
             addTransformerFromConnect(lineDrawingFromId, node.id);
             setLineDrawingFromId(null);
             setPlacingMode(null);
+          }
+          return;
+        }
+        if (placingMode.kind === 'generator') {
+          // Only attach to bus nodes (not comp_ nodes)
+          if (!node.id.startsWith('comp_')) {
+            addGeneratorToBus(node.id);
+            setPlacingMode(null);
+            setSelectedNodeId(node.id);
+          }
+          return;
+        }
+        if (placingMode.kind === 'compensator') {
+          if (!node.id.startsWith('comp_')) {
+            addCompensatorToBus(node.id);
+            // selectedNodeId set inside addCompensatorToBus
           }
           return;
         }
@@ -244,7 +260,7 @@ export function NetworkCanvas() {
 
       setSelectedNodeId(node.id);
     },
-    [lineDrawingMode, lineDrawingFromId, placingMode, addLineFromConnect, addTransformerFromConnect, setLineDrawingFromId, setPlacingMode, setSelectedNodeId],
+    [lineDrawingMode, lineDrawingFromId, placingMode, addLineFromConnect, addTransformerFromConnect, addGeneratorToBus, addCompensatorToBus, setLineDrawingFromId, setPlacingMode, setSelectedNodeId],
   );
 
   // Edge click
@@ -409,10 +425,14 @@ export function NetworkCanvas() {
           {placingMode.kind === 'bus'
             ? `Klikk på canvas for å plassere ${placingMode.busType}-buss — ESC for å avbryte`
             : placingMode.kind === 'transformer' && !lineDrawingFromId
-            ? 'Klikk buss 1 (høyspent) for transformator'
+            ? 'Klikk buss 1 (høyspent) — ESC for å avbryte'
             : placingMode.kind === 'transformer' && lineDrawingFromId
-            ? 'Klikk buss 2 (lavspent) for transformator'
-            : `Klikk for å plassere — ESC for å avbryte`}
+            ? 'Klikk buss 2 (lavspent) for å opprette transformator'
+            : placingMode.kind === 'generator'
+            ? 'Klikk på en buss for å koble til generator — ESC for å avbryte'
+            : placingMode.kind === 'compensator'
+            ? 'Klikk på en buss for å koble til kondensatorbank — ESC for å avbryte'
+            : 'Klikk for å plassere — ESC for å avbryte'}
         </div>
       )}
 
