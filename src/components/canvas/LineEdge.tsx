@@ -5,6 +5,14 @@ import type { Line } from '../../types/index.js';
 
 interface LineEdgeData extends Partial<Line> {
   label?: string;
+  voltageDropPct?: number;
+}
+
+function voltageDropColor(pct: number | undefined, lineType: string): string {
+  if (pct === undefined) return lineType === 'cable' ? '#4FC3F7' : '#1565C0';
+  if (pct < 5) return '#4CAF50';
+  if (pct < 10) return '#FFB74D';
+  return '#EF5350';
 }
 
 function LineEdgeComponent({
@@ -27,7 +35,7 @@ function LineEdgeComponent({
   });
 
   const lineType = data?.lineType ?? 'overhead';
-  const stroke = lineType === 'cable' ? '#4FC3F7' : '#1565C0';
+  const stroke = voltageDropColor(data?.voltageDropPct, lineType);
   const strokeDasharray = lineType === 'cable' ? '6 3' : undefined;
   const label = data?.label ?? data?.name;
 

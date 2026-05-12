@@ -4,6 +4,64 @@ Tekniske beslutninger og begrunnelser. Oppdateres ved hvert viktig valg.
 
 ---
 
+## Sprint 4 — 2026-05-12
+
+### BESLUTNING 19: Pi-modell fasit — 100 km FeAl 95mm², 20MW/8MVAr, 66kV
+
+Beregnet fasit for pi-modell med følgende parametere:
+- Linje: 100 km FeAl 95mm² luftlinje
+- R = 30 Ω, X = 33 Ω, B = 290 μS
+- P = 20 MW, Q = 8 MVAr, U_n = 66 kV
+
+**Trinnvis beregning:**
+
+V_S_phase = 66 000 / √3 = 38 105.1 V (referansefase, reell)
+
+I_R = (P − jQ) / (3 · V_S_phase) = (20·10⁶ − j8·10⁶) / 114 315.3 = 175.05 − j70.02 A
+
+I_C1 = V_S_phase · j(B/2) = 38 105.1 · j·145·10⁻⁶ = j5.525 A
+
+I_linje = 175.05 − j64.49 A
+
+Spenningsfall i serie-impedans: (R + jX) · I_linje
+  = (30 + j33)(175.05 − j64.49)
+  = [30·175.05 + 33·64.49] + j[33·175.05 − 30·64.49]
+  = [5251.5 + 2128.2] + j[5776.7 − 1934.7]
+  = 7379.7 + j3842.0 V
+
+V_R_phase = 38 105.1 − 7379.7 − j3842.0 = 30 725.4 − j3842.0 V
+
+|V_R_phase| = √(30 725.4² + 3842.0²) = 30 964.3 V
+
+V_R_LL = 30 964.3 · √3 = 53 618 V
+
+**ΔU = 66 000 − 53 618 = 12 382 V → ΔU% = 18.76%**
+
+Toleranse for test: ±0.1% → akseptert område: 18.66–18.86%.
+
+**Merknad:** Pi-modellen gir ca. 1% lavere tap enn enkel modell (19.8% enkel vs 18.76% pi) på grunn av kapasitiv strøm fra shunt-kondensansen som reduserer netto linjestrøm. Dette er den pedagogiske kjernen i pi-modellen: lengre linjer har merkbar kapasitiv selvkompensering.
+
+### BESLUTNING 20: Automatisk spenningsfallsberegning etter lastflyt
+
+To alternativer vurdert:
+1. **Manuelt trigger** — student klikker "Beregn spenningsfall" selv
+2. **Automatisk etter konvergens** (valgt) — `runPowerFlow()` kaller `runVoltageDrop()` automatisk ved konvergens
+
+Valgt automatisk fordi: (a) spenningsfall er naturlig sekundærresultat av lastflyt og alltid relevant, (b) reduserer antall klikk for studenten, (c) resultatene er alltid synkroniserte med siste lastflyt.
+
+**Unntak:** VoltageDropPanel viser manuell "Beregn"-knapp for at studenten skal kunne endre modell (Auto/Enkel/Pi) og re-beregne uten ny lastflyt.
+
+### BESLUTNING 21: Modell-auto basert på linjelengde
+
+Terskelverdi 50 km er valgt basert på faglitteratur (Glover/Sarma: "Power Systems Analysis and Design"):
+- Under 50 km: kapasitanseffekten er typisk < 1% og kan neglisjeres (enkel modell)
+- Over 50 km: kapasitanseffekten er merkbar og bør inkluderes (pi-modell)
+- Over 200 km: distribuert parameter-modell anbefales (utenfor scope)
+
+Studenten kan overstyre auto-valget via modell-selector i VoltageDropPanel.
+
+---
+
 ## Sprint 3.7 — 2026-05-12
 
 ### BESLUTNING 16: Kubisk P(v)-kurve for vindkraft

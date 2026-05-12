@@ -7,12 +7,13 @@ import type { BusType } from '../../types/index.js';
 interface ToolbarProps {
   onToggleCompensation?: () => void;
   onToggleProduction?: () => void;
+  onToggleVoltageDrop?: () => void;
 }
 
 type CloudSaveState = 'idle' | 'input' | 'saving' | 'done' | 'error';
 type CloudLoadState = 'idle' | 'loading' | 'list' | 'error';
 
-export function Toolbar({ onToggleCompensation, onToggleProduction }: ToolbarProps) {
+export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVoltageDrop }: ToolbarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const legacyInputRef = useRef<HTMLInputElement>(null);
 
@@ -279,6 +280,20 @@ export function Toolbar({ onToggleCompensation, onToggleProduction }: ToolbarPro
           }}
         >
           ⚡ Produksjon
+        </button>
+
+        {/* Spenningsfall */}
+        <button
+          onClick={onToggleVoltageDrop}
+          disabled={project.lines.length === 0}
+          style={{
+            ...btnStyle,
+            background: '#1A2B0F',
+            border: '1px solid #558B2F',
+            opacity: project.lines.length === 0 ? 0.5 : 1,
+          }}
+        >
+          ΔU Spenningsfall
         </button>
 
         {/* Import legacy (Gemini scenario) */}

@@ -2,6 +2,7 @@ import { useNetworkStore } from '../../store/useNetworkStore.js';
 import type { Line } from '../../types/index.js';
 import { LineLibrary } from './LineLibrary.js';
 import type { LibraryCable } from './LineLibrary.js';
+import { LineComparisonPanel } from '../voltagedrop/LineComparisonPanel.js';
 
 interface FieldProps {
   label: string;
@@ -149,6 +150,8 @@ export function LineEditor() {
         <div>X total: {(line.xOhmPerKm * line.lengthKm).toFixed(3)} Ω</div>
         <div>B total: {(line.bMuSPerKm * line.lengthKm).toFixed(1)} µS</div>
       </div>
+
+      <LineComparisonPanel lineId={line.id} />
     </div>
   );
 }

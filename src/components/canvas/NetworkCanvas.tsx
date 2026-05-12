@@ -29,13 +29,13 @@ function busToNode(bus: Bus, selectedNodeId: string | null): Node {
   };
 }
 
-function lineToEdge(line: Line, selectedEdgeId: string | null): Edge {
+function lineToEdge(line: Line, selectedEdgeId: string | null, voltageDropPct?: number): Edge {
   return {
     id: line.id,
     source: line.fromBusId,
     target: line.toBusId,
     type: 'lineEdge',
-    data: { ...line, label: line.name },
+    data: { ...line, label: line.name, voltageDropPct },
     selected: line.id === selectedEdgeId,
   };
 }
@@ -77,6 +77,7 @@ export function NetworkCanvas() {
   const lines = useNetworkStore((s) => s.project.lines);
   const transformers = useNetworkStore((s) => s.project.transformers);
   const compensators = useNetworkStore((s) => s.project.compensators);
+  const voltageDropResults = useNetworkStore((s) => s.project.results.voltageDrop);
   const selectedNodeId = useNetworkStore((s) => s.selectedNodeId);
   const selectedEdgeId = useNetworkStore((s) => s.selectedEdgeId);
   const lineDrawingMode = useNetworkStore((s) => s.lineDrawingMode);
@@ -117,7 +118,10 @@ export function NetworkCanvas() {
 
   const edges: Edge[] = useMemo(
     () => [
-      ...lines.map((l) => lineToEdge(l, selectedEdgeId)),
+      ...lines.map((l) => {
+        const vdr = voltageDropResults?.find((r) => r.lineId === l.id);
+        return lineToEdge(l, selectedEdgeId, vdr?.deltaUPercent);
+      }),
       ...transformers.map((t) => trafoToEdge(t, selectedEdgeId)),
       ...compensators.map((c) => ({
         id: `comp-link-${c.id}`,
@@ -129,7 +133,7 @@ export function NetworkCanvas() {
         data: {},
       })),
     ],
-    [lines, transformers, compensators, selectedEdgeId],
+    [lines, transformers, compensators, selectedEdgeId, voltageDropResults],
   );
 
   // Handle keyboard: Delete key, Escape

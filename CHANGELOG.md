@@ -5,6 +5,55 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 
 ---
 
+## v4.0.0 — 2026-05-12 — Sprint 4: Spenningsfallsberegninger
+
+### Lagt til
+- **S4-00** Git branch `sprint4` opprettet
+- **S4-01** `src/core/voltage-drop.ts` — enkel modell:
+  - `calcVoltageDrop(I, R, X, cosPhi, Un, lineId)` — ΔU = √3·I·(R·cosφ + X·sinφ)
+- **S4-02** `src/core/voltage-drop.ts` — pi-modell:
+  - `calcVoltageDropPi(P, Q, Vs, R, X, B, Un, lineId)` — kompleks beregning med shunt-kapasitans
+  - Fasit 100 km FeAl 95mm²: ΔU% ≈ 18.75% ved 20MW/8MVAr, 66kV (se DEVLOG beslutning 19)
+- **S4-03** `src/core/voltage-drop.test.ts` — 12 Vitest-tester:
+  - Enkel modell: ΔU% ≈ 4.76% (±0.1%) for I=148A, R=3Ω, X=3.5Ω, cosφ=0.928, Un=22kV
+  - ΔU ≈ 1048 V · withinLimits · REN-advarsel · grensetilfeller
+  - Pi-modell: ΔU% ≈ 18.75% for 100km FeAl95 · Ferranti-effekt ved nullast
+  - Pi < Enkel (kapasitanseffekt) bekreftet
+- **S4-04** `src/components/voltagedrop/VoltageDropPanel.tsx` — flytende panel:
+  - Modellvalg: Auto / Enkel / Pi med beskrivelse
+  - REN 4100-fargeforklaring
+  - "Beregn spenningsfall"-knapp (deaktivert uten konvergens)
+  - Sammendrag: høyeste ΔU%, linjenavn, modell, ΔU [V], U_mot [kV]
+- **S4-05** `src/components/voltagedrop/VoltageDropResultPanel.tsx` — bunntabell:
+  - Sortert etter ΔU% (høyest øverst)
+  - Kolonner: Linje, Fra, Til, Lengde, Modell, ΔU [V], ΔU [%], U_mot [kV], Status
+  - REN 4100-bruddsbanner ved overskriding
+  - Fargekodede status-badges (grønn/gul/rød)
+- **S4-06** Canvas-fargekoding på linjer:
+  - Grønn (#4CAF50): ΔU < 5% · Gul (#FFB74D): 5–10% · Rød (#EF5350): ≥ 10%
+  - Standardfarge (cyan/blå) gjenopprettes når ingen beregning foreligger
+- **S4-07** REN 4100-varsler med referanse i alle resultathaner
+- **S4-08** `src/components/voltagedrop/LineComparisonPanel.tsx` — trasesammenligning:
+  - Luftlinje FeAl 95mm² vs jordkabel TSLF 150mm² for valgt linje
+  - Side-ved-side: ΔU%, ΔU [V], U_mot [kV], kabelparametere
+  - Pedagogisk kommentar om X vs B
+  - Vises i LineEditor for valgt linje
+- **S4-09** Automatisk spenningsfallsberegning etter konvergens i `runPowerFlow()`
+  - Modell-auto: enkel for < 50 km, pi for ≥ 50 km
+  - Spenningsfall-knapp i Toolbar (ΔU Spenningsfall)
+- **S4-10** Vitest: 99/99 grønne (13 nye tester lagt til)
+- **S4-11** CHANGELOG + DEVLOG oppdatert
+- **S4-12** `npx tsc -b` ren — ingen feil
+
+### Akseptanskriterier oppfylt
+- ΔU% = 4.76% for scenario 1 (±0.1%) ✓
+- Linje-fargekoding på canvas ✓
+- REN 4100-advarsel ved ΔU ≥ 10% ✓
+- Sammenligning luft vs kabel ✓
+- `npx tsc -b` ren ✓
+
+---
+
 ## v3.7.0 — 2026-05-12 — Sprint 3.7: Kraftproduksjon Nivå 1
 
 ### Lagt til

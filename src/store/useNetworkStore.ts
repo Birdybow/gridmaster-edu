@@ -10,15 +10,18 @@ import type {
   Compensator,
   Protection,
   CompensationResult,
+  VoltageDropResult,
   ValidationResult,
 } from '../types/index.js';
 import { runNewtonRaphson } from '../core/newton-raphson.js';
 import { calcCompensation } from '../core/compensation.js';
 import { validateNetwork as _validateNetwork } from '../validation/network-validator.js';
 import { calcHydro, calcWind, calcSolar, calcNuclear } from '../core/production.js';
+import { calcVoltageDrop, calcVoltageDropPi } from '../core/voltage-drop.js';
 
 export type PowerFlowStatus = 'idle' | 'running' | 'converged' | 'failed';
 export type CompensationStatus = 'idle' | 'computing' | 'done' | 'failed';
+export type VoltageDropModel = 'auto' | 'simple' | 'pi';
 
 export type PlacingMode =
   | { kind: 'bus'; busType: BusType }
@@ -140,6 +143,8 @@ interface NetworkState {
   compensationStatus: CompensationStatus;
   showResults: boolean;
   showCompensationResults: boolean;
+  showVoltageDropResults: boolean;
+  voltageDropModel: VoltageDropModel;
 
   // Builder state
   selectedNodeId: string | null;
@@ -151,6 +156,9 @@ interface NetworkState {
 
   setShowResults: (v: boolean) => void;
   setShowCompensationResults: (v: boolean) => void;
+  setShowVoltageDropResults: (v: boolean) => void;
+  setVoltageDropModel: (m: VoltageDropModel) => void;
+  runVoltageDrop: () => void;
 
   // Selection
   setSelectedNodeId: (id: string | null) => void;
@@ -212,6 +220,8 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
   compensationStatus: 'idle',
   showResults: false,
   showCompensationResults: false,
+  showVoltageDropResults: false,
+  voltageDropModel: 'auto',
 
   selectedNodeId: null,
   selectedEdgeId: null,
@@ -222,6 +232,48 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
 
   setShowResults: (v) => set({ showResults: v }),
   setShowCompensationResults: (v) => set({ showCompensationResults: v }),
+  setShowVoltageDropResults: (v) => set({ showVoltageDropResults: v }),
+  setVoltageDropModel: (m) => set({ voltageDropModel: m }),
+
+  runVoltageDrop: () => {
+    const { project, voltageDropModel } = get();
+    const pfResult = project.results.powerFlow;
+    if (!pfResult || !pfResult.converged) return;
+
+    const results: VoltageDropResult[] = project.lines.flatMap((line) => {
+      const lineResult = pfResult.lines.find((lr) => lr.lineId === line.id);
+      const fromBus = project.buses.find((b) => b.id === line.fromBusId);
+      if (!lineResult || !fromBus) return [];
+
+      const Un = fromBus.voltageKV * 1000;
+      const R = line.rOhmPerKm * line.lengthKm;
+      const X = line.xOhmPerKm * line.lengthKm;
+      const useSimple = voltageDropModel === 'simple' || (voltageDropModel === 'auto' && line.lengthKm < 50);
+
+      if (useSimple) {
+        const I = lineResult.currentKA * 1000;
+        const S = Math.sqrt(lineResult.pFromMW ** 2 + lineResult.qFromMVAr ** 2);
+        const cosPhi = S > 0 ? Math.abs(lineResult.pFromMW) / S : 1;
+        return [calcVoltageDrop(I, R, X, cosPhi, Un, line.id)];
+      } else {
+        const fromBusResult = pfResult.buses.find((br) => br.busId === line.fromBusId);
+        const Vs = fromBusResult ? fromBusResult.vMagKV * 1000 : Un;
+        const B = line.bMuSPerKm * line.lengthKm * 1e-6;
+        const P = lineResult.pFromMW * 1e6;
+        const Q = lineResult.qFromMVAr * 1e6;
+        return [calcVoltageDropPi(P, Q, Vs, R, X, B, Un, line.id)];
+      }
+    });
+
+    set((s) => ({
+      showVoltageDropResults: true,
+      project: {
+        ...s.project,
+        results: { ...s.project.results, voltageDrop: results },
+        metadata: { ...s.project.metadata, modified: now() },
+      },
+    }));
+  },
 
   setSelectedNodeId: (id) => set({ selectedNodeId: id, selectedEdgeId: null }),
   setSelectedEdgeId: (id) => set({ selectedEdgeId: id, selectedNodeId: null }),
@@ -248,6 +300,10 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
       }));
     } catch {
       set({ powerFlowStatus: 'failed' });
+    }
+    // Auto-compute voltage drop after converged power flow
+    if (get().powerFlowStatus === 'converged' && get().project.lines.length > 0) {
+      get().runVoltageDrop();
     }
   },
 

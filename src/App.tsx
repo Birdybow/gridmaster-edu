@@ -15,6 +15,8 @@ import { GeneratorEditor } from './components/editors/GeneratorEditor.js';
 import { CompensatorEditor } from './components/editors/CompensatorEditor.js';
 import { ProductionPanel } from './components/production/ProductionPanel.js';
 import { ProductionSummaryPanel } from './components/production/ProductionSummaryPanel.js';
+import { VoltageDropPanel } from './components/voltagedrop/VoltageDropPanel.js';
+import { VoltageDropResultPanel } from './components/voltagedrop/VoltageDropResultPanel.js';
 import { useNetworkStore } from './store/useNetworkStore.js';
 
 function EditorPanel() {
@@ -108,7 +110,8 @@ export default function App() {
   const [showIterations, setShowIterations] = useState(false);
   const [showCompensation, setShowCompensation] = useState(false);
   const [showProduction, setShowProduction] = useState(false);
-  const [activeTab, setActiveTab] = useState<'powerflow' | 'compensation' | 'production'>('powerflow');
+  const [showVoltageDropFloating, setShowVoltageDropFloating] = useState(false);
+  const [activeTab, setActiveTab] = useState<'powerflow' | 'compensation' | 'production' | 'voltagedrop'>('powerflow');
 
   const powerFlow = useNetworkStore((s) => s.project.results.powerFlow);
   const showResults = useNetworkStore((s) => s.showResults);
@@ -118,16 +121,23 @@ export default function App() {
   const rawCompResults = useNetworkStore((s) => s.project.results.compensation);
   const compensationResults = rawCompResults ?? [];
   const generators = useNetworkStore((s) => s.project.generators);
+  const showVoltageDropResults = useNetworkStore((s) => s.showVoltageDropResults);
+  const setShowVoltageDropResults = useNetworkStore((s) => s.setShowVoltageDropResults);
+  const rawVdResults = useNetworkStore((s) => s.project.results.voltageDrop);
+  const voltageDropResults = rawVdResults ?? [];
 
   const hasPF = !!(powerFlow && showResults);
   const hasComp = compensationResults.length > 0 && showCompensationResults;
   const hasProd = generators.length > 0 && showProduction;
-  const showBottom = hasPF || hasComp || hasProd;
+  const hasVD = voltageDropResults.length > 0 && showVoltageDropResults;
+  const showBottom = hasPF || hasComp || hasProd || hasVD;
 
   const resolvedTab =
-    activeTab === 'compensation' && hasComp ? 'compensation'
+    activeTab === 'voltagedrop' && hasVD ? 'voltagedrop'
+    : activeTab === 'compensation' && hasComp ? 'compensation'
     : activeTab === 'production' && hasProd ? 'production'
     : activeTab === 'powerflow' && hasPF ? 'powerflow'
+    : hasVD ? 'voltagedrop'
     : hasComp ? 'compensation'
     : hasProd ? 'production'
     : 'powerflow';
@@ -137,6 +147,7 @@ export default function App() {
       <Toolbar
         onToggleCompensation={() => setShowCompensation((v) => !v)}
         onToggleProduction={() => { setShowProduction((v) => !v); setActiveTab('production'); }}
+        onToggleVoltageDrop={() => { setShowVoltageDropFloating((v) => !v); setActiveTab('voltagedrop'); }}
       />
 
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', position: 'relative' }}>
@@ -146,6 +157,25 @@ export default function App() {
         {/* Center: Canvas */}
         <div style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
           <NetworkCanvas />
+
+          {/* Floating voltage drop panel */}
+          {showVoltageDropFloating && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 12,
+                right: showCompensation ? 404 : 12,
+                width: 340,
+                maxHeight: 'calc(100vh - 120px)',
+                overflowY: 'auto',
+                zIndex: 40,
+                borderRadius: 8,
+                boxShadow: '0 4px 32px rgba(0,0,0,0.6)',
+              }}
+            >
+              <VoltageDropPanel onClose={() => setShowVoltageDropFloating(false)} />
+            </div>
+          )}
 
           {/* Floating compensation input panel */}
           {showCompensation && (
@@ -232,6 +262,24 @@ export default function App() {
                 ⚡ Produksjon
               </button>
             )}
+            {hasVD && (
+              <button
+                onClick={() => setActiveTab('voltagedrop')}
+                style={{
+                  background: resolvedTab === 'voltagedrop' ? '#0F1F30' : 'none',
+                  border: 'none',
+                  borderRight: '1px solid #1565C0',
+                  borderBottom: resolvedTab === 'voltagedrop' ? '2px solid #8BC34A' : '2px solid transparent',
+                  color: resolvedTab === 'voltagedrop' ? '#8BC34A' : '#607D8B',
+                  cursor: 'pointer',
+                  padding: '6px 16px',
+                  fontSize: 12,
+                  fontWeight: resolvedTab === 'voltagedrop' ? 600 : 400,
+                }}
+              >
+                ΔU Spenningsfall
+              </button>
+            )}
           </div>
 
           {resolvedTab === 'powerflow' && hasPF && (
@@ -266,6 +314,12 @@ export default function App() {
           )}
           {resolvedTab === 'production' && hasProd && (
             <ProductionSummaryPanel onClose={() => setShowProduction(false)} />
+          )}
+          {resolvedTab === 'voltagedrop' && hasVD && (
+            <VoltageDropResultPanel
+              results={voltageDropResults}
+              onClose={() => setShowVoltageDropResults(false)}
+            />
           )}
         </div>
       )}
