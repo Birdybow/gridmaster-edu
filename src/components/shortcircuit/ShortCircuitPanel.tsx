@@ -117,10 +117,10 @@ export function ShortCircuitPanel({ onClose }: Props) {
           <button
             onClick={() => { clearShortCircuit(); onClose(); }}
             style={{
-              background: '#1A1A1A',
-              border: '1px solid #37474F',
+              background: '#E65100',
+              border: '1px solid #BF360C',
               borderRadius: 4,
-              color: '#607D8B',
+              color: '#fff',
               padding: '7px 12px',
               cursor: 'pointer',
               fontSize: 12,
@@ -128,7 +128,7 @@ export function ShortCircuitPanel({ onClose }: Props) {
               whiteSpace: 'nowrap',
             }}
           >
-            Nullstill
+            🗑 Nullstill
           </button>
           <button
             onClick={handleCompute}
