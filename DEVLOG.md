@@ -6,6 +6,19 @@ Tekniske beslutninger og begrunnelser. Oppdateres ved hvert viktig valg.
 
 ## Sprint 8 — 2026-05-12
 
+### BESLUTNING 32: Versjonbump-regel — alltid bump ved bugfixer
+
+**Problem:** Tidligere sprinter har ikke bumped `package.json`-versjon konsekvent ved bugfixer mellom sprinter. Vercel viser alltid siste build, men versjonsnummeret i UI og `package.json` henger etter.
+
+**Regel:**
+- **Bugfix / hotfix** → patch-bump (X.Y.Z += 1), commit `fix:` eller `chore: bump vX.Y.Z`
+- **Sprint-leveranse** → minor-bump (X.Y.0, Y += 1), commit `feat(sN):`
+- **Ny sprint-serie** → major-bump (X.0.0, X += 1)
+
+**Gjelder fra:** v8.1.0
+
+---
+
 ### BESLUTNING 29: Forenklet jordfeilformel (Uf·ω·C₀·L)
 
 **Problem:** IEC-litteraturen bruker `I = 3·Uf·ω·C` (faktor 3 for tre faser). Spec-dokumentet bruker `I = Uf·ω·C₀·L` uten faktor 3.

@@ -5,6 +5,14 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 
 ---
 
+## v8.1.0 — 2026-05-12 — Versjonbump og regler
+
+### Endret
+- `package.json` bumped til `8.1.0`
+- **Versjonregel innført:** Alle bugfixer som går til `main` skal bumpe patch-versjon (X.Y.**Z** += 1). Sprint-leveranser bumper minor (X.**Y**.0 += 1). Ny sprint bumper major (**X**.0.0 += 1).
+
+---
+
 ## v8.0.0 — 2026-05-12 — Sprint 8: Jordfeil og nøytralbehandling
 
 ### Lagt til
