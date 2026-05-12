@@ -1,4 +1,6 @@
+import { useNetworkStore } from '../../store/useNetworkStore.js';
 import type { CompensationResult } from '../../types/index.js';
+import { getBusName } from '../../utils/display.js';
 
 interface CompensationResultPanelProps {
   results: CompensationResult[];
@@ -30,6 +32,7 @@ function Row({ label, before, after, unit, digits = 2, lowerIsBetter = true }: {
 }
 
 export function CompensationResultPanel({ results, onClose }: CompensationResultPanelProps) {
+  const buses = useNetworkStore((s) => s.project.buses);
   if (results.length === 0) return null;
 
   const tableHeader: React.CSSProperties = {
@@ -65,7 +68,7 @@ export function CompensationResultPanel({ results, onClose }: CompensationResult
       {results.map((r) => (
         <div key={r.busId} style={{ marginBottom: 16 }}>
           <div style={{ color: '#AB47BC', fontWeight: 600, fontSize: 12, marginBottom: 6 }}>
-            Buss: {r.busId}
+            Buss: {getBusName(r.busId, buses)}
             <span style={{ color: '#9E9E9E', fontWeight: 400, marginLeft: 8 }}>
               {new Date(r.timestamp).toLocaleTimeString('nb-NO')}
             </span>

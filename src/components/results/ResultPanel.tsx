@@ -1,4 +1,6 @@
+import { useNetworkStore } from '../../store/useNetworkStore.js';
 import type { PowerFlowResult } from '../../types/index.js';
+import { getBusName, getLineName } from '../../utils/display.js';
 
 interface Props {
   result: PowerFlowResult;
@@ -17,6 +19,8 @@ function voltageColor(v: number): string {
 
 /** Displays bus voltages, angles, and line currents/losses after a power flow. */
 export function ResultPanel({ result, onClose }: Props) {
+  const buses = useNetworkStore((s) => s.project.buses);
+  const lines = useNetworkStore((s) => s.project.lines);
   return (
     <div
       style={{
@@ -57,7 +61,7 @@ export function ResultPanel({ result, onClose }: Props) {
             <tbody>
               {result.buses.map((b) => (
                 <tr key={b.busId}>
-                  <td style={cell}>{b.busId}</td>
+                  <td style={cell}>{getBusName(b.busId, buses)}</td>
                   <td style={{ ...cell, color: voltageColor(b.vMagPU), fontWeight: 600 }}>
                     {b.vMagPU.toFixed(4)}
                   </td>
@@ -85,7 +89,7 @@ export function ResultPanel({ result, onClose }: Props) {
             <tbody>
               {result.lines.map((l) => (
                 <tr key={l.lineId}>
-                  <td style={cell}>{l.lineId}</td>
+                  <td style={cell}>{getLineName(l.lineId, lines)}</td>
                   <td style={cell}>{(l.currentKA * 1000).toFixed(1)}</td>
                   <td style={cell}>{(l.lossesActiveMW * 1000).toFixed(1)}</td>
                   <td style={{ ...cell, color: l.overloaded ? '#F44336' : '#4CAF50' }}>
