@@ -4,6 +4,34 @@ Tekniske beslutninger og begrunnelser. Oppdateres ved hvert viktig valg.
 
 ---
 
+## Sprint 12 — 2026-05-12
+
+### BESLUTNING 40: PDF-bibliotek — jsPDF + jspdf-autotable + html2canvas
+
+**Problem:** PDF-eksport krever tabeller (autotable), diagrammer (html2canvas) og typesatt tekst (jsPDF). Tre alternativer ble vurdert: (1) jsPDF-stack, (2) pdfmake, (3) server-side (Puppeteer).
+
+**Løsning:** jsPDF + jspdf-autotable + html2canvas. Alle tre er rent klient-sidige, krever ingen server, og fungerer i Vercel static-deploy. jsPDF 4.x + jspdf-autotable 5.x er kompatible.
+
+**Alternativ avvist:** Puppeteer/server-side ville krevd en server-funksjon på Vercel og mer kompleks deployment. pdfmake mangler html2canvas-integrasjon for canvas-screenshot.
+
+### BESLUTNING 41: Per-unit base — S_base=100 MVA, U_base=22 kV som standard
+
+**Problem:** Per-unit normalisering krever en valgt base. Norsk distribusjonsnett opererer typisk på 22 kV.
+
+**Løsning:** Default `S_base=100 MVA`, `U_base=22 kV` (kan endres i PerUnitPanel). Verdiene hentes fra `project.system.sBaseMVA` og et justerbart felt. Z_base = U²_base / S_base = 4.84 Ω ved 22 kV / 100 MVA.
+
+**Pedagogisk verdi:** PerUnitPanel viser Z_base og I_base beregnet i sanntid slik at studenten forstår sammenhengen.
+
+### BESLUTNING 42: Migrasjon — kjedet v1→v12 i ett steg via array av step-funksjoner
+
+**Problem:** Eldre .gmx-filer (v1.0–v3.5) mangler felter som ble lagt til i sprint 3–11. Baklengs-kompatibilitet krever at alle eksisterende filer kan lastes.
+
+**Løsning:** `migration.ts` definerer en array av `{ from, fn }` step-funksjoner. `migrateProject()` itererer og anvender hvert steg der `current < target`. Hvert steg oppdaterer `metadata.version`. UI viser banner i 8 sekunder etter migrasjon.
+
+**Regel:** Aldri migrer baklengs. `needsMigration()` sjekker om `semver(version) < 12`. Originale felter beholdes alltid — steg legger til defaults, fjerner ingenting.
+
+---
+
 ## Sprint 11 — 2026-05-12
 
 ### BESLUTNING 38: To-rads toolbar fremfor horisontal scrolling i én rad
