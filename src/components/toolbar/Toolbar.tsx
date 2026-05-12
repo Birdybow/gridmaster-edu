@@ -2,7 +2,6 @@ import { useRef, useState } from 'react';
 import { useNetworkStore } from '../../store/useNetworkStore.js';
 import { saveProject, loadProject, importLegacyGmx, saveToCloud, loadFromCloud, listCloudProjects } from '../../io/gmx.js';
 import type { CloudProjectSummary } from '../../types/index.js';
-import type { BusType } from '../../types/index.js';
 
 interface ToolbarProps {
   onToggleCompensation?: () => void;
@@ -22,10 +21,6 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
 
   const { project, loadProject: storeLoad, clearProject, runPowerFlow, powerFlowStatus } =
     useNetworkStore();
-  const placingMode = useNetworkStore((s) => s.placingMode);
-  const lineDrawingMode = useNetworkStore((s) => s.lineDrawingMode);
-  const setPlacingMode = useNetworkStore((s) => s.setPlacingMode);
-  const setLineDrawingMode = useNetworkStore((s) => s.setLineDrawingMode);
   const validationResult = useNetworkStore((s) => s.validationResult);
 
   // Cloud save state
@@ -127,62 +122,6 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
         >
           GridMaster Edu
         </span>
-
-        {/* Separator */}
-        <div style={{ width: 1, height: 24, background: '#1E3A5F', margin: '0 4px' }} />
-
-        {/* Component toolbar buttons */}
-        {(['slack', 'PV', 'PQ'] as BusType[]).map((t) => {
-          const labels = { slack: '⚡ Slack', PV: '🔋 PV', PQ: '🏭 PQ' };
-          const active = placingMode?.kind === 'bus' && placingMode.busType === t;
-          return (
-            <button
-              key={t}
-              onClick={() => {
-                if (active) { setPlacingMode(null); } else { setPlacingMode({ kind: 'bus', busType: t }); setLineDrawingMode(null); }
-              }}
-              title={`Legg til ${t}-buss`}
-              style={{ ...btnStyle, background: active ? '#0F3B66' : '#0D3B66', border: `1px solid ${active ? '#4FC3F7' : '#1565C0'}`, padding: '4px 8px', fontSize: 12 }}
-            >
-              {labels[t]}
-            </button>
-          );
-        })}
-
-        <button
-          onClick={() => {
-            const active = lineDrawingMode === 'overhead';
-            if (active) { setLineDrawingMode(null); } else { setLineDrawingMode('overhead'); setPlacingMode(null); }
-          }}
-          title="Tegn luftlinje"
-          style={{ ...btnStyle, background: lineDrawingMode === 'overhead' ? '#0F3B55' : '#0D3B66', border: `1px solid ${lineDrawingMode === 'overhead' ? '#4FC3F7' : '#1565C0'}`, padding: '4px 8px', fontSize: 12 }}
-        >
-          〰 Luftlinje
-        </button>
-
-        <button
-          onClick={() => {
-            const active = lineDrawingMode === 'cable';
-            if (active) { setLineDrawingMode(null); } else { setLineDrawingMode('cable'); setPlacingMode(null); }
-          }}
-          title="Tegn jordkabel"
-          style={{ ...btnStyle, background: lineDrawingMode === 'cable' ? '#0F3B55' : '#0D3B66', border: `1px solid ${lineDrawingMode === 'cable' ? '#4FC3F7' : '#1565C0'}`, padding: '4px 8px', fontSize: 12 }}
-        >
-          🔌 Kabel
-        </button>
-
-        <button
-          onClick={() => {
-            const active = placingMode?.kind === 'transformer';
-            if (active) { setPlacingMode(null); } else { setPlacingMode({ kind: 'transformer' }); setLineDrawingMode(null); }
-          }}
-          title="Koble to busser med transformator"
-          style={{ ...btnStyle, background: placingMode?.kind === 'transformer' ? '#3B2A0F' : '#0D3B66', border: `1px solid ${placingMode?.kind === 'transformer' ? '#FFB74D' : '#1565C0'}`, padding: '4px 8px', fontSize: 12 }}
-        >
-          🔄 Trafo
-        </button>
-
-        <div style={{ width: 1, height: 24, background: '#1E3A5F', margin: '0 4px' }} />
 
         <div className="flex-1" />
 
