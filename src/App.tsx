@@ -13,6 +13,8 @@ import { LineEditor } from './components/editors/LineEditor.js';
 import { TransformerEditor } from './components/editors/TransformerEditor.js';
 import { GeneratorEditor } from './components/editors/GeneratorEditor.js';
 import { CompensatorEditor } from './components/editors/CompensatorEditor.js';
+import { ProductionPanel } from './components/production/ProductionPanel.js';
+import { ProductionSummaryPanel } from './components/production/ProductionSummaryPanel.js';
 import { useNetworkStore } from './store/useNetworkStore.js';
 
 function EditorPanel() {
@@ -86,6 +88,9 @@ function EditorPanel() {
         {/* Generator editor shown below bus editor for PV/slack */}
         {selectedBus && isPVorSlack && <GeneratorEditor />}
 
+        {/* Production panel shown below generator editor */}
+        {selectedBus && isPVorSlack && <ProductionPanel />}
+
         {/* Line editor */}
         {isLine && <LineEditor />}
 
@@ -102,7 +107,8 @@ function EditorPanel() {
 export default function App() {
   const [showIterations, setShowIterations] = useState(false);
   const [showCompensation, setShowCompensation] = useState(false);
-  const [activeTab, setActiveTab] = useState<'powerflow' | 'compensation'>('powerflow');
+  const [showProduction, setShowProduction] = useState(false);
+  const [activeTab, setActiveTab] = useState<'powerflow' | 'compensation' | 'production'>('powerflow');
 
   const powerFlow = useNetworkStore((s) => s.project.results.powerFlow);
   const showResults = useNetworkStore((s) => s.showResults);
@@ -111,20 +117,27 @@ export default function App() {
   const setShowCompensationResults = useNetworkStore((s) => s.setShowCompensationResults);
   const rawCompResults = useNetworkStore((s) => s.project.results.compensation);
   const compensationResults = rawCompResults ?? [];
+  const generators = useNetworkStore((s) => s.project.generators);
 
   const hasPF = !!(powerFlow && showResults);
   const hasComp = compensationResults.length > 0 && showCompensationResults;
-  const showBottom = hasPF || hasComp;
+  const hasProd = generators.length > 0 && showProduction;
+  const showBottom = hasPF || hasComp || hasProd;
 
   const resolvedTab =
     activeTab === 'compensation' && hasComp ? 'compensation'
+    : activeTab === 'production' && hasProd ? 'production'
     : activeTab === 'powerflow' && hasPF ? 'powerflow'
     : hasComp ? 'compensation'
+    : hasProd ? 'production'
     : 'powerflow';
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#0D1B2A', position: 'relative' }}>
-      <Toolbar onToggleCompensation={() => setShowCompensation((v) => !v)} />
+      <Toolbar
+        onToggleCompensation={() => setShowCompensation((v) => !v)}
+        onToggleProduction={() => { setShowProduction((v) => !v); setActiveTab('production'); }}
+      />
 
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', position: 'relative' }}>
         {/* Left: Component panel */}
@@ -201,6 +214,24 @@ export default function App() {
                 Kompensering
               </button>
             )}
+            {hasProd && (
+              <button
+                onClick={() => setActiveTab('production')}
+                style={{
+                  background: resolvedTab === 'production' ? '#0F1F30' : 'none',
+                  border: 'none',
+                  borderRight: '1px solid #1565C0',
+                  borderBottom: resolvedTab === 'production' ? '2px solid #66BB6A' : '2px solid transparent',
+                  color: resolvedTab === 'production' ? '#66BB6A' : '#607D8B',
+                  cursor: 'pointer',
+                  padding: '6px 16px',
+                  fontSize: 12,
+                  fontWeight: resolvedTab === 'production' ? 600 : 400,
+                }}
+              >
+                ⚡ Produksjon
+              </button>
+            )}
           </div>
 
           {resolvedTab === 'powerflow' && hasPF && (
@@ -232,6 +263,9 @@ export default function App() {
               results={compensationResults}
               onClose={() => setShowCompensationResults(false)}
             />
+          )}
+          {resolvedTab === 'production' && hasProd && (
+            <ProductionSummaryPanel onClose={() => setShowProduction(false)} />
           )}
         </div>
       )}

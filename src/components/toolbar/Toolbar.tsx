@@ -6,12 +6,13 @@ import type { BusType } from '../../types/index.js';
 
 interface ToolbarProps {
   onToggleCompensation?: () => void;
+  onToggleProduction?: () => void;
 }
 
 type CloudSaveState = 'idle' | 'input' | 'saving' | 'done' | 'error';
 type CloudLoadState = 'idle' | 'loading' | 'list' | 'error';
 
-export function Toolbar({ onToggleCompensation }: ToolbarProps) {
+export function Toolbar({ onToggleCompensation, onToggleProduction }: ToolbarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const legacyInputRef = useRef<HTMLInputElement>(null);
 
@@ -264,6 +265,20 @@ export function Toolbar({ onToggleCompensation }: ToolbarProps) {
           }}
         >
           Fasekompensering
+        </button>
+
+        {/* Produksjon */}
+        <button
+          onClick={onToggleProduction}
+          disabled={project.generators.length === 0}
+          style={{
+            ...btnStyle,
+            background: '#0F3B1E',
+            border: '1px solid #2E7D32',
+            opacity: project.generators.length === 0 ? 0.5 : 1,
+          }}
+        >
+          ⚡ Produksjon
         </button>
 
         {/* Import legacy (Gemini scenario) */}

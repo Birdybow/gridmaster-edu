@@ -156,6 +156,11 @@ export interface Generator {
   cutInMs?: number;
   cutOutMs?: number;
   ratedWindMs?: number;
+  numTurbines?: number;    // wind: turbine count
+  windRatedMW?: number;    // wind: rated MW per turbine
+  solarPeakMW?: number;    // solar: installed peak MW
+  solarHour?: number;      // solar: simulation hour (0-24)
+  utilizationPct?: number; // nuclear/thermal: utilization 0-100
   description?: string;
 }
 

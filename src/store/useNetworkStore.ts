@@ -15,6 +15,7 @@ import type {
 import { runNewtonRaphson } from '../core/newton-raphson.js';
 import { calcCompensation } from '../core/compensation.js';
 import { validateNetwork as _validateNetwork } from '../validation/network-validator.js';
+import { calcHydro, calcWind, calcSolar, calcNuclear } from '../core/production.js';
 
 export type PowerFlowStatus = 'idle' | 'running' | 'converged' | 'failed';
 export type CompensationStatus = 'idle' | 'computing' | 'done' | 'failed';
@@ -198,6 +199,7 @@ interface NetworkState {
   deleteNode: (id: string) => void;
   deleteEdge: (id: string) => void;
   validateNetwork: () => ValidationResult;
+  runProduction: () => void;
 
   // Project-level actions
   loadProject: (p: GmxProject) => void;
@@ -651,6 +653,54 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
     const result = _validateNetwork(get().project);
     set({ validationResult: result });
     return result;
+  },
+
+  runProduction: () => {
+    const { project } = get();
+    const updatedGenerators = project.generators.map((g) => {
+      let pMW = g.pSetMW;
+      if (g.generatorType === 'hydro_francis' || g.generatorType === 'hydro_pelton' || g.generatorType === 'hydro_kaplan') {
+        const H = g.headM ?? (g.generatorType === 'hydro_pelton' ? 600 : g.generatorType === 'hydro_kaplan' ? 20 : 200);
+        const Q = g.flowM3s ?? (g.generatorType === 'hydro_pelton' ? 10 : g.generatorType === 'hydro_kaplan' ? 200 : 50);
+        const eta = (g.efficiencyPct ?? (g.generatorType === 'hydro_pelton' ? 90 : g.generatorType === 'hydro_kaplan' ? 91 : 92)) / 100;
+        pMW = calcHydro(H, Q, eta);
+      } else if (g.generatorType === 'wind') {
+        const v = g.ratedWindMs ?? 13;
+        const vci = g.cutInMs ?? 3;
+        const vr = g.ratedWindMs ?? 13;
+        const vco = g.cutOutMs ?? 25;
+        const Pn = g.windRatedMW ?? g.ratedMVA;
+        const n = g.numTurbines ?? 1;
+        pMW = calcWind(v, vci, vr, vco, Pn, n);
+      } else if (g.generatorType === 'solar') {
+        const Ppeak = g.solarPeakMW ?? g.ratedMVA;
+        const t = g.solarHour ?? 13;
+        pMW = calcSolar(Ppeak, t);
+      } else {
+        const Pn = g.ratedMVA * ((g.utilizationPct ?? 100) / 100);
+        pMW = calcNuclear(Pn);
+      }
+      return { ...g, pSetMW: pMW };
+    });
+
+    const updatedBuses = project.buses.map((b) => {
+      const gen = updatedGenerators.find((g) => g.busId === b.id);
+      if (gen && (b.type === 'PV' || b.type === 'slack')) {
+        return { ...b, genMW: gen.pSetMW };
+      }
+      return b;
+    });
+
+    set((s) => ({
+      project: {
+        ...s.project,
+        generators: updatedGenerators,
+        buses: updatedBuses,
+        metadata: { ...s.project.metadata, modified: now() },
+      },
+    }));
+
+    get().runPowerFlow();
   },
 
   loadProject: (p) => set({ project: p, validationResult: null }),
