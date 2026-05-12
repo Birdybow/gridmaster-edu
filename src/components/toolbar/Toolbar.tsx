@@ -133,24 +133,18 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
         {/* New */}
         <button
           onClick={() => { if (confirm('Nytt prosjekt? Ulagrede endringer går tapt.')) clearProject(); }}
-          style={{ ...btnBase, backgroundColor: '#0D3B66', color: '#E8F0FE', border: '1px solid #1565C0' }}
+          style={btnStyle}
         >
           Nytt
         </button>
 
         {/* Save local */}
-        <button
-          onClick={handleSave}
-          style={{ ...btnBase, backgroundColor: '#0D3B66', color: '#E8F0FE', border: '1px solid #1565C0' }}
-        >
+        <button onClick={handleSave} style={btnStyle}>
           Lagre .gmx
         </button>
 
         {/* Load local */}
-        <button
-          onClick={() => fileInputRef.current?.click()}
-          style={{ ...btnBase, backgroundColor: '#0D3B66', color: '#E8F0FE', border: '1px solid #1565C0' }}
-        >
+        <button onClick={() => fileInputRef.current?.click()} style={btnStyle}>
           Åpne .gmx
         </button>
         <input
@@ -168,7 +162,7 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
             setCloudSaveState('input');
             setCloudSaveError('');
           }}
-          style={{ ...btnBase, backgroundColor: '#0A3B5C', color: '#E8F0FE', border: '1px solid #1E88E5' }}
+          style={{ ...btnStyle, background: '#0A3B5C', border: '1px solid #1E88E5' }}
         >
           ☁ Lagre til sky
         </button>
@@ -176,7 +170,7 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
         {/* Open from cloud */}
         <button
           onClick={handleOpenCloudList}
-          style={{ ...btnBase, backgroundColor: '#0A3B5C', color: '#E8F0FE', border: '1px solid #1E88E5' }}
+          style={{ ...btnStyle, background: '#0A3B5C', border: '1px solid #1E88E5' }}
         >
           ☁ Åpne fra sky
         </button>
@@ -187,12 +181,11 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
           disabled={project.buses.length === 0 || powerFlowStatus === 'running'}
           title={validationResult && !validationResult.valid ? `${validationResult.errors.length} valideringsfeil` : undefined}
           style={{
-            ...btnBase,
-            backgroundColor: validationResult && !validationResult.valid ? '#5C1A1A'
+            ...btnStyle,
+            background: validationResult && !validationResult.valid ? '#5C1A1A'
               : powerFlowStatus === 'converged' ? '#1A5C3A'
               : powerFlowStatus === 'failed' ? '#5C1A1A'
               : '#0D3B66',
-            color: '#E8F0FE',
             border: validationResult && !validationResult.valid ? '1px solid #EF4444' : '1px solid #1565C0',
             opacity: project.buses.length === 0 ? 0.5 : 1,
           }}
@@ -207,9 +200,8 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
           onClick={onToggleCompensation}
           disabled={project.buses.length === 0}
           style={{
-            ...btnBase,
-            backgroundColor: '#3A1A5C',
-            color: '#E8F0FE',
+            ...btnStyle,
+            background: '#3A1A5C',
             border: '1px solid #9C27B0',
             opacity: project.buses.length === 0 ? 0.5 : 1,
           }}
@@ -222,9 +214,8 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
           onClick={onToggleProduction}
           disabled={project.generators.length === 0}
           style={{
-            ...btnBase,
-            backgroundColor: '#0F3B1E',
-            color: '#E8F0FE',
+            ...btnStyle,
+            background: '#0F3B1E',
             border: '1px solid #2E7D32',
             opacity: project.generators.length === 0 ? 0.5 : 1,
           }}
@@ -237,9 +228,8 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
           onClick={onToggleVoltageDrop}
           disabled={project.lines.length === 0}
           style={{
-            ...btnBase,
-            backgroundColor: '#1A2B0F',
-            color: '#E8F0FE',
+            ...btnStyle,
+            background: '#1A2B0F',
             border: '1px solid #558B2F',
             opacity: project.lines.length === 0 ? 0.5 : 1,
           }}
@@ -252,8 +242,8 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
           onClick={onToggleShortCircuit}
           disabled={project.buses.length < 2}
           style={{
-            ...btnBase,
-            backgroundColor: '#1A0000',
+            ...btnStyle,
+            background: '#1A0000',
             color: '#EF9A9A',
             border: '1px solid #B71C1C',
             opacity: project.buses.length < 2 ? 0.5 : 1,
@@ -267,8 +257,8 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
           onClick={onToggleRingNetwork}
           disabled={project.buses.length < 3}
           style={{
-            ...btnBase,
-            backgroundColor: '#001A00',
+            ...btnStyle,
+            background: '#001A00',
             color: '#A5D6A7',
             border: '1px solid #1B5E20',
             opacity: project.buses.length < 3 ? 0.5 : 1,
@@ -283,8 +273,8 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
           disabled={project.lines.length === 0}
           title="Klikk på en linje for å legge til vern"
           style={{
-            ...btnBase,
-            backgroundColor: '#1A1A0F',
+            ...btnStyle,
+            background: '#1A1A0F',
             color: '#F9A825',
             border: '1px solid #827717',
             opacity: project.lines.length === 0 ? 0.5 : 1,
@@ -296,7 +286,7 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
         {/* Import legacy (Gemini scenario) */}
         <button
           onClick={() => legacyInputRef.current?.click()}
-          style={{ ...btnBase, backgroundColor: '#1A5C3A', color: '#E8F0FE', border: '1px solid #0D3B22' }}
+          style={{ ...btnStyle, background: '#1A5C3A' }}
         >
           Importer
         </button>
@@ -455,12 +445,14 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
   );
 }
 
-const btnBase: React.CSSProperties = {
-  padding: '8px 12px',
-  fontSize: '13px',
-  borderRadius: '4px',
+const btnStyle: React.CSSProperties = {
+  background: '#0D3B66',
+  color: '#E8F0FE',
+  border: '1px solid #1565C0',
+  borderRadius: 6,
+  padding: '4px 12px',
+  fontSize: 13,
   cursor: 'pointer',
-  whiteSpace: 'nowrap',
 };
 
 const overlayStyle: React.CSSProperties = {
