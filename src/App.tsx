@@ -28,6 +28,7 @@ import { SelectivityPanel } from './components/protection/SelectivityPanel.js';
 import { EarthFaultPanel } from './components/earthfault/EarthFaultPanel.js';
 import { NeutralTreatmentPanel } from './components/earthfault/NeutralTreatmentPanel.js';
 import { ProductionDashboard } from './components/production/ProductionDashboard.js';
+import { TimeSeriesPanel } from './components/timeseries/TimeSeriesPanel.js';
 import { useNetworkStore } from './store/useNetworkStore.js';
 
 function EditorPanel() {
@@ -131,6 +132,7 @@ export default function App() {
   const [showEarthFaultFloating, setShowEarthFaultFloating] = useState(false);
   const [showNeutralTreatment, setShowNeutralTreatment] = useState(false);
   const [showProductionDashboard, setShowProductionDashboard] = useState(false);
+  const [showTimeSeries, setShowTimeSeries] = useState(false);
   const [protectionHint, setProtectionHint] = useState(false);
   const [activeTab, setActiveTab] = useState<'powerflow' | 'compensation' | 'production' | 'voltagedrop' | 'shortcircuit' | 'ringnetwork' | 'protection'>('powerflow');
 
@@ -203,6 +205,7 @@ export default function App() {
         onToggleEarthFault={() => setShowEarthFaultFloating((v) => !v)}
         onToggleNeutralTreatment={() => setShowNeutralTreatment((v) => !v)}
         onToggleProductionDashboard={() => setShowProductionDashboard((v) => !v)}
+        onToggleTimeSeries={() => setShowTimeSeries((v) => !v)}
       />
 
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', position: 'relative' }}>
@@ -277,6 +280,22 @@ export default function App() {
               }}
             >
               <ProductionDashboard onClose={() => setShowProductionDashboard(false)} />
+            </div>
+          )}
+
+          {/* Floating time series panel */}
+          {showTimeSeries && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 12,
+                left: 350,
+                zIndex: 44,
+                borderRadius: 8,
+                boxShadow: '0 4px 32px rgba(0,0,0,0.6)',
+              }}
+            >
+              <TimeSeriesPanel onClose={() => setShowTimeSeries(false)} />
             </div>
           )}
 

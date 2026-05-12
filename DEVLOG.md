@@ -4,6 +4,22 @@ Tekniske beslutninger og begrunnelser. Oppdateres ved hvert viktig valg.
 
 ---
 
+## Sprint 10 — 2026-05-12
+
+### BESLUTNING 36: Typisk norsk lastprofil som konstant array
+
+**Problem:** Lastprofilen er ikke dynamisk — den er en normert kurve som representerer typisk norsk husholdning/industri. Verdier fra Statnett-statistikk.
+
+**Løsning:** Eksportert `LOAD_PROFILE_PCT` som konstant array i `timeseries.ts`. Brukes direkte i tester for fasit-verifisering og i `LoadProfileChart` for SVG-rendering. Ikke gjenberegnes per call.
+
+### BESLUTNING 37: NR-integrasjon fordeler P_time likt på alle PQ-busser
+
+**Problem:** Tidsserie-simuleringen vet ikke hvilken buss som har hvilken andel av lasten — det er prosjektavhengig. En enkel fordeling er nødvendig for pedagogisk demonstrasjon.
+
+**Løsning:** `TimeSeriesPanel` fordeler `P_time(t)` og `Q_time(t)` likt på alle PQ-busser (`pPerBus = P_time / nPQ`). Studenten kan justere enkeltbusser manuelt etterpå. Knappen er deaktivert når det ikke finnes PQ-busser.
+
+---
+
 ## Sprint 9 — 2026-05-12
 
 ### BESLUTNING 33: Parabolsk η-kurve for vannkraft (k-verdi per turbintype)

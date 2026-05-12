@@ -5,6 +5,30 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 
 ---
 
+## v10.0.0 — 2026-05-12 — Sprint 10: Tidsserie-simulering 24t
+
+### Lagt til
+- **S10-00** Git branch `sprint10` opprettet
+- **S10-01** `package.json` bumped til `10.0.0`
+- **S10-02** `calcLoadProfile(Pmax, cosPhi)` — norsk lastprofil 24t, returnerer `TimeStep[]` med P og Q
+- **S10-03** `calcProductionProfile(generators)` — tidsvarierende produksjonsprofil per kildetype (vann, vind, sol, atom, termisk)
+- **S10-04** `calcEnergyBalance(load, production)` — balanse = produksjon − last per time
+- **S10-05** `timeseries.test.ts` — 21 tester, inkl. fasit kl 12: −1.552 MW, kl 3: +2.2 MW ✓
+- **S10-06** `TimeSeriesPanel.tsx` — slider 0–23t, parameterinnstilling (P_max, cosφ), NR-integrasjon
+- **S10-07** `LoadProfileChart.tsx` — SVG-kurve med fargekoding (grønn/gul/rød) og klikk-til-time
+- **S10-08** `ProductionProfileChart.tsx` — stablet arealkart per kildetype + lastlinje overlay
+- **S10-09** `EnergyBalanceChart.tsx` — stolpediagram med grønn/rød balanse per time
+- **S10-10** Integrasjon: NR-lastflyt kjøres med P_time/Q_time fordelt på PQ-busser
+- **S10-11** 195/195 Vitest-tester grønne
+- **S10-12** CHANGELOG v10.0.0 + DEVLOG beslutning 36–37
+
+### Fasit-verifisering
+- P_max=10 MW, cosφ=0.9, P_hydro=5 MW, P_sol_peak=2 MW:
+  - Kl 12: P_sol=2·sin(π·6/14)=1.948 MW → Balanse=6.948−8.5=**−1.552 MW** ✓
+  - Kl 3:  P_sol=0 (natt) → Balanse=5.0−2.8=**+2.2 MW** ✓
+
+---
+
 ## v9.0.0 — 2026-05-12 — Sprint 9: Kraftproduksjon Nivå 2
 
 ### Lagt til
