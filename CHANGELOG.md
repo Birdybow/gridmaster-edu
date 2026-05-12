@@ -5,6 +5,42 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 
 ---
 
+## v8.0.0 — 2026-05-12 — Sprint 8: Jordfeil og nøytralbehandling
+
+### Lagt til
+- **S8-00** Git branch `sprint8` opprettet
+- **S8-01** Toolbar `btnStyle` — `minHeight: 36`, `whiteSpace: 'nowrap'` for synlig knappehøyde
+- **S8-02** `calcEarthFaultIT(Un, C0, L, f)` — IT-nett jordfeilstrøm: `Uf · ω · C₀ · L`
+- **S8-03** `calcEarthFaultTN(Uf, Zfase, Zjord)` — TN-nett jordfeilstrøm: `Uf / (Z_fase + Z_jord)`
+- **S8-04** `calcPetersen(Un, C0, L, f, k)` — Petersen-spole: `L_P = 1/(3ω²C₀L)`, `I_rest`
+- **S8-05** `src/core/earth-fault.test.ts` — 9 Vitest-tester grønne:
+  - IT fasit: 11.97 A (±0.5 A) ✓
+  - TN fasit: 230 A (±5 A) ✓
+  - Petersen L_P: 1.126 H (±0.01 H) ✓
+- **S8-06** `src/components/earthfault/EarthFaultPanel.tsx` — jordfeilberegningspanel:
+  - Netttype-selector (IT / TN / Petersen) med pedagogisk beskrivelse
+  - Buss-selector, beregn-knapp, resultatvisning
+  - Nullstill-knapp (orange) + X-lukking
+- **S8-07** `src/components/earthfault/NeutralTreatmentPanel.tsx` — sammenlignstabell:
+  - Interaktiv tabell: IT / TN / Petersen med I_jord, driftskontinuitet, bruksområde
+  - Klikk for å sette aktiv netttype, formelreferanse
+- **S8-08** `BusNode.tsx` — jordfeilmarkering canvas:
+  - Gul glødende kant (#FFB74D) + ⏚-symbol ved enpolet jordfeil
+  - Reaktivt: forsvinner automatisk ved `clearEarthFault()`
+- **S8-09** Zustand store — jordfeil-actions:
+  - `runEarthFault(busId, networkType)` — beregner og lagrer resultat
+  - `clearEarthFault()` — nullstiller buss-markering og resultater
+  - `setNetworkType(t)` — oppdaterer aktiv netttype
+- **S8-10** Alle 163 Vitest-tester grønne ✓
+- **S8-11** `EarthFaultResult`, `NetworkType` — nye typer i `types/index.ts`
+- **S8-12** Toolbar — `⏚ Jordfeil`-knapp og `∿ Nøytral`-knapp
+
+### Merk
+- Petersen L_P fasit i spec-dokument inneholder trykkfeil (ω²=9870 vs 98696).
+  Implementasjonen bruker fysisk korrekt formel → L_P ≈ 1.126 H
+
+---
+
 ## v7.0.0 — 2026-05-12 — Sprint 7: Vernkoordinering
 
 ### Lagt til
