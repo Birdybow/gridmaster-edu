@@ -64,7 +64,6 @@ export function NuclearEditor({ gen }: { gen: Generator }) {
 
   const nuclear = isNuclear(gen.generatorType);
   const color = nuclear ? '#B71C1C' : '#E65100';
-  const icon = nuclear ? '⚛' : '🔥';
   const label = nuclear ? 'Kjernekraft' : 'Termisk';
   const defaultRated = nuclear ? 1000 : 400;
 
