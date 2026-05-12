@@ -27,11 +27,22 @@ export function ProtectionHierarchyPanel({ onClose }: { onClose: () => void }) {
 
   const hierarchy: HNode[] = [];
 
-  if (slackBus) {
-    const visited = new Set<string>();
-    const queue: Array<{ busId: string; depth: number }> = [{ busId: slackBus.id, depth: 0 }];
-    visited.add(slackBus.id);
+  // BFS from slack bus; fall back to flat list over all lines when no slack bus
+  const startBusId = slackBus?.id ?? null;
+  const visited = new Set<string>();
+  const queue: Array<{ busId: string; depth: number }> = startBusId
+    ? [{ busId: startBusId, depth: 0 }]
+    : [];
+  if (startBusId) visited.add(startBusId);
 
+  // Flat fallback: enqueue all buses when no slack bus
+  if (!startBusId && buses.length > 0) {
+    for (const bus of buses) {
+      if (!visited.has(bus.id)) { visited.add(bus.id); queue.push({ busId: bus.id, depth: 0 }); }
+    }
+  }
+
+  if (queue.length > 0) {
     while (queue.length > 0) {
       const { busId, depth } = queue.shift()!;
       const outLines = lines.filter(
@@ -113,14 +124,21 @@ export function ProtectionHierarchyPanel({ onClose }: { onClose: () => void }) {
       </div>
 
       <div style={{ padding: '10px 14px', maxHeight: 420, overflowY: 'auto' }}>
-        {slackBus && (
+        {slackBus ? (
           <div style={{ color: '#4FC3F7', fontSize: 11, fontWeight: 700, marginBottom: 8 }}>
             ⚡ {slackBus.name} (kilde)
           </div>
-        )}
+        ) : lines.length > 0 ? (
+          <div style={{ color: '#FFB74D', fontSize: 10, marginBottom: 8 }}>
+            ⚠ Ingen slack-buss — viser alle linjer
+          </div>
+        ) : null}
 
-        {hierarchy.length === 0 && (
+        {hierarchy.length === 0 && lines.length === 0 && (
           <div style={{ color: '#607D8B', fontSize: 11 }}>Ingen linjer i nettet.</div>
+        )}
+        {hierarchy.length === 0 && lines.length > 0 && (
+          <div style={{ color: '#607D8B', fontSize: 11 }}>Ingen linjer koblet til nettverket.</div>
         )}
 
         {hierarchy.map((node) => {
