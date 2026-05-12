@@ -100,6 +100,12 @@ export function NetworkCanvas() {
   const wrapperRef = useRef<HTMLDivElement>(null);
   const [rfInstance, setRfInstance] = useState<ReactFlowInstance | null>(null);
   const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  function showToast(msg: string) {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(null), 3000);
+  }
 
   const nodes: Node[] = useMemo(
     () => [
@@ -238,11 +244,15 @@ export function NetworkCanvas() {
           return;
         }
         if (placingMode.kind === 'generator') {
-          // Only attach to bus nodes (not comp_ nodes)
           if (!node.id.startsWith('comp_')) {
-            addGeneratorToBus(node.id);
-            setPlacingMode(null);
-            setSelectedNodeId(node.id);
+            const bus = buses.find((b) => b.id === node.id);
+            if (bus && bus.type === 'PQ') {
+              showToast('Generator kan kun kobles til PV-buss eller Slack-buss. PQ-buss er en ren lastbuss uten produksjon.');
+            } else {
+              addGeneratorToBus(node.id);
+              setPlacingMode(null);
+              setSelectedNodeId(node.id);
+            }
           }
           return;
         }
@@ -433,6 +443,31 @@ export function NetworkCanvas() {
             : placingMode.kind === 'compensator'
             ? 'Klikk på en buss for å koble til kondensatorbank — ESC for å avbryte'
             : 'Klikk for å plassere — ESC for å avbryte'}
+        </div>
+      )}
+
+      {/* Toast */}
+      {toastMsg && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 48,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#3B1A1A',
+            border: '1px solid #EF4444',
+            borderRadius: 6,
+            padding: '8px 16px',
+            fontSize: 12,
+            color: '#FCA5A5',
+            pointerEvents: 'none',
+            zIndex: 30,
+            maxWidth: 400,
+            textAlign: 'center',
+            lineHeight: 1.5,
+          }}
+        >
+          ⚠ {toastMsg}
         </div>
       )}
 

@@ -72,7 +72,7 @@ export const PALETTE: ComponentDef[] = [
   {
     id: 'generator',
     label: 'Generator',
-    description: 'Elektrisk generator koblet til en PV-buss',
+    description: 'Kobles til PV- eller Slack-buss',
     emoji: '⚙',
     section: 'PRODUKSJON',
     kind: 'generator',
