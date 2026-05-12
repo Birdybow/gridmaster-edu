@@ -13,12 +13,13 @@ interface ToolbarProps {
   onToggleEarthFault?: () => void;
   onToggleNeutralTreatment?: () => void;
   onToggleProductionDashboard?: () => void;
+  onToggleTimeSeries?: () => void;
 }
 
 type CloudSaveState = 'idle' | 'input' | 'saving' | 'done' | 'error';
 type CloudLoadState = 'idle' | 'loading' | 'list' | 'error';
 
-export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVoltageDrop, onToggleShortCircuit, onToggleRingNetwork, onToggleProtection, onToggleEarthFault, onToggleNeutralTreatment, onToggleProductionDashboard }: ToolbarProps) {
+export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVoltageDrop, onToggleShortCircuit, onToggleRingNetwork, onToggleProtection, onToggleEarthFault, onToggleNeutralTreatment, onToggleProductionDashboard, onToggleTimeSeries }: ToolbarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const legacyInputRef = useRef<HTMLInputElement>(null);
 
@@ -300,6 +301,20 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
           }}
         >
           ☀ Dashboard
+        </button>
+
+        {/* Tidsserie */}
+        <button
+          onClick={onToggleTimeSeries}
+          title="Tidsserie-simulering 24t — lastprofil, produksjon, balanse"
+          style={{
+            ...btnStyle,
+            background: '#0D1A0D',
+            color: '#80CBC4',
+            border: '1px solid #00796B',
+          }}
+        >
+          ⏱ Tidsserie
         </button>
 
         {/* Jordfeil */}

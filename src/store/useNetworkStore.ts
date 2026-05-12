@@ -17,6 +17,8 @@ import { runNewtonRaphson } from '../core/newton-raphson.js';
 import { calcCompensation } from '../core/compensation.js';
 import { validateNetwork as _validateNetwork } from '../validation/network-validator.js';
 import { calcHydro, calcWind, calcSolar, calcNuclear } from '../core/production.js';
+import { calcLoadProfile, calcProductionProfile, calcEnergyBalance } from '../core/timeseries.js';
+import type { TimeStep, ProductionTimeStep, BalanceStep } from '../core/timeseries.js';
 import { calcVoltageDrop, calcVoltageDropPi } from '../core/voltage-drop.js';
 import { calcZThevenin, calcIk3p, calcIk2p, calcImpact, calcIk3pMin, calcContributions } from '../core/short-circuit.js';
 import { calcRingSymmetric, calcRingAsymmetric } from '../core/ring-network.js';
@@ -236,6 +238,14 @@ interface NetworkState {
   validateNetwork: () => ValidationResult;
   runProduction: () => void;
 
+  // Time series
+  selectedHour: number;
+  timeSeriesLoad: TimeStep[];
+  timeSeriesProduction: ProductionTimeStep[];
+  timeSeriesBalance: BalanceStep[];
+  setSelectedHour: (h: number) => void;
+  runTimeSeries: (pMaxMW: number, cosPhi: number) => void;
+
   // Project-level actions
   clearAllResults: () => void;
   loadProject: (p: GmxProject) => void;
@@ -265,6 +275,11 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
   lineDrawingFromId: null,
   placingMode: null,
   validationResult: null,
+
+  selectedHour: 12,
+  timeSeriesLoad: [],
+  timeSeriesProduction: [],
+  timeSeriesBalance: [],
 
   setShowResults: (v) => set({ showResults: v }),
   setShowCompensationResults: (v) => set({ showCompensationResults: v }),
@@ -1040,6 +1055,16 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
         metadata: { ...s.project.metadata, modified: now() },
       },
     }));
+  },
+
+  setSelectedHour: (h) => set({ selectedHour: h }),
+
+  runTimeSeries: (pMaxMW, cosPhi) => {
+    const generators = get().project.generators;
+    const load = calcLoadProfile(pMaxMW, cosPhi);
+    const production = calcProductionProfile(generators);
+    const balance = calcEnergyBalance(load, production);
+    set({ timeSeriesLoad: load, timeSeriesProduction: production, timeSeriesBalance: balance });
   },
 
   clearAllResults: () => set({
