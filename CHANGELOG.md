@@ -5,6 +5,44 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 
 ---
 
+## v5.0.0 — 2026-05-12 — Sprint 5: Kortslutningsberegninger (IEC 60909)
+
+### Lagt til
+- **S5-00** Git branch `sprint5` opprettet
+- **S5-01** `src/core/short-circuit.ts` — `calcIk3p(zkOhm, unV, c?)`:
+  - I′′k3p = (c · Un) / (√3 · |Z_k|) [kA], c_maks = 1.10
+- **S5-02** `calcIk2p(ik3pKA)` — I′′k2p = (√3/2) · I′′k3p = 0.866 · I′′k3p
+- **S5-03** `calcImpact(ik3pKA, rOverX)` — ip = κ · √2 · I′′k3p, κ = 1.02 + 0.98·e^(−3R/X)
+- **S5-04** `calcIk3pMin(zkOhm, unV, tempFactor?)` — minimal kortslutningsstrøm, c_min = 1.00
+- **S5-05** `src/core/short-circuit.test.ts` — 22 Vitest-tester:
+  - Fasit: I′′k3p = 1.252 kA (±0.01 kA), I′′k2p = 1.084 kA, ip = 2.557 kA
+  - Z-buss Thevenin-test: |Z_th| ≈ 11.17 Ω, Re ≈ 3.0 Ω, Im ≈ 10.76 Ω
+  - Ende-til-ende fasit-nett bekreftet
+- **S5-06** `src/core/short-circuit.ts` — `calcZThevenin(project, faultBusId)`:
+  - Bygger p.u. Y-buss (linjer + transformatorer + generatorshunter)
+  - Gauss-Jordan-inversjon med partiell pivotvalg
+  - Returnerer Z_kk i fysiske Ohm (referert til feilsted-buss)
+- **S5-07** `calcContributions(project, faultBusId)` — bidrag per generator (superposisjon)
+- **S5-08** `src/components/shortcircuit/ShortCircuitPanel.tsx` — flytende panel:
+  - Velg feilsted-buss fra rullegardin
+  - IEC 60909 metode-info, advarsel ved manglende generatorer
+  - "Beregn kortslutningsstrøm"-knapp
+- **S5-09** `src/components/shortcircuit/ShortCircuitResultPanel.tsx` — bunntabell:
+  - I′′k3p maks, I′′k2p, ip støtstrøm, I′′k3p min
+  - Bryterevne-sjekk med rød advarsel ved overskriding
+- **S5-10** `src/components/shortcircuit/ContributionTable.tsx` — bidragstabell:
+  - Generator | I′′k3p-bidrag [kA] | Andel [%]
+- **S5-11** Feilsted-markering på canvas (BusNode.tsx):
+  - Rød glødende kant (#EF5350), rød bakgrunn, ⚡ pulserende lyn-symbol
+  - CSS `@keyframes pulse` i index.css
+- **S5-12** Bryterevne-sjekk i BusEditor: nytt felt `cbRatingKA` (standard 16 kA)
+- **S5-13** `Bus`-type utvidet med `cbRatingKA?: number`
+- **S5-14** Store: `selectedFaultBusId`, `showShortCircuitResults`, `runShortCircuit(busId)`
+- **S5-15** CHANGELOG v5.0.0 + DEVLOG beslutning 22
+- **S5-16** `npx tsc -b` — ingen feil, 121/121 Vitest grønne
+
+---
+
 ## v4.0.0 — 2026-05-12 — Sprint 4: Spenningsfallsberegninger
 
 ### Lagt til

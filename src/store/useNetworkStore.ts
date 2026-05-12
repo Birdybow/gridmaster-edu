@@ -18,6 +18,8 @@ import { calcCompensation } from '../core/compensation.js';
 import { validateNetwork as _validateNetwork } from '../validation/network-validator.js';
 import { calcHydro, calcWind, calcSolar, calcNuclear } from '../core/production.js';
 import { calcVoltageDrop, calcVoltageDropPi } from '../core/voltage-drop.js';
+import { calcZThevenin, calcIk3p, calcIk2p, calcImpact, calcIk3pMin, calcContributions } from '../core/short-circuit.js';
+import type { ShortCircuitResult } from '../types/index.js';
 
 export type PowerFlowStatus = 'idle' | 'running' | 'converged' | 'failed';
 export type CompensationStatus = 'idle' | 'computing' | 'done' | 'failed';
@@ -145,6 +147,8 @@ interface NetworkState {
   showCompensationResults: boolean;
   showVoltageDropResults: boolean;
   voltageDropModel: VoltageDropModel;
+  selectedFaultBusId: string | null;
+  showShortCircuitResults: boolean;
 
   // Builder state
   selectedNodeId: string | null;
@@ -159,6 +163,9 @@ interface NetworkState {
   setShowVoltageDropResults: (v: boolean) => void;
   setVoltageDropModel: (m: VoltageDropModel) => void;
   runVoltageDrop: () => void;
+  setSelectedFaultBusId: (id: string | null) => void;
+  setShowShortCircuitResults: (v: boolean) => void;
+  runShortCircuit: (busId: string) => void;
 
   // Selection
   setSelectedNodeId: (id: string | null) => void;
@@ -222,6 +229,8 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
   showCompensationResults: false,
   showVoltageDropResults: false,
   voltageDropModel: 'auto',
+  selectedFaultBusId: null,
+  showShortCircuitResults: false,
 
   selectedNodeId: null,
   selectedEdgeId: null,
@@ -234,6 +243,56 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
   setShowCompensationResults: (v) => set({ showCompensationResults: v }),
   setShowVoltageDropResults: (v) => set({ showVoltageDropResults: v }),
   setVoltageDropModel: (m) => set({ voltageDropModel: m }),
+  setSelectedFaultBusId: (id) => set({ selectedFaultBusId: id }),
+  setShowShortCircuitResults: (v) => set({ showShortCircuitResults: v }),
+
+  runShortCircuit: (busId) => {
+    const { project } = get();
+    const faultBus = project.buses.find((b) => b.id === busId);
+    if (!faultBus) return;
+
+    const zTh = calcZThevenin(project, busId);
+    if (!zTh) return;
+
+    const zkMag = Math.sqrt(zTh.re ** 2 + zTh.im ** 2);
+    const unV = faultBus.voltageKV * 1000;
+    const rOverX = zTh.im > 0 ? zTh.re / zTh.im : 0;
+
+    const ik3pMaxKA = calcIk3p(zkMag, unV);
+    const ik2pKA = calcIk2p(ik3pMaxKA);
+    const ipKA = calcImpact(ik3pMaxKA, rOverX);
+    const ik3pMinKA = calcIk3pMin(zkMag, unV);
+    const contributions = calcContributions(project, busId);
+
+    const result: ShortCircuitResult = {
+      timestamp: now(),
+      busId,
+      faultType: '3phase',
+      ik3pMaxKA,
+      ik2pKA,
+      ipKA,
+      ik3pMinKA,
+      ik1pMinKA: ik3pMinKA * 0.87, // approximation for isolated neutral
+      contributions,
+      cFactorMax: 1.10,
+      cFactorMin: 1.00,
+      tempCorrFactor: 1.0,
+    };
+
+    const prev = project.results.shortCircuit ?? [];
+    set((s) => ({
+      selectedFaultBusId: busId,
+      showShortCircuitResults: true,
+      project: {
+        ...s.project,
+        results: {
+          ...s.project.results,
+          shortCircuit: [...prev.filter((r) => r.busId !== busId), result],
+        },
+        metadata: { ...s.project.metadata, modified: now() },
+      },
+    }));
+  },
 
   runVoltageDrop: () => {
     const { project, voltageDropModel } = get();

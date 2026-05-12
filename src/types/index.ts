@@ -94,6 +94,7 @@ export interface Bus {
   vMinPU: number;
   position: { x: number; y: number };
   neutralTreatment?: NeutralTreatment;
+  cbRatingKA?: number;
   description?: string;
 }
 

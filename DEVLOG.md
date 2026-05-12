@@ -4,6 +4,36 @@ Tekniske beslutninger og begrunnelser. Oppdateres ved hvert viktig valg.
 
 ---
 
+## Sprint 5 — 2026-05-12
+
+### BESLUTNING 22: Z-buss inversjon som Thevenin-ekvivalent
+
+**Problem:** Kortslutningsstrøm krever Thevenin-impedans ved feilsted. For mesh-nett er ikke enkel serieaddisjon korrekt.
+
+**Løsning:** Bygg augmentert Y-buss (nettverk + generatorshunter som p.u.-admittanser), inverter med Gauss-Jordan til Z-buss. Z_thevenin = Z[k][k] (diagonalelement ved feilsted-buss).
+
+**Beregning p.u.:**
+- Z_gen_pu = j·x″d·(S_base/S_n) — generator-shunt
+- ZBase_linje = Un²/SBase — linje-impedans til p.u.
+- Resultat Z_kk [p.u.] → Z_kk_ohm = Z_kk_pu · ZBase_fault
+
+**Valg:** Arbeider i p.u. gjennomgående for konsistens med eksisterende Y-buss. Converter til Ohm på slutten.
+
+**Fasit-verifisering:**
+- Gen: x″d=0.15, Sn=10MVA, SBase=100MVA → Z_gen_pu = j·1.5
+- Linje: R=3Ω, X=3.5Ω, ZBase=4.84Ω → R_pu=0.6198, X_pu=0.7231
+- Z_k_pu = 0.6198 + j2.2231 → |Z_k_pu|=2.308 → Z_k_ohm=11.17Ω ✓
+
+### BESLUTNING 23: Bidrag per generator — superposisjonsmetode
+
+**Problem:** I et nett med N generatorer: hvordan fordeles I′′k3p per kilde?
+
+**Løsning:** Superposisjon — én generator ad gangen. For generator g: beregn Z_thevenin med BARE g's shunt i Y-buss. Dette gir "hva ville strømmen vært om bare g var tilstede?" Pedagogisk nyttig, viser relativ styrke per kilde.
+
+**Merk:** Summen av individuelle bidrag ≈ total I′′k3p, men ikke eksakt (parallell-effekt). For enkeltgenerator-nett: bidrag = 100%.
+
+---
+
 ## Sprint 4 — 2026-05-12
 
 ### BESLUTNING 19: Pi-modell fasit — 100 km FeAl 95mm², 20MW/8MVAr, 66kV

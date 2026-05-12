@@ -17,6 +17,8 @@ import { ProductionPanel } from './components/production/ProductionPanel.js';
 import { ProductionSummaryPanel } from './components/production/ProductionSummaryPanel.js';
 import { VoltageDropPanel } from './components/voltagedrop/VoltageDropPanel.js';
 import { VoltageDropResultPanel } from './components/voltagedrop/VoltageDropResultPanel.js';
+import { ShortCircuitPanel } from './components/shortcircuit/ShortCircuitPanel.js';
+import { ShortCircuitResultPanel } from './components/shortcircuit/ShortCircuitResultPanel.js';
 import { useNetworkStore } from './store/useNetworkStore.js';
 
 function EditorPanel() {
@@ -111,7 +113,8 @@ export default function App() {
   const [showCompensation, setShowCompensation] = useState(false);
   const [showProduction, setShowProduction] = useState(false);
   const [showVoltageDropFloating, setShowVoltageDropFloating] = useState(false);
-  const [activeTab, setActiveTab] = useState<'powerflow' | 'compensation' | 'production' | 'voltagedrop'>('powerflow');
+  const [showShortCircuitFloating, setShowShortCircuitFloating] = useState(false);
+  const [activeTab, setActiveTab] = useState<'powerflow' | 'compensation' | 'production' | 'voltagedrop' | 'shortcircuit'>('powerflow');
 
   const powerFlow = useNetworkStore((s) => s.project.results.powerFlow);
   const showResults = useNetworkStore((s) => s.showResults);
@@ -125,18 +128,25 @@ export default function App() {
   const setShowVoltageDropResults = useNetworkStore((s) => s.setShowVoltageDropResults);
   const rawVdResults = useNetworkStore((s) => s.project.results.voltageDrop);
   const voltageDropResults = rawVdResults ?? [];
+  const showShortCircuitResults = useNetworkStore((s) => s.showShortCircuitResults);
+  const setShowShortCircuitResults = useNetworkStore((s) => s.setShowShortCircuitResults);
+  const rawScResults = useNetworkStore((s) => s.project.results.shortCircuit);
+  const shortCircuitResults = rawScResults ?? [];
 
   const hasPF = !!(powerFlow && showResults);
   const hasComp = compensationResults.length > 0 && showCompensationResults;
   const hasProd = generators.length > 0 && showProduction;
   const hasVD = voltageDropResults.length > 0 && showVoltageDropResults;
-  const showBottom = hasPF || hasComp || hasProd || hasVD;
+  const hasSC = shortCircuitResults.length > 0 && showShortCircuitResults;
+  const showBottom = hasPF || hasComp || hasProd || hasVD || hasSC;
 
   const resolvedTab =
-    activeTab === 'voltagedrop' && hasVD ? 'voltagedrop'
+    activeTab === 'shortcircuit' && hasSC ? 'shortcircuit'
+    : activeTab === 'voltagedrop' && hasVD ? 'voltagedrop'
     : activeTab === 'compensation' && hasComp ? 'compensation'
     : activeTab === 'production' && hasProd ? 'production'
     : activeTab === 'powerflow' && hasPF ? 'powerflow'
+    : hasSC ? 'shortcircuit'
     : hasVD ? 'voltagedrop'
     : hasComp ? 'compensation'
     : hasProd ? 'production'
@@ -148,6 +158,7 @@ export default function App() {
         onToggleCompensation={() => setShowCompensation((v) => !v)}
         onToggleProduction={() => { setShowProduction((v) => !v); setActiveTab('production'); }}
         onToggleVoltageDrop={() => { setShowVoltageDropFloating((v) => !v); setActiveTab('voltagedrop'); }}
+        onToggleShortCircuit={() => { setShowShortCircuitFloating((v) => !v); setActiveTab('shortcircuit'); }}
       />
 
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', position: 'relative' }}>
@@ -174,6 +185,25 @@ export default function App() {
               }}
             >
               <VoltageDropPanel onClose={() => setShowVoltageDropFloating(false)} />
+            </div>
+          )}
+
+          {/* Floating short-circuit panel */}
+          {showShortCircuitFloating && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 12,
+                right: showCompensation ? 804 : showVoltageDropFloating ? 404 : 12,
+                width: 320,
+                maxHeight: 'calc(100vh - 120px)',
+                overflowY: 'auto',
+                zIndex: 41,
+                borderRadius: 8,
+                boxShadow: '0 4px 32px rgba(0,0,0,0.6)',
+              }}
+            >
+              <ShortCircuitPanel onClose={() => setShowShortCircuitFloating(false)} />
             </div>
           )}
 
@@ -280,6 +310,24 @@ export default function App() {
                 ΔU Spenningsfall
               </button>
             )}
+            {hasSC && (
+              <button
+                onClick={() => setActiveTab('shortcircuit')}
+                style={{
+                  background: resolvedTab === 'shortcircuit' ? '#1A0000' : 'none',
+                  border: 'none',
+                  borderRight: '1px solid #1565C0',
+                  borderBottom: resolvedTab === 'shortcircuit' ? '2px solid #EF5350' : '2px solid transparent',
+                  color: resolvedTab === 'shortcircuit' ? '#EF5350' : '#607D8B',
+                  cursor: 'pointer',
+                  padding: '6px 16px',
+                  fontSize: 12,
+                  fontWeight: resolvedTab === 'shortcircuit' ? 600 : 400,
+                }}
+              >
+                ⚡ Kortslutning
+              </button>
+            )}
           </div>
 
           {resolvedTab === 'powerflow' && hasPF && (
@@ -319,6 +367,12 @@ export default function App() {
             <VoltageDropResultPanel
               results={voltageDropResults}
               onClose={() => setShowVoltageDropResults(false)}
+            />
+          )}
+          {resolvedTab === 'shortcircuit' && hasSC && (
+            <ShortCircuitResultPanel
+              results={shortCircuitResults}
+              onClose={() => setShowShortCircuitResults(false)}
             />
           )}
         </div>

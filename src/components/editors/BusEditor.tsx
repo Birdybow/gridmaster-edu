@@ -194,6 +194,19 @@ export function BusEditor() {
         />
       )}
 
+      <div style={{ borderTop: '1px solid #1E3A5F', paddingTop: 10, marginTop: 4 }}>
+        <div style={{ fontSize: 10, color: '#607D8B', marginBottom: 4, fontWeight: 600 }}>VERNDATA</div>
+        <Field
+          label="Bryterevne (cb_rating)"
+          unit="kA"
+          hint="Bryterens kortslutningsevne [kA]. Standard 16 kA for 22 kV-nett."
+          value={bus.cbRatingKA ?? 16}
+          step="0.5"
+          onChange={(v) => patch({ cbRatingKA: parseFloat(v) || 16 })}
+          valid={(bus.cbRatingKA ?? 16) > 0}
+        />
+      </div>
+
       <div
         style={{
           borderTop: '1px solid #1E3A5F',

@@ -33,27 +33,46 @@ function voltageRingColor(vMagPU: number | undefined): string {
 function BusNodeComponent({ data, selected }: NodeProps<Bus>) {
   const powerFlow = useNetworkStore((s) => s.project.results.powerFlow);
   const generators = useNetworkStore((s) => s.project.generators);
+  const selectedFaultBusId = useNetworkStore((s) => s.selectedFaultBusId);
   const busResult = powerFlow?.buses.find((b) => b.busId === data.id);
   const gen = generators.find((g) => g.busId === data.id);
   const genBadge = gen ? GEN_BADGE[gen.generatorType] : null;
+  const isFaultBus = selectedFaultBusId === data.id;
 
   const icon = ICON_MAP[data.type] ?? '/icons/bus-pq.png';
   const badge = TYPE_LABELS[data.type] ?? data.type;
-  const borderColor = selected ? '#4FC3F7' : voltageRingColor(busResult?.vMagPU);
+  const borderColor = isFaultBus ? '#EF5350' : selected ? '#4FC3F7' : voltageRingColor(busResult?.vMagPU);
 
   return (
     <div
       className="relative flex flex-col items-center cursor-pointer select-none"
       style={{ width: 80 }}
     >
+      {isFaultBus && (
+        <div
+          style={{
+            position: 'absolute',
+            top: -14,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            fontSize: 16,
+            animation: 'pulse 1s infinite',
+            zIndex: 10,
+          }}
+        >
+          ⚡
+        </div>
+      )}
       <div
         className="rounded-lg overflow-hidden border-2"
         style={{
           width: 56,
           height: 56,
-          background: '#0D3B66',
+          background: isFaultBus ? '#1A0000' : '#0D3B66',
           borderColor,
-          boxShadow: selected ? `0 0 8px ${borderColor}` : 'none',
+          boxShadow: isFaultBus
+            ? `0 0 12px #EF5350, 0 0 24px #B71C1C`
+            : selected ? `0 0 8px ${borderColor}` : 'none',
         }}
       >
         <img src={icon} alt={badge} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
