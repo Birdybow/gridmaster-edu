@@ -19,7 +19,8 @@ import { validateNetwork as _validateNetwork } from '../validation/network-valid
 import { calcHydro, calcWind, calcSolar, calcNuclear } from '../core/production.js';
 import { calcVoltageDrop, calcVoltageDropPi } from '../core/voltage-drop.js';
 import { calcZThevenin, calcIk3p, calcIk2p, calcImpact, calcIk3pMin, calcContributions } from '../core/short-circuit.js';
-import type { ShortCircuitResult } from '../types/index.js';
+import { calcRingSymmetric, calcRingAsymmetric } from '../core/ring-network.js';
+import type { ShortCircuitResult, RingNetworkResult } from '../types/index.js';
 
 export type PowerFlowStatus = 'idle' | 'running' | 'converged' | 'failed';
 export type CompensationStatus = 'idle' | 'computing' | 'done' | 'failed';
@@ -149,6 +150,8 @@ interface NetworkState {
   voltageDropModel: VoltageDropModel;
   selectedFaultBusId: string | null;
   showShortCircuitResults: boolean;
+  showFlowDirections: boolean;
+  ringNetworkResults: RingNetworkResult | null;
 
   // Builder state
   selectedNodeId: string | null;
@@ -166,6 +169,9 @@ interface NetworkState {
   setSelectedFaultBusId: (id: string | null) => void;
   setShowShortCircuitResults: (v: boolean) => void;
   runShortCircuit: (busId: string) => void;
+  toggleFlowDirections: () => void;
+  setRingNetworkResults: (r: RingNetworkResult | null) => void;
+  runRingNetwork: (busAId: string, busBId: string, busCId: string) => void;
 
   // Selection
   setSelectedNodeId: (id: string | null) => void;
@@ -231,6 +237,8 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
   voltageDropModel: 'auto',
   selectedFaultBusId: null,
   showShortCircuitResults: false,
+  showFlowDirections: false,
+  ringNetworkResults: null,
 
   selectedNodeId: null,
   selectedEdgeId: null,
@@ -245,6 +253,8 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
   setVoltageDropModel: (m) => set({ voltageDropModel: m }),
   setSelectedFaultBusId: (id) => set({ selectedFaultBusId: id }),
   setShowShortCircuitResults: (v) => set({ showShortCircuitResults: v }),
+  toggleFlowDirections: () => set((s) => ({ showFlowDirections: !s.showFlowDirections })),
+  setRingNetworkResults: (r) => set({ ringNetworkResults: r }),
 
   runShortCircuit: (busId) => {
     const { project } = get();
@@ -816,6 +826,85 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
     }));
 
     get().runPowerFlow();
+  },
+
+  runRingNetwork: (busAId, busBId, busCId) => {
+    const { project } = get();
+    const busA = project.buses.find((b) => b.id === busAId);
+    const busB = project.buses.find((b) => b.id === busBId);
+    const busC = project.buses.find((b) => b.id === busCId);
+    if (!busA || !busB || !busC) return;
+
+    // Find lines A-C and C-B (or B-C)
+    const lineAC = project.lines.find(
+      (l) => (l.fromBusId === busAId && l.toBusId === busCId) ||
+              (l.fromBusId === busCId && l.toBusId === busAId),
+    );
+    const lineCB = project.lines.find(
+      (l) => (l.fromBusId === busBId && l.toBusId === busCId) ||
+              (l.fromBusId === busCId && l.toBusId === busBId),
+    );
+    if (!lineAC || !lineCB) return;
+
+    const rAC = lineAC.rOhmPerKm * lineAC.lengthKm;
+    const xAC = lineAC.xOhmPerKm * lineAC.lengthKm;
+    const rCB = lineCB.rOhmPerKm * lineCB.lengthKm;
+    const xCB = lineCB.xOhmPerKm * lineCB.lengthKm;
+    const zAC = Math.sqrt(rAC ** 2 + xAC ** 2);
+    const zCB = Math.sqrt(rCB ** 2 + xCB ** 2);
+
+    const p = busC.loadMW;
+    const q = busC.loadMVAr;
+    const unV = busC.voltageKV * 1000;
+    const iLoad = (Math.sqrt(p ** 2 + q ** 2) * 1e6) / (Math.sqrt(3) * unV);
+
+    const isSymmetric = Math.abs(zAC - zCB) < 0.01 * Math.max(zAC, zCB);
+    const res = isSymmetric
+      ? calcRingSymmetric(iLoad, zAC, zCB, rAC, rCB)
+      : calcRingAsymmetric(iLoad, zAC, zCB, rAC, rCB);
+
+    const ratingMVA_AC = lineAC.ratingMVA;
+    const ratingMVA_CB = lineCB.ratingMVA;
+    const iRatAC = (ratingMVA_AC * 1e6) / (Math.sqrt(3) * unV);
+    const iRatCB = (ratingMVA_CB * 1e6) / (Math.sqrt(3) * unV);
+
+    const ringResult: RingNetworkResult = {
+      timestamp: now(),
+      topology: isSymmetric ? 'symmetric' : 'asymmetric',
+      busA: busAId,
+      busB: busBId,
+      busC: busCId,
+      iLoadA: res.IA,
+      iLoadB: res.IB,
+      branches: [
+        {
+          fromBusId: busAId,
+          toBusId: busCId,
+          currentA: res.IA,
+          tapKW: res.tapAC,
+          loadingPercent: iRatAC > 0 ? (res.IA / iRatAC) * 100 : 0,
+        },
+        {
+          fromBusId: busBId,
+          toBusId: busCId,
+          currentA: res.IB,
+          tapKW: res.tapCB,
+          loadingPercent: iRatCB > 0 ? (res.IB / iRatCB) * 100 : 0,
+        },
+      ],
+      totalTapKW: res.totalTap,
+      radialTapKW: res.radialTap,
+      tapReductionPercent: res.tapReductionPercent,
+    };
+
+    set((s) => ({
+      ringNetworkResults: ringResult,
+      project: {
+        ...s.project,
+        results: { ...s.project.results, ringNetwork: ringResult },
+        metadata: { ...s.project.metadata, modified: now() },
+      },
+    }));
   },
 
   loadProject: (p) => set({ project: p, validationResult: null }),

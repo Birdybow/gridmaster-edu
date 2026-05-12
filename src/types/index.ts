@@ -293,6 +293,28 @@ export interface VoltageDropResult {
   renReference: string;
 }
 
+export interface RingBranchResult {
+  fromBusId: GmxId;
+  toBusId: GmxId;
+  currentA: number;
+  tapKW: number;
+  loadingPercent: number;
+}
+
+export interface RingNetworkResult {
+  timestamp: ISOTimestamp;
+  topology: 'symmetric' | 'asymmetric' | 'general';
+  busA: GmxId;
+  busB: GmxId;
+  busC: GmxId;
+  iLoadA: number;
+  iLoadB: number;
+  branches: RingBranchResult[];
+  totalTapKW: number;
+  radialTapKW: number;
+  tapReductionPercent: number;
+}
+
 // ---------------------------------------------------------------------------
 // Builder / Validation
 // ---------------------------------------------------------------------------
@@ -340,6 +362,7 @@ export interface GmxProject {
     shortCircuit?: ShortCircuitResult[];
     compensation?: CompensationResult[];
     voltageDrop?: VoltageDropResult[];
+    ringNetwork?: RingNetworkResult;
   };
   canvas: {
     zoom: number;

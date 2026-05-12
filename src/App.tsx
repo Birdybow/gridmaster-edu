@@ -19,6 +19,9 @@ import { VoltageDropPanel } from './components/voltagedrop/VoltageDropPanel.js';
 import { VoltageDropResultPanel } from './components/voltagedrop/VoltageDropResultPanel.js';
 import { ShortCircuitPanel } from './components/shortcircuit/ShortCircuitPanel.js';
 import { ShortCircuitResultPanel } from './components/shortcircuit/ShortCircuitResultPanel.js';
+import { RingNetworkPanel } from './components/ringnetwork/RingNetworkPanel.js';
+import { RingNetworkResultPanel } from './components/ringnetwork/RingNetworkResultPanel.js';
+import { RadialVsRingPanel } from './components/ringnetwork/RadialVsRingPanel.js';
 import { useNetworkStore } from './store/useNetworkStore.js';
 
 function EditorPanel() {
@@ -114,7 +117,8 @@ export default function App() {
   const [showProduction, setShowProduction] = useState(false);
   const [showVoltageDropFloating, setShowVoltageDropFloating] = useState(false);
   const [showShortCircuitFloating, setShowShortCircuitFloating] = useState(false);
-  const [activeTab, setActiveTab] = useState<'powerflow' | 'compensation' | 'production' | 'voltagedrop' | 'shortcircuit'>('powerflow');
+  const [showRingNetworkFloating, setShowRingNetworkFloating] = useState(false);
+  const [activeTab, setActiveTab] = useState<'powerflow' | 'compensation' | 'production' | 'voltagedrop' | 'shortcircuit' | 'ringnetwork'>('powerflow');
 
   const powerFlow = useNetworkStore((s) => s.project.results.powerFlow);
   const showResults = useNetworkStore((s) => s.showResults);
@@ -138,14 +142,18 @@ export default function App() {
   const hasProd = generators.length > 0 && showProduction;
   const hasVD = voltageDropResults.length > 0 && showVoltageDropResults;
   const hasSC = shortCircuitResults.length > 0 && showShortCircuitResults;
-  const showBottom = hasPF || hasComp || hasProd || hasVD || hasSC;
+  const rawRingResult = useNetworkStore((s) => s.ringNetworkResults);
+  const hasRing = rawRingResult !== null;
+  const showBottom = hasPF || hasComp || hasProd || hasVD || hasSC || hasRing;
 
   const resolvedTab =
-    activeTab === 'shortcircuit' && hasSC ? 'shortcircuit'
+    activeTab === 'ringnetwork' && hasRing ? 'ringnetwork'
+    : activeTab === 'shortcircuit' && hasSC ? 'shortcircuit'
     : activeTab === 'voltagedrop' && hasVD ? 'voltagedrop'
     : activeTab === 'compensation' && hasComp ? 'compensation'
     : activeTab === 'production' && hasProd ? 'production'
     : activeTab === 'powerflow' && hasPF ? 'powerflow'
+    : hasRing ? 'ringnetwork'
     : hasSC ? 'shortcircuit'
     : hasVD ? 'voltagedrop'
     : hasComp ? 'compensation'
@@ -159,6 +167,7 @@ export default function App() {
         onToggleProduction={() => { setShowProduction((v) => !v); setActiveTab('production'); }}
         onToggleVoltageDrop={() => { setShowVoltageDropFloating((v) => !v); setActiveTab('voltagedrop'); }}
         onToggleShortCircuit={() => { setShowShortCircuitFloating((v) => !v); setActiveTab('shortcircuit'); }}
+        onToggleRingNetwork={() => { setShowRingNetworkFloating((v) => !v); setActiveTab('ringnetwork'); }}
       />
 
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', position: 'relative' }}>
@@ -205,6 +214,11 @@ export default function App() {
             >
               <ShortCircuitPanel onClose={() => setShowShortCircuitFloating(false)} />
             </div>
+          )}
+
+          {/* Floating ring network panel */}
+          {showRingNetworkFloating && (
+            <RingNetworkPanel onClose={() => setShowRingNetworkFloating(false)} />
           )}
 
           {/* Floating compensation input panel */}
@@ -328,6 +342,24 @@ export default function App() {
                 ⚡ Kortslutning
               </button>
             )}
+            {hasRing && (
+              <button
+                onClick={() => setActiveTab('ringnetwork')}
+                style={{
+                  background: resolvedTab === 'ringnetwork' ? '#001A00' : 'none',
+                  border: 'none',
+                  borderRight: '1px solid #1565C0',
+                  borderBottom: resolvedTab === 'ringnetwork' ? '2px solid #4CAF50' : '2px solid transparent',
+                  color: resolvedTab === 'ringnetwork' ? '#4CAF50' : '#607D8B',
+                  cursor: 'pointer',
+                  padding: '6px 16px',
+                  fontSize: 12,
+                  fontWeight: resolvedTab === 'ringnetwork' ? 600 : 400,
+                }}
+              >
+                ⭕ Ringnett
+              </button>
+            )}
           </div>
 
           {resolvedTab === 'powerflow' && hasPF && (
@@ -374,6 +406,13 @@ export default function App() {
               results={shortCircuitResults}
               onClose={() => setShowShortCircuitResults(false)}
             />
+          )}
+          {resolvedTab === 'ringnetwork' && hasRing && (
+            <div style={{ display: 'flex', gap: 0, borderTop: '1px solid #1B5E20' }}>
+              <RingNetworkResultPanel />
+              <div style={{ width: 1, background: '#1B5E20' }} />
+              <RadialVsRingPanel />
+            </div>
           )}
         </div>
       )}

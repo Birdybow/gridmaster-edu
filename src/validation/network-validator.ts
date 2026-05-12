@@ -146,6 +146,46 @@ export function validateNetwork(project: GmxProject): ValidationResult {
     }
   }
 
+  // Masket nett (syklisk topologi) — advarsel, ikke feil
+  if (buses.length > 2) {
+    const allEdges = [
+      ...lines.map((l) => ({ a: l.fromBusId, b: l.toBusId })),
+      ...transformers.map((t) => ({ a: t.fromBusId, b: t.toBusId })),
+    ];
+    const adj: Record<string, string[]> = {};
+    for (const bus of buses) adj[bus.id] = [];
+    for (const { a, b } of allEdges) {
+      adj[a]?.push(b);
+      adj[b]?.push(a);
+    }
+    const visited = new Set<string>();
+    let hasCycle = false;
+    function dfs(node: string, parent: string | null): boolean {
+      visited.add(node);
+      for (const nb of adj[node] ?? []) {
+        if (!visited.has(nb)) {
+          if (dfs(nb, node)) return true;
+        } else if (nb !== parent) {
+          return true;
+        }
+      }
+      return false;
+    }
+    for (const bus of buses) {
+      if (!visited.has(bus.id) && dfs(bus.id, null)) {
+        hasCycle = true;
+        break;
+      }
+    }
+    if (hasCycle) {
+      warnings.push({
+        code: 'MESHED_NETWORK',
+        message: 'Masket nett oppdaget — NR løser automatisk.',
+        type: 'warning',
+      });
+    }
+  }
+
   return {
     valid: errors.length === 0,
     errors,

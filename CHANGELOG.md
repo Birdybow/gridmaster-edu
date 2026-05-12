@@ -5,6 +5,53 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 
 ---
 
+## v6.0.0 — 2026-05-12 — Sprint 6: Ringnett og strømdeling
+
+### Lagt til
+- **S6-00** Git branch `sprint6` opprettet
+- **S6-01** `src/core/ring-network.ts` — `calcRingSymmetric(Iload, Zac, Zcb, Rac, Rcb)`:
+  - I_A = I_last · Z_CB / Z_total, I_B = I_last · Z_AC / Z_total
+  - Tap per grein: P = I² · R [kW], tapreduksjon vs radial [%]
+- **S6-02** `calcRingAsymmetric(Iload, Zac, Zcb, Rac, Rcb, vaDeltaV?)`:
+  - Kirchhoff: I_A = (I_last · Z_CB + ΔV) / Z_total
+  - Generell løsning for ulik impedans og spenning
+- **S6-03** `src/core/ring-network.test.ts` — 16 Vitest-tester:
+  - Fasit symmetrisk: I_A = I_B = 83.0 A (±1 A), total tap = 20.6 kW (±0.5 kW)
+  - Tapreduksjon 75% ±2% bekreftet
+  - Asymmetrisk, kanttilfeller: iLoad=0 og Z_CB→0 testet
+- **S6-04** `src/validation/network-validator.ts` — syklusdeteksjon:
+  - DFS-basert ringtopologi-deteksjon
+  - Advarsel (ikke feil): 'Masket nett oppdaget — NR løser automatisk.'
+- **S6-05** `src/components/canvas/LineEdge.tsx` — animerte strømpiler:
+  - `stroke-dashoffset`-animasjon på React Flow edges etter NR-konvergens
+  - Farge: grønn < 70%, oransje 70–100%, rød > 100% belastning
+  - Hastighet proporsjonal med strøm (animasjonsdur 0.5–3 s)
+  - Retning basert på strømsignet (normal/reverse CSS animation)
+- **S6-06** `src/components/ringnetwork/RingNetworkPanel.tsx` — flytende panel:
+  - Velg forsyningspunkt A, B og lastbuss C
+  - "Beregn strømdeling"-knapp + "Kjør lastflyt (NR)"-knapp
+  - Toggling av strømpiler på canvas
+- **S6-07** `src/components/ringnetwork/RingNetworkResultPanel.tsx` — bunntabell:
+  - Grein-tabell: strøm, tap, belastningsprosent med farger
+  - Radial-tap vs. ring-tap med tapreduksjon
+- **S6-08** `src/components/ringnetwork/RadialVsRingPanel.tsx` — sammenligning:
+  - Tabell: Radial vs Ringnett — maks strøm, total tap, tapreduksjon, leveringssikkerhet
+- **S6-09** Store-integrasjon (`src/store/useNetworkStore.ts`):
+  - State: `showFlowDirections`, `ringNetworkResults`
+  - Actions: `toggleFlowDirections`, `setRingNetworkResults`, `runRingNetwork`
+  - `runRingNetwork(busAId, busBId, busCId)` finner linjer, beregner analytisk
+- **S6-10** Vitest: 137/137 grønne (16 nye ringnett-tester)
+- **S6-11** CHANGELOG + DEVLOG oppdatert
+- **S6-12** `npx tsc -b` ren → merget til main → pushet
+
+### Fasitsvar bekreftet
+- I_last = 166.0 A (P=6MW, Q=2MVAr, 22kV)
+- I_A = I_B = 83.0 A (symmetrisk ringnett)
+- Total tap = 20.6 kW, Radial tap = 82.7 kW
+- Tapreduksjon = 75.1%
+
+---
+
 ## v5.0.0 — 2026-05-12 — Sprint 5: Kortslutningsberegninger (IEC 60909)
 
 ### Lagt til

@@ -9,12 +9,13 @@ interface ToolbarProps {
   onToggleProduction?: () => void;
   onToggleVoltageDrop?: () => void;
   onToggleShortCircuit?: () => void;
+  onToggleRingNetwork?: () => void;
 }
 
 type CloudSaveState = 'idle' | 'input' | 'saving' | 'done' | 'error';
 type CloudLoadState = 'idle' | 'loading' | 'list' | 'error';
 
-export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVoltageDrop, onToggleShortCircuit }: ToolbarProps) {
+export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVoltageDrop, onToggleShortCircuit, onToggleRingNetwork }: ToolbarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const legacyInputRef = useRef<HTMLInputElement>(null);
 
@@ -310,6 +311,21 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
           }}
         >
           ⚡ Kortslutning
+        </button>
+
+        {/* Ringnett */}
+        <button
+          onClick={onToggleRingNetwork}
+          disabled={project.buses.length < 3}
+          style={{
+            ...btnStyle,
+            background: '#001A00',
+            border: '1px solid #1B5E20',
+            color: '#A5D6A7',
+            opacity: project.buses.length < 3 ? 0.5 : 1,
+          }}
+        >
+          ⭕ Ringnett
         </button>
 
         {/* Import legacy (Gemini scenario) */}

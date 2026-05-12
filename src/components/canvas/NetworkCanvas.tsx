@@ -29,13 +29,20 @@ function busToNode(bus: Bus, selectedNodeId: string | null): Node {
   };
 }
 
-function lineToEdge(line: Line, selectedEdgeId: string | null, voltageDropPct?: number): Edge {
+function lineToEdge(
+  line: Line,
+  selectedEdgeId: string | null,
+  voltageDropPct?: number,
+  flowCurrentA?: number,
+  loadingPercent?: number,
+  showFlow?: boolean,
+): Edge {
   return {
     id: line.id,
     source: line.fromBusId,
     target: line.toBusId,
     type: 'lineEdge',
-    data: { ...line, label: line.name, voltageDropPct },
+    data: { ...line, label: line.name, voltageDropPct, flowCurrentA, loadingPercent, showFlow },
     selected: line.id === selectedEdgeId,
   };
 }
@@ -78,6 +85,8 @@ export function NetworkCanvas() {
   const transformers = useNetworkStore((s) => s.project.transformers);
   const compensators = useNetworkStore((s) => s.project.compensators);
   const voltageDropResults = useNetworkStore((s) => s.project.results.voltageDrop);
+  const powerFlowResult = useNetworkStore((s) => s.project.results.powerFlow);
+  const showFlowDirections = useNetworkStore((s) => s.showFlowDirections);
   const selectedNodeId = useNetworkStore((s) => s.selectedNodeId);
   const selectedEdgeId = useNetworkStore((s) => s.selectedEdgeId);
   const lineDrawingMode = useNetworkStore((s) => s.lineDrawingMode);
@@ -120,7 +129,10 @@ export function NetworkCanvas() {
     () => [
       ...lines.map((l) => {
         const vdr = voltageDropResults?.find((r) => r.lineId === l.id);
-        return lineToEdge(l, selectedEdgeId, vdr?.deltaUPercent);
+        const flr = powerFlowResult?.lines.find((r) => r.lineId === l.id);
+        // Convert kA → A for display (currentKA * 1000)
+        const flowA = flr ? flr.currentKA * 1000 : undefined;
+        return lineToEdge(l, selectedEdgeId, vdr?.deltaUPercent, flowA, flr?.loadingPercent, showFlowDirections && powerFlowResult?.converged);
       }),
       ...transformers.map((t) => trafoToEdge(t, selectedEdgeId)),
       ...compensators.map((c) => ({
@@ -133,7 +145,7 @@ export function NetworkCanvas() {
         data: {},
       })),
     ],
-    [lines, transformers, compensators, selectedEdgeId, voltageDropResults],
+    [lines, transformers, compensators, selectedEdgeId, voltageDropResults, powerFlowResult, showFlowDirections],
   );
 
   // Handle keyboard: Delete key, Escape

@@ -4,6 +4,28 @@ Tekniske beslutninger og begrunnelser. Oppdateres ved hvert viktig valg.
 
 ---
 
+## Sprint 6 — 2026-05-12
+
+### BESLUTNING 24: Analytisk ringnett-løsning ved siden av NR
+
+**Problem:** Newton-Raphson løser automatisk maskede nett, men gir ingen pedagogisk forklaring på strømdeling.
+
+**Løsning:** Implementerer analytisk 3-buss-løsning i `ring-network.ts` basert på KVL rundt sløyfen:
+- Symmetrisk: I_A = I_last · Z_CB / Z_total (ren impedansfordeling)
+- Asymmetrisk: I_A = (I_last · Z_CB + ΔV) / Z_total (KVL med spenningsdifferanse)
+
+**Valg:** Analytisk løsning brukes for det pedagogiske panelet (RingNetworkPanel/ResultPanel). NR-lastflyt kjøres separat for full nettanalyse. Begge beregninger er tilgjengelige for studenten.
+
+### BESLUTNING 25: CSS stroke-dashoffset for strømpiler
+
+**Problem:** React Flow har ingen innebygd mekanisme for animerte strømpiler med retning og hastighet.
+
+**Løsning:** Overlay en sekundær `<path>` på LineEdge med `stroke-dasharray="12 12"` og `@keyframes` som animerer `stroke-dashoffset` fra 24→0 (normal) eller 0→24 (reverse). Varighet beregnet som 300/I_A sekunder (kappes til 0.5–3 s).
+
+**Valg:** Ren CSS — ingen ekstra bibliotek. Farger (grønn/oransje/rød) følger belastningsprosent fra NR-resultat. Pilene slås på/av via `showFlowDirections`-flag i store.
+
+---
+
 ## Sprint 5 — 2026-05-12
 
 ### BESLUTNING 22: Z-buss inversjon som Thevenin-ekvivalent
