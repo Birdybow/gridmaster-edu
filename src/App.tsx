@@ -29,6 +29,11 @@ import { EarthFaultPanel } from './components/earthfault/EarthFaultPanel.js';
 import { NeutralTreatmentPanel } from './components/earthfault/NeutralTreatmentPanel.js';
 import { ProductionDashboard } from './components/production/ProductionDashboard.js';
 import { TimeSeriesPanel } from './components/timeseries/TimeSeriesPanel.js';
+import { LearningObjectivesPanel } from './components/pedagogy/LearningObjectivesPanel.js';
+import { FormulaSheet } from './components/pedagogy/FormulaSheet.js';
+import { HintSystem } from './components/pedagogy/HintSystem.js';
+import { ScenarioLibraryPanel } from './components/pedagogy/ScenarioLibraryPanel.js';
+import { GlossaryPanel } from './components/pedagogy/GlossaryPanel.js';
 import { useNetworkStore } from './store/useNetworkStore.js';
 
 function EditorPanel() {
@@ -133,6 +138,10 @@ export default function App() {
   const [showNeutralTreatment, setShowNeutralTreatment] = useState(false);
   const [showProductionDashboard, setShowProductionDashboard] = useState(false);
   const [showTimeSeries, setShowTimeSeries] = useState(false);
+  const [showFormulaSheet, setShowFormulaSheet] = useState(false);
+  const [showScenarioLibrary, setShowScenarioLibrary] = useState(false);
+  const [showGlossary, setShowGlossary] = useState(false);
+  const [showLearningObjectives, setShowLearningObjectives] = useState(false);
   const [protectionHint, setProtectionHint] = useState(false);
   const [activeTab, setActiveTab] = useState<'powerflow' | 'compensation' | 'production' | 'voltagedrop' | 'shortcircuit' | 'ringnetwork' | 'protection'>('powerflow');
 
@@ -206,6 +215,10 @@ export default function App() {
         onToggleNeutralTreatment={() => setShowNeutralTreatment((v) => !v)}
         onToggleProductionDashboard={() => setShowProductionDashboard((v) => !v)}
         onToggleTimeSeries={() => setShowTimeSeries((v) => !v)}
+        onToggleFormulaSheet={() => setShowFormulaSheet((v) => !v)}
+        onToggleScenarioLibrary={() => setShowScenarioLibrary((v) => !v)}
+        onToggleGlossary={() => setShowGlossary((v) => !v)}
+        onToggleLearningObjectives={() => setShowLearningObjectives((v) => !v)}
       />
 
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', position: 'relative' }}>
@@ -296,6 +309,34 @@ export default function App() {
               }}
             >
               <TimeSeriesPanel onClose={() => setShowTimeSeries(false)} />
+            </div>
+          )}
+
+          {/* Formula sheet */}
+          {showFormulaSheet && (
+            <div style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 50 }}>
+              <FormulaSheet onClose={() => setShowFormulaSheet(false)} />
+            </div>
+          )}
+
+          {/* Scenario library */}
+          {showScenarioLibrary && (
+            <div style={{ position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)', zIndex: 50 }}>
+              <ScenarioLibraryPanel onClose={() => setShowScenarioLibrary(false)} />
+            </div>
+          )}
+
+          {/* Glossary */}
+          {showGlossary && (
+            <div style={{ position: 'absolute', top: 12, right: 12, zIndex: 50 }}>
+              <GlossaryPanel onClose={() => setShowGlossary(false)} />
+            </div>
+          )}
+
+          {/* Learning objectives */}
+          {showLearningObjectives && (
+            <div style={{ position: 'absolute', top: 12, left: 350, zIndex: 50 }}>
+              <LearningObjectivesPanel onClose={() => setShowLearningObjectives(false)} />
             </div>
           )}
 
@@ -564,6 +605,9 @@ export default function App() {
           )}
         </div>
       )}
+
+      {/* Contextual hint system */}
+      <HintSystem />
 
       {/* Copyright + version badge */}
       <div className="fixed bottom-2 left-2 z-50 text-xs text-gray-500 opacity-40 select-none pointer-events-none leading-relaxed">

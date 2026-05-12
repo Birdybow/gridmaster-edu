@@ -4,6 +4,36 @@ Tekniske beslutninger og begrunnelser. Oppdateres ved hvert viktig valg.
 
 ---
 
+## Sprint 11 — 2026-05-12
+
+### BESLUTNING 38: To-rads toolbar fremfor horisontal scrolling i én rad
+
+**Problem:** 15+ knapper på én linje går ut over skjermen på standard 1280px-skjerm.
+
+**Løsning:** Rad 1 (fil/prosjekt, h=46px) er alltid synlig og inneholder kritiske handlinger. Rad 2 (analyse, h=38px) har `overflow-x: auto` og `minWidth: max-content` på inner-div — scroller horisontalt på smale skjermer uten å klippe knapper.
+
+**Alternativ vurdert:** Dropdown-meny for analyseverktøy. Avvist fordi det gjemmer funksjonene for studenter som ikke vet hva de leter etter.
+
+### BESLUTNING 39: Pedagogiske paneler som egne flytende komponenter
+
+**Problem:** Læringsmål, formelark og ordliste kan enten integreres i sidebar eller være egne paneler.
+
+**Løsning:** Egne flytende paneler trigget fra toolbar-knapper. Lar studenter ha formelarket åpent ved siden av beregningsverktøyet (side-by-side læring).
+
+### BESLUTNING 40: HintSystem som passiv observatør (ikke modal)
+
+**Problem:** Kontekstsensitive hints kan vises som popup-modal (blokkerende) eller passivt overlay.
+
+**Løsning:** HintSystem rendres som `position: fixed` nedre høyre hjørne, `pointerEvents: none`. Forstyrrer ikke arbeidsflyten. Forsvinner automatisk når feiltilstanden er ryddet opp.
+
+### BESLUTNING 41: Vitest Windows Temp EPERM — cross-env i npm test
+
+**Problem:** Vitest forsøker å opprette SSR-temp-kataloger under `C:\Windows\Temp` som krever admin-tilgang. Resulterer i `EPERM: operation not permitted` og 0 kjørte tester.
+
+**Løsning:** `npm test` bruker `cross-env` til å sette `TEMP` og `TMP` til `%USERPROFILE%\AppData\Local\Temp` før Vitest starter. `vitest.config.ts` berøres ikke. Løser problemet uten å endre systemkonfigurasjon.
+
+---
+
 ## Sprint 10 — 2026-05-12
 
 ### BESLUTNING 36: Typisk norsk lastprofil som konstant array
