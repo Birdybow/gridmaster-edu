@@ -237,6 +237,7 @@ interface NetworkState {
   runProduction: () => void;
 
   // Project-level actions
+  clearAllResults: () => void;
   loadProject: (p: GmxProject) => void;
   clearProject: () => void;
 }
@@ -1041,7 +1042,27 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
     }));
   },
 
-  loadProject: (p) => set({ project: p, validationResult: null }),
+  clearAllResults: () => set({
+    showResults: false,
+    showCompensationResults: false,
+    showVoltageDropResults: false,
+    showShortCircuitResults: false,
+    selectedFaultBusId: null,
+    ringNetworkResults: null,
+    showProtectionResults: false,
+    selectivityResults: [],
+    selectedEarthFaultBusId: null,
+    powerFlowStatus: 'idle',
+    compensationStatus: 'idle',
+  }),
 
-  clearProject: () => set({ project: emptyProject(), validationResult: null, selectedNodeId: null, selectedEdgeId: null }),
+  loadProject: (p) => {
+    get().clearAllResults();
+    set({ project: p, validationResult: null });
+  },
+
+  clearProject: () => {
+    get().clearAllResults();
+    set({ project: emptyProject(), validationResult: null, selectedNodeId: null, selectedEdgeId: null });
+  },
 }));
