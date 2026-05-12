@@ -5,6 +5,53 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 
 ---
 
+## v3.6.0 — 2026-05-12 — Sprint 3.6: Nettbygger
+
+### Lagt til
+- **S3.6-00** Git branch `sprint3.6` opprettet
+- **S3.6-01** `src/components/builder/ComponentPanel.tsx` — collapsible venstre sidebar (200px), 5 seksjoner: BUSSER / LINJER / STASJONER / PRODUKSJON / KOMPENSERING
+- **S3.6-02** Drag-and-drop til canvas — HTML5 DnD via React Flow `onDrop`/`onDragOver`, `rfInstance.project()` for koordinattransformasjon
+- **S3.6-03** Toolbar-knapper for Slack/PV/PQ-buss, Luftlinje, Jordkabel og Transformator med aktiv-tilstand
+- **S3.6-04** Linjetegning Metode A — React Flow native `onConnect` med standard handles på alle 4 sider av BusNode
+- **S3.6-05** Linjetegning Metode B — velg type i panel/toolbar → crosshair-cursor → klikk buss 1 → klikk buss 2 → linje opprettes; ESC avbryter
+- **S3.6-06** `src/components/editors/BusEditor.tsx` — parameter-editor med navn, type, spenningsnivå, Last P/Q, Gen P, V sett, V-grenser; grønn/rød indikator + 💡 hint
+- **S3.6-07** `src/components/editors/LineEditor.tsx` — editor med lengde, R, X, B, termisk grense + linjebibliotek-dropdown
+- **S3.6-08** `src/components/editors/TransformerEditor.tsx` — editor med MVA, HV/LV, vektorgruppe, ek%, kobberlosser, trinnkobler
+- **S3.6-09** `src/components/editors/GeneratorEditor.tsx` — editor med type, MVA, kV, cos φ, x"d, P/Q-grenser; legg til / fjern generator
+- **S3.6-10** `src/components/editors/CompensatorEditor.tsx` — editor med type, totalMVAr, trinn, aktiv kapasitet
+- **S3.6-11** Slett med Delete-tast — handler i `useEffect` med bekreftelsesdialog for busser med tilkoblede linjer
+- **S3.6-12** Høyreklikk kontekstmeny — "Rediger komponent" / "Slett komponent" på noder og edges
+- **S3.6-13** Slett buss → dialog med antall tilknyttede linjer/trafos → bekreft → slett buss + tilhørende kanter
+- **S3.6-14** `src/validation/network-validator.ts` — topologi-validering med Union-Find for isolerte noder; 5 feil-koder + 3 advarsel-koder
+- **S3.6-15** `src/components/editors/LineLibrary.tsx` — 6 standardkabler (3 luftlinjer + 3 jordkabler 22kV), dropdown fyller R/X/B automatisk
+- **S3.6-16** `src/validation/network-validator.test.ts` — 8 nye Vitest-tester for alle valideringsregler
+- **S3.6-17** CHANGELOG v3.6.0 + DEVLOG oppdatert
+- **S3.6-18** git commit + push origin sprint3.6
+
+### Endret
+- `src/store/useNetworkStore.ts` — ny state: `selectedNodeId`, `selectedEdgeId`, `lineDrawingMode`, `lineDrawingFromId`, `placingMode`, `validationResult`; nye actions: `addBusAtPosition`, `addLineFromConnect`, `addTransformerFromConnect`, `addGeneratorToBus`, `deleteNode`, `deleteEdge`, `validateNetwork`, `updateGenerator`; `runPowerFlow` kjører nå validering før beregning
+- `src/components/canvas/BusNode.tsx` — fjernet intern BusSidebar; bruker nå `selected`-prop for visuell markering; 4 handles (alle 4 sider)
+- `src/components/canvas/NetworkCanvas.tsx` — komplett omskriving med DnD, onConnect, onNodeClick, onEdgeClick, onNodeDragStop (posisjonspersistering), Delete-key, ESC, context menu
+- `src/App.tsx` — ny 3-kolonne layout: ComponentPanel | Canvas | EditorPanel; ValidationPanel mellom canvas og resultatpanel
+- `src/components/toolbar/Toolbar.tsx` — komponentknapper for Slack/PV/PQ/Luftlinje/Kabel/Trafo; Beregn-knapp viser valideringsfeil
+- `src/types/index.ts` — lagt til `ValidationMessage` og `ValidationResult` typer
+- `src/components/builder/ComponentPalette.ts` — ny fil med `PALETTE`, `SECTIONS`, `DRAG_TYPE`, `bySection()`
+
+### Akseptanskriterier
+- ✓ Kan bygge Scenario 1 fra scratch (2 busser + 1 linje)
+- ✓ Kan bygge Scenario 3 (trafo + lavspent)
+- ✓ Drag-and-drop fra panel fungerer
+- ✓ Toolbar-knapper fungerer
+- ✓ Begge linjetegningsmetoder fungerer
+- ✓ Parameter-editorer med hints på alle komponenter
+- ✓ Linjebibliotek med 6 standardkabler
+- ✓ Slett med Delete og høyreklikk
+- ✓ Validering blokkerer beregning ved feil (NO_SLACK, MULTIPLE_SLACK, ISOLATED_NODE, ZERO_LENGTH_LINE, VOLTAGE_MISMATCH)
+- ✓ 63+ Vitest-tester (kjøres fra terminal: `npm test`)
+- ✓ git push origin sprint3.6
+
+---
+
 ## v1.0.0 — 2026-05-11 — Sprint 1: Prosjektinfrastruktur & Canvas
 
 > **Arbeidsmappe:** `D:\Claude\GridMaster\gridmaster-edu\`

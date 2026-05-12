@@ -4,6 +4,39 @@ Tekniske beslutninger og begrunnelser. Oppdateres ved hvert viktig valg.
 
 ---
 
+## Sprint 3.6 — 2026-05-12
+
+### Nettbygger: arkitektur og designvalg
+
+**DnD-koordinattransformasjon:**
+React Flow bruker `rfInstance.project({ x, y })` (v11) for å konvertere fra screen-koordinater til flow-koordinater. Vi bruker `onInit={setRfInstance}` på `<ReactFlow>` og lagrer instansen i lokal state. `onDrop` bruker `wrapperRef.current.getBoundingClientRect()` for offset.
+
+**Linjetegning Metode B (velg type → klikk):**
+State `lineDrawingMode: 'overhead' | 'cable' | null` og `lineDrawingFromId: string | null` i Zustand-storen. `onNodeClick` i NetworkCanvas sjekker mode-state og oppretter linje ved andre klikk. ESC-handler i global `useEffect` nullstiller mode.
+
+**Plassering av busser via panel/toolbar:**
+`placingMode: PlacingMode` i storen. `onPaneClick` (klikk på tom canvas) plasserer bussen. Transformer-plassering bruker samme `lineDrawingFromId` som Metode B for å velge to busser.
+
+**Valideringsintegrasjon:**
+`runPowerFlow()` kaller `_validateNetwork(project)` først og setter `validationResult` i store. Hvis `!result.valid` returneres tidlig uten å starte lastflyt-beregning. `ValidationPanel` vises mellom canvas og resultatpanel.
+
+**Union-Find for isolert-node-sjekk:**
+Enkel Union-Find implementert inline i `network-validator.ts`. Unngår external dependencies. Tid: O(n α(n)) ≈ O(n) for praktiske nett-størrelser.
+
+**GeneratorEditor — "legg til / fjern" mønster:**
+Generator er en separat entitet koblet til en buss via `busId`. Editoren vises under BusEditor for PV/Slack-busser. Hvis ingen generator finnes, vises "Legg til generator"-knapp. Bruker `updateGenerator` for patch (ren, ingen remove+add).
+
+**Posisjonspersistering:**
+`onNodeDragStop` kaller `updateBus(node.id, { position: node.position })` for å lagre posisjonen permanent i Zustand-storen (og dermed i .gmx-filen). Kompensatornoder ekskluderes (de er avledet fra busposisjoner).
+
+**Slett-bekreftelse:**
+Slett buss med tilkoblede linjer krever `confirm()`-dialog med antall tilkoblede kanter. Enkel UX, ingen modal-komponent nødvendig.
+
+**BusNode forenkling:**
+Fjernet intern `BusSidebar` og `showPanel`-state fra BusNode. All redigering skjer nå i høyre EditorPanel. BusNode er ren display-komponent med `selected`-prop for visuell markering (glow-effekt).
+
+---
+
 ## ⚠ ARKITEKTURREGLER
 
 > Disse reglene er permanente og gjelder alle sprints.

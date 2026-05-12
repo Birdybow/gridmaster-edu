@@ -288,6 +288,23 @@ export interface VoltageDropResult {
 }
 
 // ---------------------------------------------------------------------------
+// Builder / Validation
+// ---------------------------------------------------------------------------
+
+export interface ValidationMessage {
+  code: string;
+  message: string;
+  type: 'error' | 'warning';
+  componentId?: string;
+}
+
+export interface ValidationResult {
+  valid: boolean;
+  errors: ValidationMessage[];
+  warnings: ValidationMessage[];
+}
+
+// ---------------------------------------------------------------------------
 // Cloud storage
 // ---------------------------------------------------------------------------
 

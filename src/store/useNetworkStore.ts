@@ -2,18 +2,30 @@ import { create } from 'zustand';
 import type {
   GmxProject,
   Bus,
+  BusType,
   Line,
+  LineType,
   Transformer,
   Generator,
   Compensator,
   Protection,
   CompensationResult,
+  ValidationResult,
 } from '../types/index.js';
 import { runNewtonRaphson } from '../core/newton-raphson.js';
 import { calcCompensation } from '../core/compensation.js';
+import { validateNetwork as _validateNetwork } from '../validation/network-validator.js';
 
 export type PowerFlowStatus = 'idle' | 'running' | 'converged' | 'failed';
 export type CompensationStatus = 'idle' | 'computing' | 'done' | 'failed';
+
+export type PlacingMode =
+  | { kind: 'bus'; busType: BusType }
+  | { kind: 'line'; lineType: LineType }
+  | { kind: 'transformer' }
+  | { kind: 'generator' }
+  | { kind: 'compensator' }
+  | null;
 
 function now(): string {
   return new Date().toISOString();
@@ -46,14 +58,118 @@ function emptyProject(): GmxProject {
   };
 }
 
+function defaultBus(type: BusType, x: number, y: number): Bus {
+  const id = crypto.randomUUID();
+  const base: Bus = {
+    id,
+    name: type === 'slack' ? 'Slack' : type === 'PV' ? 'Gen' : 'Last',
+    type,
+    voltageKV: 22,
+    loadMW: type === 'PQ' ? 1.0 : 0,
+    loadMVAr: type === 'PQ' ? 0.5 : 0,
+    genMW: type !== 'PQ' ? 5.0 : undefined,
+    vSetPU: 1.0,
+    vMaxPU: 1.05,
+    vMinPU: 0.95,
+    position: { x, y },
+  };
+  return base;
+}
+
+function defaultLine(fromId: string, toId: string, lineType: LineType, idx: number): Line {
+  const isOverhead = lineType === 'overhead';
+  return {
+    id: crypto.randomUUID(),
+    name: `Linje ${idx}`,
+    fromBusId: fromId,
+    toBusId: toId,
+    lineType,
+    lengthKm: 1.0,
+    rOhmPerKm: isOverhead ? 0.30 : 0.206,
+    xOhmPerKm: isOverhead ? 0.35 : 0.106,
+    bMuSPerKm: isOverhead ? 2.8 : 160,
+    ratingMVA: 10,
+  };
+}
+
+function defaultTransformer(fromId: string, toId: string, idx: number): Transformer {
+  return {
+    id: crypto.randomUUID(),
+    name: `Trafo ${idx}`,
+    fromBusId: fromId,
+    toBusId: toId,
+    ratedMVA: 0.315,
+    voltageHV_kV: 22,
+    voltageLV_kV: 0.4,
+    vectorGroup: 'Dyn11',
+    ekPercent: 4.0,
+    rrPercent: 1.0,
+    noLoadLossKW: 0.5,
+    loadLossKW: 3.5,
+    noLoadCurrentPercent: 1.5,
+    tapMin: -5,
+    tapMax: 5,
+    tapStep: 1,
+    tapCurrent: 0,
+  };
+}
+
+function defaultGenerator(busId: string, idx: number): Generator {
+  return {
+    id: crypto.randomUUID(),
+    name: `Generator ${idx}`,
+    busId,
+    generatorType: 'hydro_francis',
+    ratedMVA: 10,
+    ratedKV: 6.6,
+    powerFactor: 0.90,
+    xdSubtransientPU: 0.15,
+    xdTransientPU: 0.20,
+    xdSteadyStatePU: 1.0,
+    pSetMW: 5.0,
+    qMaxMVAr: 5.0,
+    qMinMVAr: -2.0,
+  };
+}
+
+function defaultCompensator(busId: string, idx: number): Compensator {
+  return {
+    id: crypto.randomUUID(),
+    name: `Kondensator ${idx}`,
+    busId,
+    type: 'capacitor',
+    totalMVAr: 1.0,
+    steps: 3,
+    stepSizeMVAr: 1.0 / 3,
+    stepsEnabled: 3,
+  };
+}
+
 interface NetworkState {
   project: GmxProject;
   powerFlowStatus: PowerFlowStatus;
   compensationStatus: CompensationStatus;
   showResults: boolean;
   showCompensationResults: boolean;
+
+  // Builder state
+  selectedNodeId: string | null;
+  selectedEdgeId: string | null;
+  lineDrawingMode: LineType | null;
+  lineDrawingFromId: string | null;
+  placingMode: PlacingMode;
+  validationResult: ValidationResult | null;
+
   setShowResults: (v: boolean) => void;
   setShowCompensationResults: (v: boolean) => void;
+
+  // Selection
+  setSelectedNodeId: (id: string | null) => void;
+  setSelectedEdgeId: (id: string | null) => void;
+  setLineDrawingMode: (mode: LineType | null) => void;
+  setLineDrawingFromId: (id: string | null) => void;
+  setPlacingMode: (mode: PlacingMode) => void;
+
   runPowerFlow: () => void;
   runCompensation: (busId: string, cosPhi2: number, steps: number) => void;
 
@@ -74,6 +190,7 @@ interface NetworkState {
 
   // Generator actions
   addGenerator: (g: Generator) => void;
+  updateGenerator: (id: string, patch: Partial<Generator>) => void;
   removeGenerator: (id: string) => void;
 
   // Compensator actions
@@ -83,6 +200,15 @@ interface NetworkState {
   // Protection actions
   addProtection: (p: Protection) => void;
   removeProtection: (id: string) => void;
+
+  // Builder actions
+  addBusAtPosition: (type: BusType, x: number, y: number) => string;
+  addLineFromConnect: (fromId: string, toId: string, lineType: LineType) => string;
+  addTransformerFromConnect: (fromId: string, toId: string) => string;
+  addGeneratorToBus: (busId: string) => string;
+  deleteNode: (id: string) => void;
+  deleteEdge: (id: string) => void;
+  validateNetwork: () => ValidationResult;
 
   // Project-level actions
   loadProject: (p: GmxProject) => void;
@@ -96,19 +222,36 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
   showResults: false,
   showCompensationResults: false,
 
+  selectedNodeId: null,
+  selectedEdgeId: null,
+  lineDrawingMode: null,
+  lineDrawingFromId: null,
+  placingMode: null,
+  validationResult: null,
+
   setShowResults: (v) => set({ showResults: v }),
   setShowCompensationResults: (v) => set({ showCompensationResults: v }),
 
+  setSelectedNodeId: (id) => set({ selectedNodeId: id, selectedEdgeId: null }),
+  setSelectedEdgeId: (id) => set({ selectedEdgeId: id, selectedNodeId: null }),
+  setLineDrawingMode: (mode) => set({ lineDrawingMode: mode, lineDrawingFromId: null }),
+  setLineDrawingFromId: (id) => set({ lineDrawingFromId: id }),
+  setPlacingMode: (mode) => set({ placingMode: mode }),
+
   runPowerFlow: () => {
+    const result = _validateNetwork(get().project);
+    set({ validationResult: result });
+    if (!result.valid) return;
+
     set({ powerFlowStatus: 'running' });
     try {
-      const result = runNewtonRaphson(get().project);
+      const pfResult = runNewtonRaphson(get().project);
       set((s) => ({
-        powerFlowStatus: result.converged ? 'converged' : 'failed',
+        powerFlowStatus: pfResult.converged ? 'converged' : 'failed',
         showResults: true,
         project: {
           ...s.project,
-          results: { ...s.project.results, powerFlow: result },
+          results: { ...s.project.results, powerFlow: pfResult },
           metadata: { ...s.project.metadata, modified: now() },
         },
       }));
@@ -239,6 +382,9 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
         lines: s.project.lines.filter(
           (l) => l.fromBusId !== id && l.toBusId !== id
         ),
+        transformers: s.project.transformers.filter(
+          (t) => t.fromBusId !== id && t.toBusId !== id
+        ),
         metadata: { ...s.project.metadata, modified: now() },
       },
     })),
@@ -321,6 +467,15 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
       },
     })),
 
+  updateGenerator: (id, patch) =>
+    set((s) => ({
+      project: {
+        ...s.project,
+        generators: s.project.generators.map((g) => g.id === id ? { ...g, ...patch } : g),
+        metadata: { ...s.project.metadata, modified: now() },
+      },
+    })),
+
   removeGenerator: (id) =>
     set((s) => ({
       project: {
@@ -366,7 +521,125 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
       },
     })),
 
-  loadProject: (p) => set({ project: p }),
+  // --- Builder actions ---
 
-  clearProject: () => set({ project: emptyProject() }),
+  addBusAtPosition: (type, x, y) => {
+    const bus = defaultBus(type, x, y);
+    set((s) => ({
+      project: {
+        ...s.project,
+        buses: [...s.project.buses, bus],
+        metadata: { ...s.project.metadata, modified: now() },
+      },
+      selectedNodeId: bus.id,
+      selectedEdgeId: null,
+      placingMode: null,
+    }));
+    return bus.id;
+  },
+
+  addLineFromConnect: (fromId, toId, lineType) => {
+    const { project } = get();
+    const line = defaultLine(fromId, toId, lineType, project.lines.length + 1);
+    set((s) => ({
+      project: {
+        ...s.project,
+        lines: [...s.project.lines, line],
+        metadata: { ...s.project.metadata, modified: now() },
+      },
+      selectedEdgeId: line.id,
+      selectedNodeId: null,
+      lineDrawingMode: null,
+      lineDrawingFromId: null,
+    }));
+    return line.id;
+  },
+
+  addTransformerFromConnect: (fromId, toId) => {
+    const { project } = get();
+    const t = defaultTransformer(fromId, toId, project.transformers.length + 1);
+    set((s) => ({
+      project: {
+        ...s.project,
+        transformers: [...s.project.transformers, t],
+        metadata: { ...s.project.metadata, modified: now() },
+      },
+      selectedEdgeId: t.id,
+      selectedNodeId: null,
+    }));
+    return t.id;
+  },
+
+  addGeneratorToBus: (busId) => {
+    const { project } = get();
+    const g = defaultGenerator(busId, project.generators.length + 1);
+    set((s) => ({
+      project: {
+        ...s.project,
+        generators: [...s.project.generators, g],
+        metadata: { ...s.project.metadata, modified: now() },
+      },
+    }));
+    return g.id;
+  },
+
+  deleteNode: (id) => {
+    if (id.startsWith('comp_')) {
+      const compId = id.slice(5);
+      set((s) => ({
+        project: {
+          ...s.project,
+          compensators: s.project.compensators.filter((c) => c.id !== compId),
+          metadata: { ...s.project.metadata, modified: now() },
+        },
+        selectedNodeId: null,
+      }));
+    } else {
+      // Bus node
+      set((s) => ({
+        project: {
+          ...s.project,
+          buses: s.project.buses.filter((b) => b.id !== id),
+          lines: s.project.lines.filter((l) => l.fromBusId !== id && l.toBusId !== id),
+          transformers: s.project.transformers.filter((t) => t.fromBusId !== id && t.toBusId !== id),
+          metadata: { ...s.project.metadata, modified: now() },
+        },
+        selectedNodeId: null,
+      }));
+    }
+  },
+
+  deleteEdge: (id) => {
+    const { project } = get();
+    const isLine = project.lines.some((l) => l.id === id);
+    if (isLine) {
+      set((s) => ({
+        project: {
+          ...s.project,
+          lines: s.project.lines.filter((l) => l.id !== id),
+          metadata: { ...s.project.metadata, modified: now() },
+        },
+        selectedEdgeId: null,
+      }));
+    } else {
+      set((s) => ({
+        project: {
+          ...s.project,
+          transformers: s.project.transformers.filter((t) => t.id !== id),
+          metadata: { ...s.project.metadata, modified: now() },
+        },
+        selectedEdgeId: null,
+      }));
+    }
+  },
+
+  validateNetwork: () => {
+    const result = _validateNetwork(get().project);
+    set({ validationResult: result });
+    return result;
+  },
+
+  loadProject: (p) => set({ project: p, validationResult: null }),
+
+  clearProject: () => set({ project: emptyProject(), validationResult: null, selectedNodeId: null, selectedEdgeId: null }),
 }));

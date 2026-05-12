@@ -1,11 +1,11 @@
-import { useMemo } from 'react';
+import { useMemo, useCallback, useRef, useState, useEffect } from 'react';
 import ReactFlow, {
   Background,
   Controls,
   MiniMap,
   BackgroundVariant,
 } from 'reactflow';
-import type { Node, Edge } from 'reactflow';
+import type { Node, Edge, ReactFlowInstance, Connection, NodeMouseHandler } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { useNetworkStore } from '../../store/useNetworkStore.js';
 import { BusNode } from './BusNode.js';
@@ -13,33 +13,35 @@ import { LineEdge } from './LineEdge.js';
 import { CompensatorNode } from './CompensatorNode.js';
 import { CompensatorLinkEdge } from './CompensatorLinkEdge.js';
 import type { Bus, Line, Transformer, Compensator } from '../../types/index.js';
+import { PALETTE, DRAG_TYPE } from '../builder/ComponentPalette.js';
 
-// Defined at module level — never recreated, prevents React Flow nodeTypes warning
+// Module-level constants — never recreated
 const nodeTypes = { busNode: BusNode, compensatorNode: CompensatorNode };
 const edgeTypes = { lineEdge: LineEdge, compensatorLink: CompensatorLinkEdge };
 
-function busToNode(bus: Bus): Node {
+function busToNode(bus: Bus, selectedNodeId: string | null): Node {
   return {
     id: bus.id,
     type: 'busNode',
     position: bus.position,
     data: bus,
+    selected: bus.id === selectedNodeId,
   };
 }
 
-function lineToEdge(line: Line): Edge {
+function lineToEdge(line: Line, selectedEdgeId: string | null): Edge {
   return {
     id: line.id,
     source: line.fromBusId,
     target: line.toBusId,
     type: 'lineEdge',
     data: { ...line, label: line.name },
+    selected: line.id === selectedEdgeId,
   };
 }
 
-function compensatorToNode(c: Compensator, buses: Bus[]): Node {
+function compensatorToNode(c: Compensator, buses: Bus[], selectedNodeId: string | null): Node {
   const bus = buses.find((b) => b.id === c.busId);
-  // Position relative to connected bus so it's derived from stable store data
   const position = bus
     ? { x: bus.position.x + 140, y: bus.position.y - 20 }
     : { x: 200, y: 200 };
@@ -48,45 +50,67 @@ function compensatorToNode(c: Compensator, buses: Bus[]): Node {
     type: 'compensatorNode',
     position,
     data: c,
+    selected: `comp_${c.id}` === selectedNodeId,
   };
 }
 
-function trafoToEdge(t: Transformer): Edge {
+function trafoToEdge(t: Transformer, selectedEdgeId: string | null): Edge {
   return {
     id: t.id,
     source: t.fromBusId,
     target: t.toBusId,
     type: 'lineEdge',
-    data: {
-      name: t.name,
-      label: t.name,
-      lineType: 'cable',
-    },
+    data: { name: t.name, label: t.name, lineType: 'cable' },
+    selected: t.id === selectedEdgeId,
   };
 }
 
+interface ContextMenu {
+  x: number;
+  y: number;
+  nodeId?: string;
+  edgeId?: string;
+}
+
 export function NetworkCanvas() {
-  // Granular selectors — NetworkCanvas only re-renders when topology changes,
-  // not on every power-flow / compensation result update.
   const buses = useNetworkStore((s) => s.project.buses);
   const lines = useNetworkStore((s) => s.project.lines);
   const transformers = useNetworkStore((s) => s.project.transformers);
   const compensators = useNetworkStore((s) => s.project.compensators);
+  const selectedNodeId = useNetworkStore((s) => s.selectedNodeId);
+  const selectedEdgeId = useNetworkStore((s) => s.selectedEdgeId);
+  const lineDrawingMode = useNetworkStore((s) => s.lineDrawingMode);
+  const lineDrawingFromId = useNetworkStore((s) => s.lineDrawingFromId);
+  const placingMode = useNetworkStore((s) => s.placingMode);
 
-  // useMemo gives React Flow stable array references between store updates,
-  // preventing the setNodes → re-render → setNodes infinite loop.
+  const setSelectedNodeId = useNetworkStore((s) => s.setSelectedNodeId);
+  const setSelectedEdgeId = useNetworkStore((s) => s.setSelectedEdgeId);
+  const setLineDrawingMode = useNetworkStore((s) => s.setLineDrawingMode);
+  const setLineDrawingFromId = useNetworkStore((s) => s.setLineDrawingFromId);
+  const setPlacingMode = useNetworkStore((s) => s.setPlacingMode);
+  const addBusAtPosition = useNetworkStore((s) => s.addBusAtPosition);
+  const addLineFromConnect = useNetworkStore((s) => s.addLineFromConnect);
+  const addTransformerFromConnect = useNetworkStore((s) => s.addTransformerFromConnect);
+  const deleteNode = useNetworkStore((s) => s.deleteNode);
+  const deleteEdge = useNetworkStore((s) => s.deleteEdge);
+  const updateBus = useNetworkStore((s) => s.updateBus);
+
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [rfInstance, setRfInstance] = useState<ReactFlowInstance | null>(null);
+  const [contextMenu, setContextMenu] = useState<ContextMenu | null>(null);
+
   const nodes: Node[] = useMemo(
     () => [
-      ...buses.map(busToNode),
-      ...compensators.map((c) => compensatorToNode(c, buses)),
+      ...buses.map((b) => busToNode(b, selectedNodeId)),
+      ...compensators.map((c) => compensatorToNode(c, buses, selectedNodeId)),
     ],
-    [buses, compensators],
+    [buses, compensators, selectedNodeId],
   );
 
   const edges: Edge[] = useMemo(
     () => [
-      ...lines.map(lineToEdge),
-      ...transformers.map(trafoToEdge),
+      ...lines.map((l) => lineToEdge(l, selectedEdgeId)),
+      ...transformers.map((t) => trafoToEdge(t, selectedEdgeId)),
       ...compensators.map((c) => ({
         id: `comp-link-${c.id}`,
         source: `comp_${c.id}`,
@@ -97,32 +121,340 @@ export function NetworkCanvas() {
         data: {},
       })),
     ],
-    [lines, transformers, compensators],
+    [lines, transformers, compensators, selectedEdgeId],
   );
 
+  // Handle keyboard: Delete key, Escape
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        setLineDrawingMode(null);
+        setPlacingMode(null);
+        setContextMenu(null);
+        return;
+      }
+      if (e.key === 'Delete' || e.key === 'Backspace') {
+        // Don't delete when focused on an input
+        const tag = (e.target as HTMLElement).tagName;
+        if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+
+        if (selectedNodeId) {
+          const busId = selectedNodeId.startsWith('comp_') ? null : selectedNodeId;
+          if (busId) {
+            const connCount =
+              lines.filter((l) => l.fromBusId === busId || l.toBusId === busId).length +
+              transformers.filter((t) => t.fromBusId === busId || t.toBusId === busId).length;
+            if (connCount > 0) {
+              if (confirm(`Slette buss? Dette fjerner også ${connCount} tilkoblet(e) linje(r)/trafo(er).`)) {
+                deleteNode(selectedNodeId);
+              }
+            } else {
+              deleteNode(selectedNodeId);
+            }
+          } else {
+            deleteNode(selectedNodeId);
+          }
+        } else if (selectedEdgeId && !selectedEdgeId.startsWith('comp-link-')) {
+          deleteEdge(selectedEdgeId);
+        }
+      }
+    }
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [selectedNodeId, selectedEdgeId, lines, transformers, deleteNode, deleteEdge, setLineDrawingMode, setPlacingMode]);
+
+  // DnD handlers
+  const onDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'copy';
+  }, []);
+
+  const onDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      if (!rfInstance || !wrapperRef.current) return;
+
+      const defId = e.dataTransfer.getData(DRAG_TYPE);
+      if (!defId) return;
+
+      const def = PALETTE.find((d) => d.id === defId);
+      if (!def) return;
+
+      const bounds = wrapperRef.current.getBoundingClientRect();
+      const pos = rfInstance.project({ x: e.clientX - bounds.left, y: e.clientY - bounds.top });
+
+      if (def.kind === 'bus' && def.busType) {
+        addBusAtPosition(def.busType, pos.x, pos.y);
+      }
+      // Lines/transformers/generators/compensators via drag are not placed directly —
+      // they require connection. Show a hint instead.
+    },
+    [rfInstance, addBusAtPosition],
+  );
+
+  // Canvas click — handle placing mode
+  const onPaneClick = useCallback(
+    (e: React.MouseEvent) => {
+      setContextMenu(null);
+      if (!placingMode || !rfInstance || !wrapperRef.current) return;
+
+      const bounds = wrapperRef.current.getBoundingClientRect();
+      const pos = rfInstance.project({ x: e.clientX - bounds.left, y: e.clientY - bounds.top });
+
+      if (placingMode.kind === 'bus') {
+        addBusAtPosition(placingMode.busType, pos.x, pos.y);
+        // Keep placing mode active for rapid placement; user presses Escape to stop
+      }
+      // Transformer/generator/compensator placing requires node clicks, handled in onNodeClick
+    },
+    [placingMode, rfInstance, addBusAtPosition],
+  );
+
+  // Node click — selection + line drawing mode B
+  const onNodeClick: NodeMouseHandler = useCallback(
+    (_e, node) => {
+      setContextMenu(null);
+
+      if (lineDrawingMode) {
+        if (!lineDrawingFromId) {
+          setLineDrawingFromId(node.id);
+        } else if (lineDrawingFromId !== node.id) {
+          addLineFromConnect(lineDrawingFromId, node.id, lineDrawingMode);
+        }
+        return;
+      }
+
+      if (placingMode) {
+        // Transformer/generator/compensator attached to a node
+        if (placingMode.kind === 'transformer') {
+          // Need two clicks: store first node, then second
+          if (!lineDrawingFromId) {
+            setLineDrawingFromId(node.id);
+          } else if (lineDrawingFromId !== node.id) {
+            addTransformerFromConnect(lineDrawingFromId, node.id);
+            setLineDrawingFromId(null);
+            setPlacingMode(null);
+          }
+          return;
+        }
+        setPlacingMode(null);
+        setSelectedNodeId(node.id);
+        return;
+      }
+
+      setSelectedNodeId(node.id);
+    },
+    [lineDrawingMode, lineDrawingFromId, placingMode, addLineFromConnect, addTransformerFromConnect, setLineDrawingFromId, setPlacingMode, setSelectedNodeId],
+  );
+
+  // Edge click
+  const onEdgeClick = useCallback(
+    (_e: React.MouseEvent, edge: Edge) => {
+      setContextMenu(null);
+      if (!edge.id.startsWith('comp-link-')) {
+        setSelectedEdgeId(edge.id);
+      }
+    },
+    [setSelectedEdgeId],
+  );
+
+  // Node drag — update position in store
+  const onNodeDragStop = useCallback(
+    (_e: React.MouseEvent, node: Node) => {
+      if (!node.id.startsWith('comp_')) {
+        updateBus(node.id, { position: node.position });
+      }
+    },
+    [updateBus],
+  );
+
+  // React Flow onConnect — Metode A
+  const onConnect = useCallback(
+    (connection: Connection) => {
+      if (!connection.source || !connection.target) return;
+      const mode = lineDrawingMode ?? 'overhead';
+      addLineFromConnect(connection.source, connection.target, mode);
+    },
+    [lineDrawingMode, addLineFromConnect],
+  );
+
+  // Right-click on node
+  const onNodeContextMenu: NodeMouseHandler = useCallback(
+    (e, node) => {
+      e.preventDefault();
+      setContextMenu({ x: e.clientX, y: e.clientY, nodeId: node.id });
+    },
+    [],
+  );
+
+  // Right-click on edge
+  const onEdgeContextMenu = useCallback(
+    (e: React.MouseEvent, edge: Edge) => {
+      e.preventDefault();
+      if (!edge.id.startsWith('comp-link-')) {
+        setContextMenu({ x: e.clientX, y: e.clientY, edgeId: edge.id });
+      }
+    },
+    [],
+  );
+
+  function handleContextDelete() {
+    if (contextMenu?.nodeId) {
+      const id = contextMenu.nodeId;
+      const busId = id.startsWith('comp_') ? null : id;
+      if (busId) {
+        const connCount =
+          lines.filter((l) => l.fromBusId === busId || l.toBusId === busId).length +
+          transformers.filter((t) => t.fromBusId === busId || t.toBusId === busId).length;
+        if (connCount > 0) {
+          if (confirm(`Slette buss? Dette fjerner også ${connCount} tilkoblet(e) linje(r)/trafo(er).`)) {
+            deleteNode(id);
+          }
+        } else {
+          deleteNode(id);
+        }
+      } else {
+        deleteNode(id);
+      }
+    } else if (contextMenu?.edgeId) {
+      deleteEdge(contextMenu.edgeId);
+    }
+    setContextMenu(null);
+  }
+
+  const cursorStyle =
+    lineDrawingMode ? 'crosshair'
+    : placingMode ? 'cell'
+    : 'default';
+
   return (
-    <div style={{ width: '100%', height: '100%', background: '#0D1B2A' }}>
+    <div
+      ref={wrapperRef}
+      style={{ width: '100%', height: '100%', background: '#0D1B2A', cursor: cursorStyle }}
+      onClick={() => setContextMenu(null)}
+    >
       <ReactFlow
         nodes={nodes}
         edges={edges}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
+        onInit={setRfInstance}
+        onDrop={onDrop}
+        onDragOver={onDragOver}
+        onPaneClick={onPaneClick}
+        onNodeClick={onNodeClick}
+        onEdgeClick={onEdgeClick}
+        onNodeDragStop={onNodeDragStop}
+        onConnect={onConnect}
+        onNodeContextMenu={onNodeContextMenu}
+        onEdgeContextMenu={onEdgeContextMenu}
         fitView
         minZoom={0.2}
         maxZoom={3}
         proOptions={{ hideAttribution: true }}
+        deleteKeyCode={null}
+        selectionKeyCode={null}
+        multiSelectionKeyCode={null}
       >
-        <Background
-          variant={BackgroundVariant.Dots}
-          color="#1A2A3A"
-          gap={24}
-        />
+        <Background variant={BackgroundVariant.Dots} color="#1A2A3A" gap={24} />
         <Controls style={{ background: '#1A2A3A', border: '1px solid #0D3B66' }} />
         <MiniMap
           style={{ background: '#0D1B2A', border: '1px solid #0D3B66' }}
           nodeColor="#1565C0"
         />
       </ReactFlow>
+
+      {/* Line drawing mode indicator */}
+      {lineDrawingMode && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 12,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#0F3B55',
+            border: '1px solid #4FC3F7',
+            borderRadius: 6,
+            padding: '6px 16px',
+            fontSize: 12,
+            color: '#4FC3F7',
+            pointerEvents: 'none',
+            zIndex: 20,
+          }}
+        >
+          {lineDrawingFromId
+            ? `✓ Buss 1 valgt — klikk buss 2 for å tegne ${lineDrawingMode === 'overhead' ? 'luftlinje' : 'jordkabel'}`
+            : `Klikk buss 1 for ${lineDrawingMode === 'overhead' ? 'luftlinje' : 'jordkabel'} — ESC for å avbryte`}
+        </div>
+      )}
+
+      {/* Placing mode indicator */}
+      {placingMode && !lineDrawingMode && (
+        <div
+          style={{
+            position: 'absolute',
+            top: 12,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#1A3B1A',
+            border: '1px solid #4CAF50',
+            borderRadius: 6,
+            padding: '6px 16px',
+            fontSize: 12,
+            color: '#4CAF50',
+            pointerEvents: 'none',
+            zIndex: 20,
+          }}
+        >
+          {placingMode.kind === 'bus'
+            ? `Klikk på canvas for å plassere ${placingMode.busType}-buss — ESC for å avbryte`
+            : placingMode.kind === 'transformer' && !lineDrawingFromId
+            ? 'Klikk buss 1 (høyspent) for transformator'
+            : placingMode.kind === 'transformer' && lineDrawingFromId
+            ? 'Klikk buss 2 (lavspent) for transformator'
+            : `Klikk for å plassere — ESC for å avbryte`}
+        </div>
+      )}
+
+      {/* Context menu */}
+      {contextMenu && (
+        <div
+          style={{
+            position: 'fixed',
+            top: contextMenu.y,
+            left: contextMenu.x,
+            background: '#1A2A3A',
+            border: '1px solid #1E3A5F',
+            borderRadius: 6,
+            padding: '4px 0',
+            zIndex: 1000,
+            boxShadow: '0 4px 20px rgba(0,0,0,0.6)',
+            minWidth: 160,
+          }}
+        >
+          {contextMenu.nodeId && (
+            <div
+              style={{ padding: '7px 14px', fontSize: 12, color: '#E8F0FE', cursor: 'pointer' }}
+              onClick={() => {
+                setSelectedNodeId(contextMenu.nodeId!);
+                setContextMenu(null);
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = '#0F2A45')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+            >
+              Rediger komponent
+            </div>
+          )}
+          <div
+            style={{ padding: '7px 14px', fontSize: 12, color: '#EF4444', cursor: 'pointer' }}
+            onClick={handleContextDelete}
+            onMouseEnter={(e) => (e.currentTarget.style.background = '#3B1A1A')}
+            onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+          >
+            Slett komponent
+          </div>
+        </div>
+      )}
     </div>
   );
 }
