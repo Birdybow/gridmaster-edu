@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PALETTE, SECTIONS, bySection, DRAG_TYPE } from './ComponentPalette.js';
+import { SECTIONS, bySection, DRAG_TYPE } from './ComponentPalette.js';
 import type { ComponentDef } from './ComponentPalette.js';
 import { useNetworkStore } from '../../store/useNetworkStore.js';
 

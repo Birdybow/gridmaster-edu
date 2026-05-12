@@ -132,18 +132,6 @@ function defaultGenerator(busId: string, idx: number): Generator {
   };
 }
 
-function defaultCompensator(busId: string, idx: number): Compensator {
-  return {
-    id: crypto.randomUUID(),
-    name: `Kondensator ${idx}`,
-    busId,
-    type: 'capacitor',
-    totalMVAr: 1.0,
-    steps: 3,
-    stepSizeMVAr: 1.0 / 3,
-    stepsEnabled: 3,
-  };
-}
 
 interface NetworkState {
   project: GmxProject;

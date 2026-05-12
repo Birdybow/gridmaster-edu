@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { version } from '../package.json';
 import { Toolbar } from './components/toolbar/Toolbar.js';
 import { NetworkCanvas } from './components/canvas/NetworkCanvas.js';
 import { ResultPanel } from './components/results/ResultPanel.js';
@@ -122,7 +123,7 @@ export default function App() {
     : 'powerflow';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#0D1B2A' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: '#0D1B2A', position: 'relative' }}>
       <Toolbar onToggleCompensation={() => setShowCompensation((v) => !v)} />
 
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', position: 'relative' }}>
@@ -234,6 +235,22 @@ export default function App() {
           )}
         </div>
       )}
+
+      {/* Version badge */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: 6,
+          left: 8,
+          fontSize: 10,
+          color: '#2A3F52',
+          pointerEvents: 'none',
+          userSelect: 'none',
+          zIndex: 5,
+        }}
+      >
+        v{version}
+      </div>
     </div>
   );
 }
