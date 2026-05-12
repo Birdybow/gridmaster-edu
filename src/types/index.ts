@@ -261,6 +261,20 @@ export interface ShortCircuitResult {
   tempCorrFactor: number;
 }
 
+/** Neutral earthing / network type */
+export type NetworkType = 'IT' | 'TN' | 'Petersen';
+
+export interface EarthFaultResult {
+  timestamp: ISOTimestamp;
+  busId: GmxId;
+  networkType: NetworkType;
+  earthFaultCurrentA: number;
+  /** Petersen coil inductance [H], only set for Petersen */
+  petersenCoilH?: number;
+  /** Residual current after compensation [A], only set for Petersen */
+  residualCurrentA?: number;
+}
+
 export interface CompensationResult {
   timestamp: ISOTimestamp;
   busId: GmxId;
@@ -379,6 +393,7 @@ export interface GmxProject {
     compensation?: CompensationResult[];
     voltageDrop?: VoltageDropResult[];
     ringNetwork?: RingNetworkResult;
+    earthFault?: EarthFaultResult;
   };
   canvas: {
     zoom: number;

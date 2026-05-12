@@ -5,4 +5,7 @@ export default defineConfig({
     environment: 'node',
     cache: { dir: './node_modules/.vitest' },
   },
+  server: {
+    fs: { allow: ['.'] },
+  },
 });

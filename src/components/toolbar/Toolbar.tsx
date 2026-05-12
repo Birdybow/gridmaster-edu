@@ -10,12 +10,14 @@ interface ToolbarProps {
   onToggleShortCircuit?: () => void;
   onToggleRingNetwork?: () => void;
   onToggleProtection?: () => void;
+  onToggleEarthFault?: () => void;
+  onToggleNeutralTreatment?: () => void;
 }
 
 type CloudSaveState = 'idle' | 'input' | 'saving' | 'done' | 'error';
 type CloudLoadState = 'idle' | 'loading' | 'list' | 'error';
 
-export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVoltageDrop, onToggleShortCircuit, onToggleRingNetwork, onToggleProtection }: ToolbarProps) {
+export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVoltageDrop, onToggleShortCircuit, onToggleRingNetwork, onToggleProtection, onToggleEarthFault, onToggleNeutralTreatment }: ToolbarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const legacyInputRef = useRef<HTMLInputElement>(null);
 
@@ -283,6 +285,36 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
           🛡 Vern
         </button>
 
+        {/* Jordfeil */}
+        <button
+          onClick={onToggleEarthFault}
+          disabled={project.buses.length < 1}
+          title="Beregn jordfeilstrøm (IT/TN/Petersen)"
+          style={{
+            ...btnStyle,
+            background: '#0D1A0D',
+            color: '#66BB6A',
+            border: '1px solid #2E7D32',
+            opacity: project.buses.length < 1 ? 0.5 : 1,
+          }}
+        >
+          ⏚ Jordfeil
+        </button>
+
+        {/* Nøytral */}
+        <button
+          onClick={onToggleNeutralTreatment}
+          style={{
+            ...btnStyle,
+            background: '#0D1520',
+            color: '#4FC3F7',
+            border: '1px solid #1565C0',
+          }}
+          title="Nøytralbehandling — IT / TN / Petersen sammenligning"
+        >
+          ∿ Nøytral
+        </button>
+
         {/* Import legacy (Gemini scenario) */}
         <button
           onClick={() => legacyInputRef.current?.click()}
@@ -451,8 +483,10 @@ const btnStyle: React.CSSProperties = {
   border: '1px solid #1565C0',
   borderRadius: 6,
   padding: '10px 14px',
+  minHeight: 36,
   fontSize: 13,
   cursor: 'pointer',
+  whiteSpace: 'nowrap',
 };
 
 const overlayStyle: React.CSSProperties = {

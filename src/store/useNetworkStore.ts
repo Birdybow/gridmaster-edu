@@ -21,7 +21,8 @@ import { calcVoltageDrop, calcVoltageDropPi } from '../core/voltage-drop.js';
 import { calcZThevenin, calcIk3p, calcIk2p, calcImpact, calcIk3pMin, calcContributions } from '../core/short-circuit.js';
 import { calcRingSymmetric, calcRingAsymmetric } from '../core/ring-network.js';
 import { calcTripTime } from '../core/protection.js';
-import type { ShortCircuitResult, RingNetworkResult, SelectivityResult } from '../types/index.js';
+import { calcEarthFaultIT, calcEarthFaultTN, calcPetersen } from '../core/earth-fault.js';
+import type { ShortCircuitResult, RingNetworkResult, SelectivityResult, EarthFaultResult, NetworkType } from '../types/index.js';
 import type { OcCurve } from '../types/index.js';
 
 export type PowerFlowStatus = 'idle' | 'running' | 'converged' | 'failed';
@@ -174,6 +175,11 @@ interface NetworkState {
   setShowShortCircuitResults: (v: boolean) => void;
   clearShortCircuit: () => void;
   runShortCircuit: (busId: string) => void;
+  selectedEarthFaultBusId: string | null;
+  networkType: NetworkType;
+  runEarthFault: (busId: string, networkType: NetworkType) => void;
+  clearEarthFault: () => void;
+  setNetworkType: (t: NetworkType) => void;
   toggleFlowDirections: () => void;
   setRingNetworkResults: (r: RingNetworkResult | null) => void;
   runRingNetwork: (busAId: string, busBId: string, busCId: string) => void;
@@ -245,6 +251,8 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
   voltageDropModel: 'auto',
   selectedFaultBusId: null,
   showShortCircuitResults: false,
+  selectedEarthFaultBusId: null,
+  networkType: 'IT' as NetworkType,
   showFlowDirections: false,
   ringNetworkResults: null,
   selectivityResults: [],
@@ -268,6 +276,51 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
     showShortCircuitResults: false,
     project: { ...s.project, results: { ...s.project.results, shortCircuit: [] } },
   })),
+  setNetworkType: (t) => set({ networkType: t }),
+  clearEarthFault: () => set((s) => ({
+    selectedEarthFaultBusId: null,
+    project: { ...s.project, results: { ...s.project.results, earthFault: undefined } },
+  })),
+  runEarthFault: (busId, networkType) => {
+    const { project } = get();
+    const bus = project.buses.find((b) => b.id === busId);
+    if (!bus) return;
+
+    const Un = bus.voltageKV * 1000;
+    const totalCableLengthKm = project.lines.reduce((sum, l) => sum + (l.lengthKm ?? 1), 0);
+    const C0 = 0.3e-6; // default 0.3 µF/km
+
+    let earthFaultCurrentA = 0;
+    let petersenCoilH: number | undefined;
+    let residualCurrentA: number | undefined;
+
+    if (networkType === 'IT') {
+      earthFaultCurrentA = calcEarthFaultIT(Un, C0, totalCableLengthKm || 10, 50);
+    } else if (networkType === 'TN') {
+      const Uf = Un / Math.sqrt(3);
+      earthFaultCurrentA = calcEarthFaultTN(Uf, 0.5, 0.5);
+    } else {
+      const result = calcPetersen(Un, C0, totalCableLengthKm || 10, 50, 1.0);
+      earthFaultCurrentA = result.I_jord;
+      petersenCoilH = result.L_P;
+      residualCurrentA = result.I_rest;
+    }
+
+    const efResult: EarthFaultResult = {
+      timestamp: new Date().toISOString(),
+      busId,
+      networkType,
+      earthFaultCurrentA,
+      petersenCoilH,
+      residualCurrentA,
+    };
+
+    set((s) => ({
+      selectedEarthFaultBusId: busId,
+      networkType,
+      project: { ...s.project, results: { ...s.project.results, earthFault: efResult } },
+    }));
+  },
   toggleFlowDirections: () => set((s) => ({ showFlowDirections: !s.showFlowDirections })),
   setRingNetworkResults: (r) => set({ ringNetworkResults: r }),
   setShowProtectionResults: (v) => set({ showProtectionResults: v }),

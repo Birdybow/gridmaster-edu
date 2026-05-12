@@ -25,6 +25,8 @@ import { RadialVsRingPanel } from './components/ringnetwork/RadialVsRingPanel.js
 import { ProtectionEditor } from './components/protection/ProtectionEditor.js';
 import { ProtectionHierarchyPanel } from './components/protection/ProtectionHierarchyPanel.js';
 import { SelectivityPanel } from './components/protection/SelectivityPanel.js';
+import { EarthFaultPanel } from './components/earthfault/EarthFaultPanel.js';
+import { NeutralTreatmentPanel } from './components/earthfault/NeutralTreatmentPanel.js';
 import { useNetworkStore } from './store/useNetworkStore.js';
 
 function EditorPanel() {
@@ -125,6 +127,8 @@ export default function App() {
   const [showShortCircuitFloating, setShowShortCircuitFloating] = useState(false);
   const [showRingNetworkFloating, setShowRingNetworkFloating] = useState(false);
   const [showProtectionFloating, setShowProtectionFloating] = useState(false);
+  const [showEarthFaultFloating, setShowEarthFaultFloating] = useState(false);
+  const [showNeutralTreatment, setShowNeutralTreatment] = useState(false);
   const [protectionHint, setProtectionHint] = useState(false);
   const [activeTab, setActiveTab] = useState<'powerflow' | 'compensation' | 'production' | 'voltagedrop' | 'shortcircuit' | 'ringnetwork' | 'protection'>('powerflow');
 
@@ -194,6 +198,8 @@ export default function App() {
           setShowProtectionFloating((v) => !v);
           setActiveTab('protection');
         }}
+        onToggleEarthFault={() => setShowEarthFaultFloating((v) => !v)}
+        onToggleNeutralTreatment={() => setShowNeutralTreatment((v) => !v)}
       />
 
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', position: 'relative' }}>
@@ -250,6 +256,42 @@ export default function App() {
           {/* Floating protection hierarchy panel */}
           {showProtectionFloating && (
             <ProtectionHierarchyPanel onClose={() => setShowProtectionFloating(false)} />
+          )}
+
+          {/* Floating earth fault panel */}
+          {showEarthFaultFloating && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 12,
+                left: 12,
+                width: 320,
+                maxHeight: 'calc(100vh - 120px)',
+                overflowY: 'auto',
+                zIndex: 42,
+                borderRadius: 8,
+                boxShadow: '0 4px 32px rgba(0,0,0,0.6)',
+              }}
+            >
+              <EarthFaultPanel onClose={() => setShowEarthFaultFloating(false)} />
+            </div>
+          )}
+
+          {/* Floating neutral treatment panel */}
+          {showNeutralTreatment && (
+            <div
+              style={{
+                position: 'absolute',
+                top: showEarthFaultFloating ? 320 : 12,
+                left: 12,
+                width: 340,
+                zIndex: 42,
+                borderRadius: 8,
+                boxShadow: '0 4px 32px rgba(0,0,0,0.6)',
+              }}
+            >
+              <NeutralTreatmentPanel onClose={() => setShowNeutralTreatment(false)} />
+            </div>
           )}
 
           {/* Protection placement hint toast */}

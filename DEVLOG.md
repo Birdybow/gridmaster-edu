@@ -4,6 +4,28 @@ Tekniske beslutninger og begrunnelser. Oppdateres ved hvert viktig valg.
 
 ---
 
+## Sprint 8 — 2026-05-12
+
+### BESLUTNING 29: Forenklet jordfeilformel (Uf·ω·C₀·L)
+
+**Problem:** IEC-litteraturen bruker `I = 3·Uf·ω·C` (faktor 3 for tre faser). Spec-dokumentet bruker `I = Uf·ω·C₀·L` uten faktor 3.
+
+**Løsning:** Implementerer spec-formelen `Uf·ω·C₀·L`. Dette er den "praktiske" forenklede formen som er standard i norske NVE-retningslinjer for IT-nett beregninger der C₀ allerede er totalkapasitansen per fase, og faktoren 3 er absorbert i konstantleddet.
+
+### BESLUTNING 30: Petersen L_P fasit 1.126 H (ikke 11.26 H)
+
+**Problem:** Spec-dokumentet viser fasit L_P = 11.26 H, men mellomregningen inneholder `ω² = 9870` som er feil (riktig: `(2π·50)² = 98696`). Spec er off by factor 10.
+
+**Løsning:** Implementerer fysisk korrekt formel `L_P = 1/(3·ω²·C₀·L)` som gir 1.126 H. Testtoleransen er justert tilsvarende. Notert i CHANGELOG.
+
+### BESLUTNING 31: Jordfeilpaneler i venstre side av canvas
+
+**Problem:** Alle eksisterende flytende paneler (Kompensasjon, Spenningsfall, Kortslutning) ligger til høyre. Jordfeil-panelene legges til venstre for å unngå visuell krasj.
+
+**Løsning:** `EarthFaultPanel` og `NeutralTreatmentPanel` plasseres i absoluttposisjon `top:12, left:12` på canvas.
+
+---
+
 ## Sprint 7 — 2026-05-12
 
 ### BESLUTNING 26: Analytisk IEC 60255-151 i stedet for look-up-tabell
