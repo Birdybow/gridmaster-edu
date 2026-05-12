@@ -110,257 +110,181 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
 
   return (
     <>
-      <div
-        className="flex items-center gap-3 px-4 py-2 border-b border-cyan-900"
-        style={{ background: '#0D1B2A', color: '#E8F0FE' }}
-      >
-        {/* Logo */}
-        <img
-          src="/logo.png"
-          alt="GridMaster Edu"
-          style={{ height: 36, objectFit: 'contain' }}
-        />
-        <span
-          className="font-bold text-lg tracking-wide"
-          style={{ color: '#4FC3F7' }}
-        >
-          GridMaster Edu
-        </span>
+      <div style={{ background: '#0D1B2A', borderBottom: '1px solid #0E3A5F' }}>
+        {/* Rad 1: Fil og prosjekt */}
+        <div className="flex items-center gap-2 px-4" style={{ color: '#E8F0FE', height: 46 }}>
+          <img src="/logo.png" alt="GridMaster Edu" style={{ height: 30, objectFit: 'contain' }} />
+          <span className="font-bold tracking-wide" style={{ color: '#4FC3F7', fontSize: 14, whiteSpace: 'nowrap' }}>
+            GridMaster Edu
+          </span>
 
-        <div className="flex-1" />
+          <div className="flex-1" />
 
-        {/* Project name */}
-        <span className="text-sm text-gray-400 mr-2">
-          {project.metadata.projectName}
-        </span>
+          <span style={{ fontSize: 12, color: '#607D8B', whiteSpace: 'nowrap' }}>
+            {project.metadata.projectName}
+          </span>
 
-        {/* New */}
-        <button
-          onClick={() => { if (confirm('Nytt prosjekt? Ulagrede endringer går tapt.')) clearProject(); }}
-          style={btnStyle}
-        >
-          Nytt
-        </button>
+          <button
+            onClick={() => { if (confirm('Nytt prosjekt? Ulagrede endringer går tapt.')) clearProject(); }}
+            style={btnStyle}
+          >
+            Nytt
+          </button>
 
-        {/* Save local */}
-        <button onClick={handleSave} style={btnStyle}>
-          Lagre .gmx
-        </button>
+          <button onClick={handleSave} style={btnStyle}>
+            Lagre .gmx
+          </button>
 
-        {/* Load local */}
-        <button onClick={() => fileInputRef.current?.click()} style={btnStyle}>
-          Åpne .gmx
-        </button>
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept=".gmx,.json"
-          style={{ display: 'none' }}
-          onChange={handleLoad}
-        />
+          <button onClick={() => fileInputRef.current?.click()} style={btnStyle}>
+            Åpne .gmx
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".gmx,.json"
+            style={{ display: 'none' }}
+            onChange={handleLoad}
+          />
 
-        {/* Save to cloud */}
-        <button
-          onClick={() => {
-            setCloudStudentName(project.metadata.student ?? '');
-            setCloudSaveState('input');
-            setCloudSaveError('');
-          }}
-          style={{ ...btnStyle, background: '#0A3B5C', border: '1px solid #1E88E5' }}
-        >
-          ☁ Lagre til sky
-        </button>
+          <button
+            onClick={() => {
+              setCloudStudentName(project.metadata.student ?? '');
+              setCloudSaveState('input');
+              setCloudSaveError('');
+            }}
+            style={{ ...btnStyle, background: '#0A3B5C', border: '1px solid #1E88E5' }}
+          >
+            ☁ Lagre til sky
+          </button>
 
-        {/* Open from cloud */}
-        <button
-          onClick={handleOpenCloudList}
-          style={{ ...btnStyle, background: '#0A3B5C', border: '1px solid #1E88E5' }}
-        >
-          ☁ Åpne fra sky
-        </button>
+          <button
+            onClick={handleOpenCloudList}
+            style={{ ...btnStyle, background: '#0A3B5C', border: '1px solid #1E88E5' }}
+          >
+            ☁ Åpne fra sky
+          </button>
 
-        {/* Beregn lastflyt */}
-        <button
-          onClick={runPowerFlow}
-          disabled={project.buses.length === 0 || powerFlowStatus === 'running'}
-          title={validationResult && !validationResult.valid ? `${validationResult.errors.length} valideringsfeil` : undefined}
-          style={{
-            ...btnStyle,
-            background: validationResult && !validationResult.valid ? '#5C1A1A'
-              : powerFlowStatus === 'converged' ? '#1A5C3A'
-              : powerFlowStatus === 'failed' ? '#5C1A1A'
-              : '#0D3B66',
-            border: validationResult && !validationResult.valid ? '1px solid #EF4444' : '1px solid #1565C0',
-            opacity: project.buses.length === 0 ? 0.5 : 1,
-          }}
-        >
-          {powerFlowStatus === 'running' ? '…'
-            : validationResult && !validationResult.valid ? `✗ ${validationResult.errors.length} feil`
-            : 'Lastflyt'}
-        </button>
+          <button
+            onClick={() => legacyInputRef.current?.click()}
+            style={{ ...btnStyle, background: '#1A5C3A' }}
+          >
+            Importer
+          </button>
+          <input
+            ref={legacyInputRef}
+            type="file"
+            accept=".json"
+            style={{ display: 'none' }}
+            onChange={handleImportLegacy}
+          />
+        </div>
 
-        {/* Fasekompensering */}
-        <button
-          onClick={onToggleCompensation}
-          disabled={project.buses.length === 0}
-          style={{
-            ...btnStyle,
-            background: '#3A1A5C',
-            border: '1px solid #9C27B0',
-            opacity: project.buses.length === 0 ? 0.5 : 1,
-          }}
-        >
-          Kompensering
-        </button>
+        {/* Rad 2: Analyse-verktøy */}
+        <div style={{ overflowX: 'auto', borderTop: '1px solid #0E3A5F' }}>
+          <div className="flex items-center gap-2 px-4" style={{ color: '#E8F0FE', height: 38, minWidth: 'max-content' }}>
+            <button
+              onClick={runPowerFlow}
+              disabled={project.buses.length === 0 || powerFlowStatus === 'running'}
+              title={validationResult && !validationResult.valid ? `${validationResult.errors.length} valideringsfeil` : undefined}
+              style={{
+                ...anaBtnStyle,
+                background: validationResult && !validationResult.valid ? '#5C1A1A'
+                  : powerFlowStatus === 'converged' ? '#1A5C3A'
+                  : powerFlowStatus === 'failed' ? '#5C1A1A'
+                  : '#0D3B66',
+                border: validationResult && !validationResult.valid ? '1px solid #EF4444' : '1px solid #1565C0',
+                opacity: project.buses.length === 0 ? 0.5 : 1,
+              }}
+            >
+              {powerFlowStatus === 'running' ? '…'
+                : validationResult && !validationResult.valid ? `✗ ${validationResult.errors.length} feil`
+                : 'Lastflyt'}
+            </button>
 
-        {/* Produksjon */}
-        <button
-          onClick={onToggleProduction}
-          disabled={project.generators.length === 0}
-          style={{
-            ...btnStyle,
-            background: '#0F3B1E',
-            border: '1px solid #2E7D32',
-            opacity: project.generators.length === 0 ? 0.5 : 1,
-          }}
-        >
-          ⚡ Produksjon
-        </button>
+            <button
+              onClick={onToggleCompensation}
+              disabled={project.buses.length === 0}
+              style={{ ...anaBtnStyle, background: '#3A1A5C', border: '1px solid #9C27B0', opacity: project.buses.length === 0 ? 0.5 : 1 }}
+            >
+              Kompensering
+            </button>
 
-        {/* Spenningsfall */}
-        <button
-          onClick={onToggleVoltageDrop}
-          disabled={project.lines.length === 0}
-          style={{
-            ...btnStyle,
-            background: '#1A2B0F',
-            border: '1px solid #558B2F',
-            opacity: project.lines.length === 0 ? 0.5 : 1,
-          }}
-        >
-          ΔU Spenning
-        </button>
+            <button
+              onClick={onToggleProduction}
+              disabled={project.generators.length === 0}
+              style={{ ...anaBtnStyle, background: '#0F3B1E', border: '1px solid #2E7D32', opacity: project.generators.length === 0 ? 0.5 : 1 }}
+            >
+              ⚡ Produksjon
+            </button>
 
-        {/* Kortslutning */}
-        <button
-          onClick={onToggleShortCircuit}
-          disabled={project.buses.length < 2}
-          style={{
-            ...btnStyle,
-            background: '#1A0000',
-            color: '#EF9A9A',
-            border: '1px solid #B71C1C',
-            opacity: project.buses.length < 2 ? 0.5 : 1,
-          }}
-        >
-          ⚡ Kortslutning
-        </button>
+            <button
+              onClick={onToggleVoltageDrop}
+              disabled={project.lines.length === 0}
+              style={{ ...anaBtnStyle, background: '#1A2B0F', border: '1px solid #558B2F', opacity: project.lines.length === 0 ? 0.5 : 1 }}
+            >
+              ΔU Spenning
+            </button>
 
-        {/* Ringnett */}
-        <button
-          onClick={onToggleRingNetwork}
-          disabled={project.buses.length < 3}
-          style={{
-            ...btnStyle,
-            background: '#001A00',
-            color: '#A5D6A7',
-            border: '1px solid #1B5E20',
-            opacity: project.buses.length < 3 ? 0.5 : 1,
-          }}
-        >
-          ⭕ Ringnett
-        </button>
+            <button
+              onClick={onToggleShortCircuit}
+              disabled={project.buses.length < 2}
+              style={{ ...anaBtnStyle, background: '#1A0000', color: '#EF9A9A', border: '1px solid #B71C1C', opacity: project.buses.length < 2 ? 0.5 : 1 }}
+            >
+              ⚡ Kortslutning
+            </button>
 
-        {/* Vernkoordinering */}
-        <button
-          onClick={onToggleProtection}
-          disabled={project.lines.length === 0}
-          title="Klikk på en linje for å legge til vern"
-          style={{
-            ...btnStyle,
-            background: '#1A1A0F',
-            color: '#F9A825',
-            border: '1px solid #827717',
-            opacity: project.lines.length === 0 ? 0.5 : 1,
-          }}
-        >
-          🛡 Vern
-        </button>
+            <button
+              onClick={onToggleRingNetwork}
+              disabled={project.buses.length < 3}
+              style={{ ...anaBtnStyle, background: '#001A00', color: '#A5D6A7', border: '1px solid #1B5E20', opacity: project.buses.length < 3 ? 0.5 : 1 }}
+            >
+              ⭕ Ringnett
+            </button>
 
-        {/* Produksjonsdashboard */}
-        <button
-          onClick={onToggleProductionDashboard}
-          disabled={project.generators.length === 0}
-          title="Produksjonsdashboard — MW, MWh/år, CO₂"
-          style={{
-            ...btnStyle,
-            background: '#0D1A0D',
-            color: '#A5D6A7',
-            border: '1px solid #388E3C',
-            opacity: project.generators.length === 0 ? 0.5 : 1,
-          }}
-        >
-          ☀ Dashboard
-        </button>
+            <button
+              onClick={onToggleProtection}
+              disabled={project.lines.length === 0}
+              title="Klikk på en linje for å legge til vern"
+              style={{ ...anaBtnStyle, background: '#1A1A0F', color: '#F9A825', border: '1px solid #827717', opacity: project.lines.length === 0 ? 0.5 : 1 }}
+            >
+              🛡 Vern
+            </button>
 
-        {/* Tidsserie */}
-        <button
-          onClick={onToggleTimeSeries}
-          title="Tidsserie-simulering 24t — lastprofil, produksjon, balanse"
-          style={{
-            ...btnStyle,
-            background: '#0D1A0D',
-            color: '#80CBC4',
-            border: '1px solid #00796B',
-          }}
-        >
-          ⏱ Tidsserie
-        </button>
+            <button
+              onClick={onToggleProductionDashboard}
+              disabled={project.generators.length === 0}
+              title="Produksjonsdashboard — MW, MWh/år, CO₂"
+              style={{ ...anaBtnStyle, background: '#0D1A0D', color: '#A5D6A7', border: '1px solid #388E3C', opacity: project.generators.length === 0 ? 0.5 : 1 }}
+            >
+              ☀ Dashboard
+            </button>
 
-        {/* Jordfeil */}
-        <button
-          onClick={onToggleEarthFault}
-          disabled={project.buses.length < 1}
-          title="Beregn jordfeilstrøm (IT/TN/Petersen)"
-          style={{
-            ...btnStyle,
-            background: '#0D1A0D',
-            color: '#66BB6A',
-            border: '1px solid #2E7D32',
-            opacity: project.buses.length < 1 ? 0.5 : 1,
-          }}
-        >
-          ⏚ Jordfeil
-        </button>
+            <button
+              onClick={onToggleTimeSeries}
+              title="Tidsserie-simulering 24t — lastprofil, produksjon, balanse"
+              style={{ ...anaBtnStyle, background: '#0D1A0D', color: '#80CBC4', border: '1px solid #00796B' }}
+            >
+              ⏱ Tidsserie
+            </button>
 
-        {/* Nøytral */}
-        <button
-          onClick={onToggleNeutralTreatment}
-          style={{
-            ...btnStyle,
-            background: '#0D1520',
-            color: '#4FC3F7',
-            border: '1px solid #1565C0',
-          }}
-          title="Nøytralbehandling — IT / TN / Petersen sammenligning"
-        >
-          ∿ Nøytral
-        </button>
+            <button
+              onClick={onToggleEarthFault}
+              disabled={project.buses.length < 1}
+              title="Beregn jordfeilstrøm (IT/TN/Petersen)"
+              style={{ ...anaBtnStyle, background: '#0D1A0D', color: '#66BB6A', border: '1px solid #2E7D32', opacity: project.buses.length < 1 ? 0.5 : 1 }}
+            >
+              ⏚ Jordfeil
+            </button>
 
-        {/* Import legacy (Gemini scenario) */}
-        <button
-          onClick={() => legacyInputRef.current?.click()}
-          style={{ ...btnStyle, background: '#1A5C3A' }}
-        >
-          Importer
-        </button>
-        <input
-          ref={legacyInputRef}
-          type="file"
-          accept=".json"
-          style={{ display: 'none' }}
-          onChange={handleImportLegacy}
-        />
+            <button
+              onClick={onToggleNeutralTreatment}
+              title="Nøytralbehandling — IT / TN / Petersen sammenligning"
+              style={{ ...anaBtnStyle, background: '#0D1520', color: '#4FC3F7', border: '1px solid #1565C0' }}
+            >
+              ∿ Nøytral
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Cloud save dialog */}
@@ -514,9 +438,19 @@ const btnStyle: React.CSSProperties = {
   color: '#E8F0FE',
   border: '1px solid #1565C0',
   borderRadius: 6,
-  padding: '10px 14px',
-  minHeight: 36,
-  fontSize: 13,
+  padding: '6px 12px',
+  fontSize: 12,
+  cursor: 'pointer',
+  whiteSpace: 'nowrap',
+};
+
+const anaBtnStyle: React.CSSProperties = {
+  background: '#0D3B66',
+  color: '#E8F0FE',
+  border: '1px solid #1565C0',
+  borderRadius: 5,
+  padding: '4px 10px',
+  fontSize: 12,
   cursor: 'pointer',
   whiteSpace: 'nowrap',
 };
