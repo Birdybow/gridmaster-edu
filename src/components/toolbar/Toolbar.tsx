@@ -272,6 +272,7 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
         <button
           onClick={onToggleProtection}
           disabled={project.lines.length === 0}
+          title="Klikk på en linje for å legge til vern"
           className="px-3 py-1.5 text-sm whitespace-nowrap"
           style={{
             ...btnStyle,

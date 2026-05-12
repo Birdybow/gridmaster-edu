@@ -1,5 +1,5 @@
 import { useNetworkStore } from '../../store/useNetworkStore.js';
-import type { Line } from '../../types/index.js';
+import type { Line, Protection } from '../../types/index.js';
 import { LineLibrary } from './LineLibrary.js';
 import type { LibraryCable } from './LineLibrary.js';
 import { LineComparisonPanel } from '../voltagedrop/LineComparisonPanel.js';
@@ -52,9 +52,13 @@ export function LineEditor() {
   const lines = useNetworkStore((s) => s.project.lines);
   const buses = useNetworkStore((s) => s.project.buses);
   const updateLine = useNetworkStore((s) => s.updateLine);
+  const protections = useNetworkStore((s) => s.project.protections);
+  const addProtection = useNetworkStore((s) => s.addProtection);
 
   const line = lines.find((l) => l.id === selectedEdgeId);
   if (!line) return null;
+
+  const existingProt = protections.find((p) => p.protectedLineId === selectedEdgeId);
 
   function patch(p: Partial<Line>) {
     updateLine(line!.id, p);
@@ -62,6 +66,22 @@ export function LineEditor() {
 
   function applyLibrary(cable: LibraryCable) {
     patch({ rOhmPerKm: cable.rOhmPerKm, xOhmPerKm: cable.xOhmPerKm, bMuSPerKm: cable.bMuSPerKm, cableRef: cable.id });
+  }
+
+  function handleAddProtection() {
+    const newProt: Protection = {
+      id: crypto.randomUUID(),
+      name: `Vern ${line!.name}`,
+      busId: line!.fromBusId,
+      protectedLineId: line!.id,
+      type: 'overcurrent',
+      pickupCurrentA: 100,
+      timeDelayS: 0.3,
+      tms: 0.1,
+      curve: 'standard_inverse',
+      instantTrip: false,
+    };
+    addProtection(newProt);
   }
 
   const fromBus = buses.find((b) => b.id === line.fromBusId);
@@ -82,6 +102,31 @@ export function LineEditor() {
         <div style={{ fontSize: 11, color: '#607D8B', marginBottom: 10 }}>
           {fromBus.name} ({fromBus.voltageKV} kV) → {toBus.name} ({toBus.voltageKV} kV)
         </div>
+      )}
+
+      {/* Protection status banner */}
+      {existingProt ? (
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 6,
+          background: '#0A1F10', border: '1px solid #2E7D32',
+          borderRadius: 5, padding: '6px 10px', marginBottom: 12,
+        }}>
+          <span style={{ fontSize: 12 }}>🛡</span>
+          <span style={{ color: '#81C784', fontSize: 11, fontWeight: 600 }}>{existingProt.name}</span>
+          <span style={{ color: '#4CAF50', fontSize: 10, marginLeft: 'auto' }}>✓ Vern konfigurert</span>
+        </div>
+      ) : (
+        <button
+          onClick={handleAddProtection}
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            width: '100%', background: '#1A1500', border: '1px solid #F9A825',
+            borderRadius: 5, padding: '7px 10px', marginBottom: 12,
+            color: '#F9A825', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+          }}
+        >
+          🛡 Legg til vern
+        </button>
       )}
 
       <Field

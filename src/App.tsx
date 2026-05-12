@@ -125,6 +125,7 @@ export default function App() {
   const [showShortCircuitFloating, setShowShortCircuitFloating] = useState(false);
   const [showRingNetworkFloating, setShowRingNetworkFloating] = useState(false);
   const [showProtectionFloating, setShowProtectionFloating] = useState(false);
+  const [protectionHint, setProtectionHint] = useState(false);
   const [activeTab, setActiveTab] = useState<'powerflow' | 'compensation' | 'production' | 'voltagedrop' | 'shortcircuit' | 'ringnetwork' | 'protection'>('powerflow');
 
   const powerFlow = useNetworkStore((s) => s.project.results.powerFlow);
@@ -143,6 +144,10 @@ export default function App() {
   const setShowShortCircuitResults = useNetworkStore((s) => s.setShowShortCircuitResults);
   const rawScResults = useNetworkStore((s) => s.project.results.shortCircuit);
   const shortCircuitResults = rawScResults ?? [];
+
+  const selectedEdgeId = useNetworkStore((s) => s.selectedEdgeId);
+  const appLines = useNetworkStore((s) => s.project.lines);
+  const isLineSelected = selectedEdgeId ? appLines.some((l) => l.id === selectedEdgeId) : false;
 
   const hasPF = !!(powerFlow && showResults);
   const hasComp = compensationResults.length > 0 && showCompensationResults;
@@ -181,7 +186,14 @@ export default function App() {
         onToggleVoltageDrop={() => { setShowVoltageDropFloating((v) => !v); setActiveTab('voltagedrop'); }}
         onToggleShortCircuit={() => { setShowShortCircuitFloating((v) => !v); setActiveTab('shortcircuit'); }}
         onToggleRingNetwork={() => { setShowRingNetworkFloating((v) => !v); setActiveTab('ringnetwork'); }}
-        onToggleProtection={() => { setShowProtectionFloating((v) => !v); setActiveTab('protection'); }}
+        onToggleProtection={() => {
+          if (!isLineSelected) {
+            setProtectionHint(true);
+            setTimeout(() => setProtectionHint(false), 3500);
+          }
+          setShowProtectionFloating((v) => !v);
+          setActiveTab('protection');
+        }}
       />
 
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', position: 'relative' }}>
@@ -238,6 +250,19 @@ export default function App() {
           {/* Floating protection hierarchy panel */}
           {showProtectionFloating && (
             <ProtectionHierarchyPanel onClose={() => setShowProtectionFloating(false)} />
+          )}
+
+          {/* Protection placement hint toast */}
+          {protectionHint && (
+            <div style={{
+              position: 'absolute', bottom: 24, left: '50%', transform: 'translateX(-50%)',
+              background: '#1A1500', border: '1px solid #F9A825', borderRadius: 8,
+              padding: '10px 20px', color: '#F9A825', fontSize: 13, fontWeight: 600,
+              zIndex: 60, pointerEvents: 'none', whiteSpace: 'nowrap',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.6)',
+            }}>
+              🛡 Klikk på en linje i nettet for å plassere et vern
+            </div>
           )}
 
           {/* Floating compensation input panel */}
