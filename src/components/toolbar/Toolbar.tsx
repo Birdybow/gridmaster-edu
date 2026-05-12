@@ -450,7 +450,7 @@ const btnStyle: React.CSSProperties = {
   color: '#E8F0FE',
   border: '1px solid #1565C0',
   borderRadius: 6,
-  padding: '4px 12px',
+  padding: '10px 14px',
   fontSize: 13,
   cursor: 'pointer',
 };
