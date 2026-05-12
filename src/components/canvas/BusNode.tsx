@@ -34,10 +34,11 @@ function BusNodeComponent({ data, selected }: NodeProps<Bus>) {
   const powerFlow = useNetworkStore((s) => s.project.results.powerFlow);
   const generators = useNetworkStore((s) => s.project.generators);
   const selectedFaultBusId = useNetworkStore((s) => s.selectedFaultBusId);
+  const scResults = useNetworkStore((s) => s.project.results.shortCircuit);
   const busResult = powerFlow?.buses.find((b) => b.busId === data.id);
   const gen = generators.find((g) => g.busId === data.id);
   const genBadge = gen ? GEN_BADGE[gen.generatorType] : null;
-  const isFaultBus = selectedFaultBusId === data.id;
+  const isFaultBus = selectedFaultBusId === data.id && (scResults?.length ?? 0) > 0;
 
   const icon = ICON_MAP[data.type] ?? '/icons/bus-pq.png';
   const badge = TYPE_LABELS[data.type] ?? data.type;

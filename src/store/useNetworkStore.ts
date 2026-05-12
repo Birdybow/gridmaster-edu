@@ -172,6 +172,7 @@ interface NetworkState {
   runVoltageDrop: () => void;
   setSelectedFaultBusId: (id: string | null) => void;
   setShowShortCircuitResults: (v: boolean) => void;
+  clearShortCircuit: () => void;
   runShortCircuit: (busId: string) => void;
   toggleFlowDirections: () => void;
   setRingNetworkResults: (r: RingNetworkResult | null) => void;
@@ -262,6 +263,11 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
   setVoltageDropModel: (m) => set({ voltageDropModel: m }),
   setSelectedFaultBusId: (id) => set({ selectedFaultBusId: id }),
   setShowShortCircuitResults: (v) => set({ showShortCircuitResults: v }),
+  clearShortCircuit: () => set((s) => ({
+    selectedFaultBusId: null,
+    showShortCircuitResults: false,
+    project: { ...s.project, results: { ...s.project.results, shortCircuit: [] } },
+  })),
   toggleFlowDirections: () => set((s) => ({ showFlowDirections: !s.showFlowDirections })),
   setRingNetworkResults: (r) => set({ ringNetworkResults: r }),
   setShowProtectionResults: (v) => set({ showProtectionResults: v }),

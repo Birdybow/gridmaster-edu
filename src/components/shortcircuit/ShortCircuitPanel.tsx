@@ -11,6 +11,7 @@ export function ShortCircuitPanel({ onClose }: Props) {
   const selectedFaultBusId = useNetworkStore((s) => s.selectedFaultBusId);
   const setSelectedFaultBusId = useNetworkStore((s) => s.setSelectedFaultBusId);
   const runShortCircuit = useNetworkStore((s) => s.runShortCircuit);
+  const clearShortCircuit = useNetworkStore((s) => s.clearShortCircuit);
 
   const [localBusId, setLocalBusId] = useState<string>(selectedFaultBusId ?? buses[0]?.id ?? '');
 
@@ -41,7 +42,7 @@ export function ShortCircuitPanel({ onClose }: Props) {
           ⚡ Kortslutningsberegning (IEC 60909)
         </span>
         <button
-          onClick={onClose}
+          onClick={() => { clearShortCircuit(); onClose(); }}
           style={{ background: 'none', border: 'none', color: '#607D8B', cursor: 'pointer', fontSize: 14 }}
         >
           ✕
@@ -111,24 +112,42 @@ export function ShortCircuitPanel({ onClose }: Props) {
           </div>
         )}
 
-        {/* Compute button */}
-        <button
-          onClick={handleCompute}
-          disabled={!canCompute}
-          style={{
-            width: '100%',
-            background: canCompute ? '#B71C1C' : '#1A1A1A',
-            border: `1px solid ${canCompute ? '#EF5350' : '#333'}`,
-            borderRadius: 4,
-            color: canCompute ? '#FFCDD2' : '#555',
-            padding: '7px 0',
-            cursor: canCompute ? 'pointer' : 'not-allowed',
-            fontSize: 13,
-            fontWeight: 700,
-          }}
-        >
-          Beregn kortslutningsstrøm
-        </button>
+        {/* Buttons */}
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={() => { clearShortCircuit(); onClose(); }}
+            style={{
+              background: '#1A1A1A',
+              border: '1px solid #37474F',
+              borderRadius: 4,
+              color: '#607D8B',
+              padding: '7px 12px',
+              cursor: 'pointer',
+              fontSize: 12,
+              fontWeight: 600,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            Nullstill
+          </button>
+          <button
+            onClick={handleCompute}
+            disabled={!canCompute}
+            style={{
+              flex: 1,
+              background: canCompute ? '#B71C1C' : '#1A1A1A',
+              border: `1px solid ${canCompute ? '#EF5350' : '#333'}`,
+              borderRadius: 4,
+              color: canCompute ? '#FFCDD2' : '#555',
+              padding: '7px 0',
+              cursor: canCompute ? 'pointer' : 'not-allowed',
+              fontSize: 13,
+              fontWeight: 700,
+            }}
+          >
+            Beregn kortslutningsstrøm
+          </button>
+        </div>
       </div>
     </div>
   );
