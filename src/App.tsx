@@ -273,7 +273,7 @@ export default function App() {
       {/* Copyright + version badge */}
       <div className="fixed bottom-2 left-2 z-50 text-xs text-gray-500 opacity-40 select-none pointer-events-none leading-relaxed">
         <div>© 2026 Bård Reinton-Kjellhov</div>
-        <div>BYRK AS · v{version}</div>
+        <div>v{version}</div>
       </div>
     </div>
   );
