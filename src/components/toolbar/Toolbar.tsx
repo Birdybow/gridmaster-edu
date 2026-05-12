@@ -142,8 +142,7 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
                 if (active) { setPlacingMode(null); } else { setPlacingMode({ kind: 'bus', busType: t }); setLineDrawingMode(null); }
               }}
               title={`Legg til ${t}-buss`}
-              className="px-3 py-1.5 text-sm whitespace-nowrap"
-              style={{ ...btnStyle, background: active ? '#0F3B66' : '#0D3B66', border: `1px solid ${active ? '#4FC3F7' : '#1565C0'}` }}
+              style={{ ...btnStyle, background: active ? '#0F3B66' : '#0D3B66', border: `1px solid ${active ? '#4FC3F7' : '#1565C0'}`, padding: '4px 8px', fontSize: 12 }}
             >
               {labels[t]}
             </button>
@@ -156,8 +155,7 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
             if (active) { setLineDrawingMode(null); } else { setLineDrawingMode('overhead'); setPlacingMode(null); }
           }}
           title="Tegn luftlinje"
-          className="px-3 py-1.5 text-sm whitespace-nowrap"
-          style={{ ...btnStyle, background: lineDrawingMode === 'overhead' ? '#0F3B55' : '#0D3B66', border: `1px solid ${lineDrawingMode === 'overhead' ? '#4FC3F7' : '#1565C0'}` }}
+          style={{ ...btnStyle, background: lineDrawingMode === 'overhead' ? '#0F3B55' : '#0D3B66', border: `1px solid ${lineDrawingMode === 'overhead' ? '#4FC3F7' : '#1565C0'}`, padding: '4px 8px', fontSize: 12 }}
         >
           〰 Luftlinje
         </button>
@@ -168,8 +166,7 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
             if (active) { setLineDrawingMode(null); } else { setLineDrawingMode('cable'); setPlacingMode(null); }
           }}
           title="Tegn jordkabel"
-          className="px-3 py-1.5 text-sm whitespace-nowrap"
-          style={{ ...btnStyle, background: lineDrawingMode === 'cable' ? '#0F3B55' : '#0D3B66', border: `1px solid ${lineDrawingMode === 'cable' ? '#4FC3F7' : '#1565C0'}` }}
+          style={{ ...btnStyle, background: lineDrawingMode === 'cable' ? '#0F3B55' : '#0D3B66', border: `1px solid ${lineDrawingMode === 'cable' ? '#4FC3F7' : '#1565C0'}`, padding: '4px 8px', fontSize: 12 }}
         >
           🔌 Kabel
         </button>
@@ -180,8 +177,7 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
             if (active) { setPlacingMode(null); } else { setPlacingMode({ kind: 'transformer' }); setLineDrawingMode(null); }
           }}
           title="Koble to busser med transformator"
-          className="px-3 py-1.5 text-sm whitespace-nowrap"
-          style={{ ...btnStyle, background: placingMode?.kind === 'transformer' ? '#3B2A0F' : '#0D3B66', border: `1px solid ${placingMode?.kind === 'transformer' ? '#FFB74D' : '#1565C0'}` }}
+          style={{ ...btnStyle, background: placingMode?.kind === 'transformer' ? '#3B2A0F' : '#0D3B66', border: `1px solid ${placingMode?.kind === 'transformer' ? '#FFB74D' : '#1565C0'}`, padding: '4px 8px', fontSize: 12 }}
         >
           🔄 Trafo
         </button>
@@ -198,19 +194,19 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
         {/* New */}
         <button
           onClick={() => { if (confirm('Nytt prosjekt? Ulagrede endringer går tapt.')) clearProject(); }}
-          className="px-3 py-1.5 text-sm whitespace-nowrap"
+          className="toolbar-btn"
           style={btnStyle}
         >
           Nytt
         </button>
 
         {/* Save local */}
-        <button onClick={handleSave} className="px-3 py-1.5 text-sm whitespace-nowrap" style={btnStyle}>
+        <button onClick={handleSave} style={btnStyle}>
           Lagre .gmx
         </button>
 
         {/* Load local */}
-        <button onClick={() => fileInputRef.current?.click()} className="px-3 py-1.5 text-sm whitespace-nowrap" style={btnStyle}>
+        <button onClick={() => fileInputRef.current?.click()} style={btnStyle}>
           Åpne .gmx
         </button>
         <input
@@ -228,7 +224,6 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
             setCloudSaveState('input');
             setCloudSaveError('');
           }}
-          className="px-3 py-1.5 text-sm whitespace-nowrap"
           style={{ ...btnStyle, background: '#0A3B5C', border: '1px solid #1E88E5' }}
         >
           ☁ Lagre til sky
@@ -237,7 +232,6 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
         {/* Open from cloud */}
         <button
           onClick={handleOpenCloudList}
-          className="px-3 py-1.5 text-sm whitespace-nowrap"
           style={{ ...btnStyle, background: '#0A3B5C', border: '1px solid #1E88E5' }}
         >
           ☁ Åpne fra sky
@@ -248,7 +242,6 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
           onClick={runPowerFlow}
           disabled={project.buses.length === 0 || powerFlowStatus === 'running'}
           title={validationResult && !validationResult.valid ? `${validationResult.errors.length} valideringsfeil` : undefined}
-          className="px-3 py-1.5 text-sm whitespace-nowrap"
           style={{
             ...btnStyle,
             background: validationResult && !validationResult.valid ? '#5C1A1A'
@@ -268,7 +261,6 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
         <button
           onClick={onToggleCompensation}
           disabled={project.buses.length === 0}
-          className="px-3 py-1.5 text-sm whitespace-nowrap"
           style={{
             ...btnStyle,
             background: '#3A1A5C',
@@ -283,7 +275,6 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
         <button
           onClick={onToggleProduction}
           disabled={project.generators.length === 0}
-          className="px-3 py-1.5 text-sm whitespace-nowrap"
           style={{
             ...btnStyle,
             background: '#0F3B1E',
@@ -298,7 +289,6 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
         <button
           onClick={onToggleVoltageDrop}
           disabled={project.lines.length === 0}
-          className="px-3 py-1.5 text-sm whitespace-nowrap"
           style={{
             ...btnStyle,
             background: '#1A2B0F',
@@ -313,7 +303,6 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
         <button
           onClick={onToggleShortCircuit}
           disabled={project.buses.length < 2}
-          className="px-3 py-1.5 text-sm whitespace-nowrap"
           style={{
             ...btnStyle,
             background: '#1A0000',
@@ -329,7 +318,6 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
         <button
           onClick={onToggleRingNetwork}
           disabled={project.buses.length < 3}
-          className="px-3 py-1.5 text-sm whitespace-nowrap"
           style={{
             ...btnStyle,
             background: '#001A00',
@@ -360,7 +348,6 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
         {/* Import legacy (Gemini scenario) */}
         <button
           onClick={() => legacyInputRef.current?.click()}
-          className="px-3 py-1.5 text-sm whitespace-nowrap"
           style={{ ...btnStyle, background: '#1A5C3A' }}
         >
           Importer
@@ -525,6 +512,8 @@ const btnStyle: React.CSSProperties = {
   color: '#E8F0FE',
   border: '1px solid #1565C0',
   borderRadius: 6,
+  padding: '4px 12px',
+  fontSize: 13,
   cursor: 'pointer',
 };
 
