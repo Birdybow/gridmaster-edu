@@ -271,18 +271,7 @@ export default function App() {
       )}
 
       {/* Version badge */}
-      <div
-        style={{
-          position: 'fixed',
-          bottom: 6,
-          left: 8,
-          fontSize: 10,
-          color: '#2A3F52',
-          pointerEvents: 'none',
-          userSelect: 'none',
-          zIndex: 5,
-        }}
-      >
+      <div className="fixed bottom-2 left-2 text-xs text-gray-500 opacity-50 z-50" style={{ pointerEvents: 'none', userSelect: 'none' }}>
         v{version}
       </div>
     </div>
