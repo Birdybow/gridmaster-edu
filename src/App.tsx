@@ -27,6 +27,7 @@ import { ProtectionHierarchyPanel } from './components/protection/ProtectionHier
 import { SelectivityPanel } from './components/protection/SelectivityPanel.js';
 import { EarthFaultPanel } from './components/earthfault/EarthFaultPanel.js';
 import { NeutralTreatmentPanel } from './components/earthfault/NeutralTreatmentPanel.js';
+import { ProductionDashboard } from './components/production/ProductionDashboard.js';
 import { useNetworkStore } from './store/useNetworkStore.js';
 
 function EditorPanel() {
@@ -129,6 +130,7 @@ export default function App() {
   const [showProtectionFloating, setShowProtectionFloating] = useState(false);
   const [showEarthFaultFloating, setShowEarthFaultFloating] = useState(false);
   const [showNeutralTreatment, setShowNeutralTreatment] = useState(false);
+  const [showProductionDashboard, setShowProductionDashboard] = useState(false);
   const [protectionHint, setProtectionHint] = useState(false);
   const [activeTab, setActiveTab] = useState<'powerflow' | 'compensation' | 'production' | 'voltagedrop' | 'shortcircuit' | 'ringnetwork' | 'protection'>('powerflow');
 
@@ -200,6 +202,7 @@ export default function App() {
         }}
         onToggleEarthFault={() => setShowEarthFaultFloating((v) => !v)}
         onToggleNeutralTreatment={() => setShowNeutralTreatment((v) => !v)}
+        onToggleProductionDashboard={() => setShowProductionDashboard((v) => !v)}
       />
 
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', position: 'relative' }}>
@@ -256,6 +259,25 @@ export default function App() {
           {/* Floating protection hierarchy panel */}
           {showProtectionFloating && (
             <ProtectionHierarchyPanel onClose={() => setShowProtectionFloating(false)} />
+          )}
+
+          {/* Floating production dashboard */}
+          {showProductionDashboard && (
+            <div
+              style={{
+                position: 'absolute',
+                top: 12,
+                left: 350,
+                width: 480,
+                maxHeight: 'calc(100vh - 120px)',
+                overflowY: 'auto',
+                zIndex: 43,
+                borderRadius: 8,
+                boxShadow: '0 4px 32px rgba(0,0,0,0.6)',
+              }}
+            >
+              <ProductionDashboard onClose={() => setShowProductionDashboard(false)} />
+            </div>
           )}
 
           {/* Floating earth fault panel */}

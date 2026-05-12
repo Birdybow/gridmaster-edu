@@ -4,6 +4,28 @@ Tekniske beslutninger og begrunnelser. Oppdateres ved hvert viktig valg.
 
 ---
 
+## Sprint 9 — 2026-05-12
+
+### BESLUTNING 33: Parabolsk η-kurve for vannkraft (k-verdi per turbintype)
+
+**Problem:** η er ikke konstant — varierer med Q/Q_n. Spec bruker én felles k=0.3. I praksis er Francis bredere (k=0.30), Pelton bedre ved lav vannføring (k=0.25), Kaplan mellom (k=0.28).
+
+**Løsning:** `calcHydroDetailed` tar k som parameter. `HydroDetailEditor` bruker type-spesifikke k-verdier fra `K_BY_TYPE`. SVG-kurve tegnes for Q/Q_n ∈ [0.2, 1.4].
+
+### BESLUTNING 34: Rayleigh PDF for vindenergi (ikke CF-tabell-oppslag)
+
+**Problem:** Kapasitetsfaktor kan hardkodes, men det gir ingen sammenheng med v_mean. Rayleigh-fordelingen er standard for vind (Weibull k=2).
+
+**Løsning:** `calcWindDetailed` integrerer P(v)·f_Rayleigh(v) numerisk med 0.5 m/s steg fra 0–30 m/s, multiplisert med 8760 h/år. CF beregnes som ratio E/E_max.
+
+### BESLUTNING 35: Månedlig solproduksjon normert mot årssum
+
+**Problem:** Initial implementasjon skalerte monthly med `(f/12) * E_år` som ga feil sum siden Σf = 5.53 ≠ 12.
+
+**Løsning:** `monthly[i] = E_år · (f[i] / Σf)`. Setter sum(monthly) = E_år eksakt. Oppdaget av Vitest-test "monthly sum ≈ annual total".
+
+---
+
 ## Sprint 8 — 2026-05-12
 
 ### BESLUTNING 32: Versjonbump-regel — alltid bump ved bugfixer

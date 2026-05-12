@@ -5,6 +5,32 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 
 ---
 
+## v9.0.0 — 2026-05-12 — Sprint 9: Kraftproduksjon Nivå 2
+
+### Lagt til
+- **S9-00** Git branch `sprint9` opprettet
+- **S9-01** `package.json` bumped til `9.0.0`
+- **S9-02** `TurbineSelector.tsx` — interaktiv valg av Francis/Pelton/Kaplan med info om H-range, CF og beskrivelse
+- **S9-03** `HydroDetailEditor.tsx` — virkningsgradskurve η(Q/Q_n) med SVG-diagram og driftsmarkør
+- **S9-04** `calcHydroDetailed(H, Q, Qn, etaMax, k)` — parabolsk η-kurve:
+  - η(Q/Q_n) = η_max · (1 − k · (Q/Q_n − 1)²), k=0.3 for Francis
+  - Fasit: Francis Q/Q_n=0.8 → P=72.12 MW (±0.1 MW) ✓
+- **S9-05** `WindPowerCurveEditor.tsx` — P(v)-grafkurve med SVG, Rayleigh-fordeling, CF-display
+- **S9-06** `calcWindDetailed(vMean, Pn, n)` — Rayleigh-vektet Σ P(v)·f(v)·8760 → {pMW, eYearMWh, CF}
+- **S9-07** `SolarSeasonEditor.tsx` — månedsprofil-stolpediagram, sesongfaktorer, vinkelanbefaling Norge
+- **S9-08** `calcSolarAnnual(pPeakMW)` — CF=0.11 for Norge, månedlig fordeling, E_år
+- **S9-08** `ProductionDashboard.tsx` — samlet oversikt: MW, MWh/år, CO₂ (t/år), CO₂-fri %
+  - CO₂-faktorer (livssyklus): Vann 4 · Vind 7 · Sol 45 · Atom 12 · Termisk 490 g/kWh
+- **S9-09** Toolbar: ny knapp "☀ Dashboard" (åpner ProductionDashboard)
+- **S9-10** 174/174 Vitest-tester grønne
+
+### Fasit-verifisering
+- Francis Q/Q_n=0.8, H=200m, Q=40 m³/s, Q_n=50 m³/s, η_max=0.93:
+  - η_akt = 0.93 · (1 − 0.3 · 0.04) = 0.9188
+  - P = 0.9188 · 1000 · 9.81 · 200 · 40 / 1e6 = **72.12 MW** ✓
+
+---
+
 ## v8.1.0 — 2026-05-12 — Versjonbump og regler
 
 ### Endret

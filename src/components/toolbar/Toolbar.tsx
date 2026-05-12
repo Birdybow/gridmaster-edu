@@ -12,12 +12,13 @@ interface ToolbarProps {
   onToggleProtection?: () => void;
   onToggleEarthFault?: () => void;
   onToggleNeutralTreatment?: () => void;
+  onToggleProductionDashboard?: () => void;
 }
 
 type CloudSaveState = 'idle' | 'input' | 'saving' | 'done' | 'error';
 type CloudLoadState = 'idle' | 'loading' | 'list' | 'error';
 
-export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVoltageDrop, onToggleShortCircuit, onToggleRingNetwork, onToggleProtection, onToggleEarthFault, onToggleNeutralTreatment }: ToolbarProps) {
+export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVoltageDrop, onToggleShortCircuit, onToggleRingNetwork, onToggleProtection, onToggleEarthFault, onToggleNeutralTreatment, onToggleProductionDashboard }: ToolbarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const legacyInputRef = useRef<HTMLInputElement>(null);
 
@@ -283,6 +284,22 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
           }}
         >
           🛡 Vern
+        </button>
+
+        {/* Produksjonsdashboard */}
+        <button
+          onClick={onToggleProductionDashboard}
+          disabled={project.generators.length === 0}
+          title="Produksjonsdashboard — MW, MWh/år, CO₂"
+          style={{
+            ...btnStyle,
+            background: '#0D1A0D',
+            color: '#A5D6A7',
+            border: '1px solid #388E3C',
+            opacity: project.generators.length === 0 ? 0.5 : 1,
+          }}
+        >
+          ☀ Dashboard
         </button>
 
         {/* Jordfeil */}
