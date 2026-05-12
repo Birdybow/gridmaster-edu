@@ -10,12 +10,13 @@ interface ToolbarProps {
   onToggleVoltageDrop?: () => void;
   onToggleShortCircuit?: () => void;
   onToggleRingNetwork?: () => void;
+  onToggleProtection?: () => void;
 }
 
 type CloudSaveState = 'idle' | 'input' | 'saving' | 'done' | 'error';
 type CloudLoadState = 'idle' | 'loading' | 'list' | 'error';
 
-export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVoltageDrop, onToggleShortCircuit, onToggleRingNetwork }: ToolbarProps) {
+export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVoltageDrop, onToggleShortCircuit, onToggleRingNetwork, onToggleProtection }: ToolbarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const legacyInputRef = useRef<HTMLInputElement>(null);
 
@@ -338,6 +339,22 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
           }}
         >
           ⭕ Ringnett
+        </button>
+
+        {/* Vernkoordinering */}
+        <button
+          onClick={onToggleProtection}
+          disabled={project.lines.length === 0}
+          className="px-3 py-1.5 text-sm whitespace-nowrap"
+          style={{
+            ...btnStyle,
+            background: '#1A1A0F',
+            border: '1px solid #827717',
+            color: '#F9A825',
+            opacity: project.lines.length === 0 ? 0.5 : 1,
+          }}
+        >
+          🛡 Vern
         </button>
 
         {/* Import legacy (Gemini scenario) */}

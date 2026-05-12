@@ -20,7 +20,9 @@ import { calcHydro, calcWind, calcSolar, calcNuclear } from '../core/production.
 import { calcVoltageDrop, calcVoltageDropPi } from '../core/voltage-drop.js';
 import { calcZThevenin, calcIk3p, calcIk2p, calcImpact, calcIk3pMin, calcContributions } from '../core/short-circuit.js';
 import { calcRingSymmetric, calcRingAsymmetric } from '../core/ring-network.js';
-import type { ShortCircuitResult, RingNetworkResult } from '../types/index.js';
+import { calcTripTime } from '../core/protection.js';
+import type { ShortCircuitResult, RingNetworkResult, SelectivityResult } from '../types/index.js';
+import type { OcCurve } from '../types/index.js';
 
 export type PowerFlowStatus = 'idle' | 'running' | 'converged' | 'failed';
 export type CompensationStatus = 'idle' | 'computing' | 'done' | 'failed';
@@ -152,6 +154,8 @@ interface NetworkState {
   showShortCircuitResults: boolean;
   showFlowDirections: boolean;
   ringNetworkResults: RingNetworkResult | null;
+  selectivityResults: SelectivityResult[];
+  showProtectionResults: boolean;
 
   // Builder state
   selectedNodeId: string | null;
@@ -172,6 +176,8 @@ interface NetworkState {
   toggleFlowDirections: () => void;
   setRingNetworkResults: (r: RingNetworkResult | null) => void;
   runRingNetwork: (busAId: string, busBId: string, busCId: string) => void;
+  runSelectivityCheck: () => void;
+  setShowProtectionResults: (v: boolean) => void;
 
   // Selection
   setSelectedNodeId: (id: string | null) => void;
@@ -210,6 +216,7 @@ interface NetworkState {
   // Protection actions
   addProtection: (p: Protection) => void;
   removeProtection: (id: string) => void;
+  updateProtection: (id: string, patch: Partial<Protection>) => void;
 
   // Builder actions
   addBusAtPosition: (type: BusType, x: number, y: number) => string;
@@ -239,6 +246,8 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
   showShortCircuitResults: false,
   showFlowDirections: false,
   ringNetworkResults: null,
+  selectivityResults: [],
+  showProtectionResults: false,
 
   selectedNodeId: null,
   selectedEdgeId: null,
@@ -255,6 +264,63 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
   setShowShortCircuitResults: (v) => set({ showShortCircuitResults: v }),
   toggleFlowDirections: () => set((s) => ({ showFlowDirections: !s.showFlowDirections })),
   setRingNetworkResults: (r) => set({ ringNetworkResults: r }),
+  setShowProtectionResults: (v) => set({ showProtectionResults: v }),
+
+  runSelectivityCheck: () => {
+    const { project } = get();
+    const { lines, protections } = project;
+    const scResults = project.results.shortCircuit ?? [];
+    const lineProt = protections.filter((p) => !!p.protectedLineId);
+    const results: SelectivityResult[] = [];
+
+    // Find adjacent protection pairs: p1 downstream of p2
+    // Line1 is downstream if line2.toBusId == line1.fromBusId
+    for (const p1 of lineProt) {
+      const l1 = lines.find((l) => l.id === p1.protectedLineId);
+      if (!l1) continue;
+
+      for (const p2 of lineProt) {
+        if (p1.id === p2.id) continue;
+        const l2 = lines.find((l) => l.id === p2.protectedLineId);
+        if (!l2) continue;
+        // p2 is immediately upstream: l2 feeds into l1 start
+        if (l2.toBusId !== l1.fromBusId && l2.fromBusId !== l1.fromBusId) continue;
+
+        // Use Ik3p_min at downstream bus (end of l1)
+        const scResult = scResults.find((r) => r.busId === l1.toBusId);
+        const ikTestA = scResult ? scResult.ik3pMinKA * 1000 : 1000;
+
+        const tms1 = p1.tms ?? 0.1;
+        const curve1 = (p1.curve ?? 'standard_inverse') as OcCurve;
+        const tms2 = p2.tms ?? 0.2;
+        const curve2 = (p2.curve ?? 'standard_inverse') as OcCurve;
+
+        const t1 = calcTripTime(tms1, p1.pickupCurrentA, ikTestA, curve1);
+        const t2 = calcTripTime(tms2, p2.pickupCurrentA, ikTestA, curve2);
+        const t1Finite = isFinite(t1);
+        const t2Finite = isFinite(t2);
+
+        let selective: boolean;
+        let marginS: number;
+        if (!t1Finite) {
+          selective = true; marginS = Infinity;
+        } else if (!t2Finite) {
+          selective = false; marginS = -Infinity;
+        } else {
+          marginS = t2 - t1;
+          selective = marginS >= 0.25;
+        }
+
+        results.push({
+          prot1Id: p1.id, prot2Id: p2.id,
+          ikTestA, t1s: t1, t2s: t2,
+          marginS, selective,
+          sensitive1: p1.pickupCurrentA < ikTestA,
+        });
+      }
+    }
+    set({ selectivityResults: results, showProtectionResults: true });
+  },
 
   runShortCircuit: (busId) => {
     const { project } = get();
@@ -633,6 +699,15 @@ export const useNetworkStore = create<NetworkState>((set, get) => ({
       project: {
         ...s.project,
         protections: s.project.protections.filter((p) => p.id !== id),
+        metadata: { ...s.project.metadata, modified: now() },
+      },
+    })),
+
+  updateProtection: (id, patch) =>
+    set((s) => ({
+      project: {
+        ...s.project,
+        protections: s.project.protections.map((p) => p.id === id ? { ...p, ...patch } : p),
         metadata: { ...s.project.metadata, modified: now() },
       },
     })),

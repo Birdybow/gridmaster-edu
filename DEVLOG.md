@@ -4,6 +4,28 @@ Tekniske beslutninger og begrunnelser. Oppdateres ved hvert viktig valg.
 
 ---
 
+## Sprint 7 — 2026-05-12
+
+### BESLUTNING 26: Analytisk IEC 60255-151 i stedet for look-up-tabell
+
+**Problem:** Vernkoordinering kan implementeres med forhåndsdefinerte kurvetabeller (interpolasjon) eller via de eksakte IEC 60255-151 analytiske formlene.
+
+**Løsning:** Bruker de analytiske formlene direkte. Fordeler: eksakt resultat, ingen interpolasjonsfeil, pedagogisk transparent (studenten ser formelen i kildekoden).
+
+**Formler implementert:**
+- Standard invers: `t = TMS · 0.14 / ((I/Is)^0.02 - 1)`
+- Veldig invers: `t = TMS · 13.5 / ((I/Is) - 1)`
+- Ekstremt invers: `t = TMS · 80 / ((I/Is)² - 1)`
+- Definit tid: `t = TMS` (direkte tidsforsinkelse)
+
+### BESLUTNING 27: Backup-feil gir selective=false
+
+**Problem:** Når backup-vern (prot2) ikke ser kortslutningsstrømmen (Is2 ≥ Ik), returnerer `calcTripTime` Infinity for t2. Spørsmål: er dette "selektivt" (prot1 løser alltid alene) eller "ikke selektivt" (backup feiler)?
+
+**Løsning:** Klassifiseres som `selective: false` — selv om prot1 løser korrekt, er det et koordineringsproblem at backup-vern ALDRI vil tre inn ved en kraftig feil. Riktig vernkoordinering krever at backup reagerer ved høye feilstrømmer.
+
+---
+
 ## Sprint 6 — 2026-05-12
 
 ### BESLUTNING 24: Analytisk ringnett-løsning ved siden av NR

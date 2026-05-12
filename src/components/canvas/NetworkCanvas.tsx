@@ -36,13 +36,14 @@ function lineToEdge(
   flowCurrentA?: number,
   loadingPercent?: number,
   showFlow?: boolean,
+  protectionStatus?: 'ok' | 'warning' | 'error' | 'present',
 ): Edge {
   return {
     id: line.id,
     source: line.fromBusId,
     target: line.toBusId,
     type: 'lineEdge',
-    data: { ...line, label: line.name, voltageDropPct, flowCurrentA, loadingPercent, showFlow },
+    data: { ...line, label: line.name, voltageDropPct, flowCurrentA, loadingPercent, showFlow, protectionStatus },
     selected: line.id === selectedEdgeId,
   };
 }
@@ -84,9 +85,11 @@ export function NetworkCanvas() {
   const lines = useNetworkStore((s) => s.project.lines);
   const transformers = useNetworkStore((s) => s.project.transformers);
   const compensators = useNetworkStore((s) => s.project.compensators);
+  const protections = useNetworkStore((s) => s.project.protections);
   const voltageDropResults = useNetworkStore((s) => s.project.results.voltageDrop);
   const powerFlowResult = useNetworkStore((s) => s.project.results.powerFlow);
   const showFlowDirections = useNetworkStore((s) => s.showFlowDirections);
+  const selectivityResults = useNetworkStore((s) => s.selectivityResults);
   const selectedNodeId = useNetworkStore((s) => s.selectedNodeId);
   const selectedEdgeId = useNetworkStore((s) => s.selectedEdgeId);
   const lineDrawingMode = useNetworkStore((s) => s.lineDrawingMode);
@@ -130,9 +133,21 @@ export function NetworkCanvas() {
       ...lines.map((l) => {
         const vdr = voltageDropResults?.find((r) => r.lineId === l.id);
         const flr = powerFlowResult?.lines.find((r) => r.lineId === l.id);
-        // Convert kA → A for display (currentKA * 1000)
         const flowA = flr ? flr.currentKA * 1000 : undefined;
-        return lineToEdge(l, selectedEdgeId, vdr?.deltaUPercent, flowA, flr?.loadingPercent, showFlowDirections && powerFlowResult?.converged);
+        // Protection status for shield icon
+        const prot = protections.find((p) => p.protectedLineId === l.id);
+        let protStatus: 'ok' | 'warning' | 'error' | 'present' | undefined;
+        if (prot) {
+          const sel = selectivityResults.find((r) => r.prot1Id === prot.id || r.prot2Id === prot.id);
+          if (sel) {
+            protStatus = sel.selective && (sel.marginS >= 0.3 || !isFinite(sel.marginS)) ? 'ok'
+              : sel.selective ? 'warning'
+              : 'error';
+          } else {
+            protStatus = 'present';
+          }
+        }
+        return lineToEdge(l, selectedEdgeId, vdr?.deltaUPercent, flowA, flr?.loadingPercent, showFlowDirections && powerFlowResult?.converged, protStatus);
       }),
       ...transformers.map((t) => trafoToEdge(t, selectedEdgeId)),
       ...compensators.map((c) => ({
@@ -145,7 +160,7 @@ export function NetworkCanvas() {
         data: {},
       })),
     ],
-    [lines, transformers, compensators, selectedEdgeId, voltageDropResults, powerFlowResult, showFlowDirections],
+    [lines, transformers, compensators, protections, selectedEdgeId, voltageDropResults, powerFlowResult, showFlowDirections, selectivityResults],
   );
 
   // Handle keyboard: Delete key, Escape

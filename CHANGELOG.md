@@ -5,6 +5,51 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 
 ---
 
+## v7.0.0 — 2026-05-12 — Sprint 7: Vernkoordinering
+
+### Lagt til
+- **S7-00** Git branch `sprint7` opprettet
+- **S7-01** `src/core/protection.ts` — `calcTripTime(tms, Is, I, curve)`:
+  - Kurver: `standard_inverse`, `very_inverse`, `extremely_inverse`, `definite_time`
+  - IEC 60255-151 formler, returnerer `Infinity` når I ≤ Is
+  - Fasit std. invers: TMS=0.1, Is=100A, I=500A → t=0.429 s
+- **S7-02** `checkSelectivity(prot1, prot2, Ik, dtMin=0.25)`:
+  - Håndterer kanttilfeller: backup-feil (t2=∞ → selective=false)
+  - Returnerer `{ selective, margin, t1, t2 }`
+- **S7-03** `src/core/protection.test.ts` — 17 Vitest-tester:
+  - Standard invers: t=0.429 s (±0.01 s) ✓
+  - Veldig invers: t=0.338 s (±0.01 s) ✓
+  - Selektivitets-kanttilfeller: backup-feil, ingen aktivering ✓
+- **S7-04** `src/components/canvas/LineEdge.tsx` — skjold-ikon (🛡) på kanter med vern:
+  - Farge: cyan=vern satt, grønn=selektiv, gul=marginal (Δt<0.3s), rød=ikke selektiv
+- **S7-05** `src/components/protection/ProtectionEditor.tsx` — sidebar-editor for vern på linje:
+  - I_s, TMS, kurvevalg, momentanutkobling (I_instant)
+  - Hint: I_s > 1.2 × I_n (laststrøm)
+  - Kobling mot I″k3p_min fra Sprint 5 — viser utløsetid og følsomhetsstatus
+- **S7-06** `src/components/protection/ProtectionHierarchyPanel.tsx` — flytende tre-panel:
+  - BFS fra slack-buss → viser vernkjede med utløsetid og selektivitets-status
+  - Grønn ✓ = selektiv, Rød ✗ = ikke selektiv, (uten vern) = uspesifisert
+- **S7-07** `src/components/protection/SelectivityPanel.tsx` — bunntab:
+  - Tabell: vern 1, vern 2, Ik, t₁, t₂, Δt, status
+  - «Kjør kontroll»-knapp som triggar `runSelectivityCheck()`
+- **S7-08** Kobling mot I″k3p_min fra Sprint 5 i editor og selektivitetskontroll
+- **S7-09** 154/154 Vitest-tester grønne
+- **S7-10** CHANGELOG + DEVLOG oppdatert
+- **S7-11** npx tsc -b ren → merget main → push
+
+### Typer lagt til (`src/types/index.ts`)
+- `OcCurve` — IEC 60255-151 kurvetyper
+- `tms`, `curve` på `Protection`-interface
+- `SelectivityResult` — resultater fra selektivitetskontroll
+
+### Store (`src/store/useNetworkStore.ts`)
+- `selectivityResults: SelectivityResult[]`
+- `showProtectionResults: boolean`
+- `updateProtection(id, patch)` — manglet fra tidligere sprint
+- `runSelectivityCheck()` — finner vernpar i serie, beregner utløsetider
+
+---
+
 ## v6.0.0 — 2026-05-12 — Sprint 6: Ringnett og strømdeling
 
 ### Lagt til

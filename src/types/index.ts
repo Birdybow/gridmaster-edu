@@ -43,6 +43,9 @@ export type ProtectionType =
   | 'earth_fault'
   | 'directional';
 
+/** IEC 60255-151 overcurrent characteristic curve */
+export type OcCurve = 'standard_inverse' | 'very_inverse' | 'extremely_inverse' | 'definite_time';
+
 // ---------------------------------------------------------------------------
 // Metadata
 // ---------------------------------------------------------------------------
@@ -185,6 +188,8 @@ export interface Protection {
   type: ProtectionType;
   pickupCurrentA: number;
   timeDelayS: number;
+  tms?: number;      // Time Multiplier Setting (0.05–1.0), IEC 60255
+  curve?: OcCurve;   // Inverse-time characteristic
   instantTrip: boolean;
   instantCurrentA?: number;
   zone1OhmPrimary?: number;
@@ -279,6 +284,17 @@ export interface CompensationResult {
   };
   currentReductionPercent: number;
   lossReductionPercent: number;
+}
+
+export interface SelectivityResult {
+  prot1Id: GmxId;      // downstream relay (closest to fault)
+  prot2Id: GmxId;      // upstream relay (backup)
+  ikTestA: number;     // test fault current [A]
+  t1s: number;         // trip time of prot1 [s]
+  t2s: number;         // trip time of prot2 [s]
+  marginS: number;     // t2 - t1 [s]
+  selective: boolean;  // margin ≥ 0.25 s
+  sensitive1: boolean; // Is1 < Ik
 }
 
 export interface VoltageDropResult {

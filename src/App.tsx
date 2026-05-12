@@ -22,6 +22,9 @@ import { ShortCircuitResultPanel } from './components/shortcircuit/ShortCircuitR
 import { RingNetworkPanel } from './components/ringnetwork/RingNetworkPanel.js';
 import { RingNetworkResultPanel } from './components/ringnetwork/RingNetworkResultPanel.js';
 import { RadialVsRingPanel } from './components/ringnetwork/RadialVsRingPanel.js';
+import { ProtectionEditor } from './components/protection/ProtectionEditor.js';
+import { ProtectionHierarchyPanel } from './components/protection/ProtectionHierarchyPanel.js';
+import { SelectivityPanel } from './components/protection/SelectivityPanel.js';
 import { useNetworkStore } from './store/useNetworkStore.js';
 
 function EditorPanel() {
@@ -101,6 +104,9 @@ function EditorPanel() {
         {/* Line editor */}
         {isLine && <LineEditor />}
 
+        {/* Protection editor — shown below line editor */}
+        {isLine && <ProtectionEditor />}
+
         {/* Transformer editor */}
         {isTransformer && <TransformerEditor />}
 
@@ -118,7 +124,8 @@ export default function App() {
   const [showVoltageDropFloating, setShowVoltageDropFloating] = useState(false);
   const [showShortCircuitFloating, setShowShortCircuitFloating] = useState(false);
   const [showRingNetworkFloating, setShowRingNetworkFloating] = useState(false);
-  const [activeTab, setActiveTab] = useState<'powerflow' | 'compensation' | 'production' | 'voltagedrop' | 'shortcircuit' | 'ringnetwork'>('powerflow');
+  const [showProtectionFloating, setShowProtectionFloating] = useState(false);
+  const [activeTab, setActiveTab] = useState<'powerflow' | 'compensation' | 'production' | 'voltagedrop' | 'shortcircuit' | 'ringnetwork' | 'protection'>('powerflow');
 
   const powerFlow = useNetworkStore((s) => s.project.results.powerFlow);
   const showResults = useNetworkStore((s) => s.showResults);
@@ -144,15 +151,21 @@ export default function App() {
   const hasSC = shortCircuitResults.length > 0 && showShortCircuitResults;
   const rawRingResult = useNetworkStore((s) => s.ringNetworkResults);
   const hasRing = rawRingResult !== null;
-  const showBottom = hasPF || hasComp || hasProd || hasVD || hasSC || hasRing;
+  const selectivityResults = useNetworkStore((s) => s.selectivityResults);
+  const showProtectionResults = useNetworkStore((s) => s.showProtectionResults);
+  const setShowProtectionResults = useNetworkStore((s) => s.setShowProtectionResults);
+  const hasProt = selectivityResults.length > 0 && showProtectionResults;
+  const showBottom = hasPF || hasComp || hasProd || hasVD || hasSC || hasRing || hasProt;
 
   const resolvedTab =
-    activeTab === 'ringnetwork' && hasRing ? 'ringnetwork'
+    activeTab === 'protection' && hasProt ? 'protection'
+    : activeTab === 'ringnetwork' && hasRing ? 'ringnetwork'
     : activeTab === 'shortcircuit' && hasSC ? 'shortcircuit'
     : activeTab === 'voltagedrop' && hasVD ? 'voltagedrop'
     : activeTab === 'compensation' && hasComp ? 'compensation'
     : activeTab === 'production' && hasProd ? 'production'
     : activeTab === 'powerflow' && hasPF ? 'powerflow'
+    : hasProt ? 'protection'
     : hasRing ? 'ringnetwork'
     : hasSC ? 'shortcircuit'
     : hasVD ? 'voltagedrop'
@@ -168,6 +181,7 @@ export default function App() {
         onToggleVoltageDrop={() => { setShowVoltageDropFloating((v) => !v); setActiveTab('voltagedrop'); }}
         onToggleShortCircuit={() => { setShowShortCircuitFloating((v) => !v); setActiveTab('shortcircuit'); }}
         onToggleRingNetwork={() => { setShowRingNetworkFloating((v) => !v); setActiveTab('ringnetwork'); }}
+        onToggleProtection={() => { setShowProtectionFloating((v) => !v); setActiveTab('protection'); }}
       />
 
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex', position: 'relative' }}>
@@ -219,6 +233,11 @@ export default function App() {
           {/* Floating ring network panel */}
           {showRingNetworkFloating && (
             <RingNetworkPanel onClose={() => setShowRingNetworkFloating(false)} />
+          )}
+
+          {/* Floating protection hierarchy panel */}
+          {showProtectionFloating && (
+            <ProtectionHierarchyPanel onClose={() => setShowProtectionFloating(false)} />
           )}
 
           {/* Floating compensation input panel */}
@@ -360,6 +379,24 @@ export default function App() {
                 ⭕ Ringnett
               </button>
             )}
+            {hasProt && (
+              <button
+                onClick={() => setActiveTab('protection')}
+                style={{
+                  background: resolvedTab === 'protection' ? '#1A1A00' : 'none',
+                  border: 'none',
+                  borderRight: '1px solid #1565C0',
+                  borderBottom: resolvedTab === 'protection' ? '2px solid #F9A825' : '2px solid transparent',
+                  color: resolvedTab === 'protection' ? '#F9A825' : '#607D8B',
+                  cursor: 'pointer',
+                  padding: '6px 16px',
+                  fontSize: 12,
+                  fontWeight: resolvedTab === 'protection' ? 600 : 400,
+                }}
+              >
+                🛡 Vernkoordinering
+              </button>
+            )}
           </div>
 
           {resolvedTab === 'powerflow' && hasPF && (
@@ -413,6 +450,9 @@ export default function App() {
               <div style={{ width: 1, background: '#1B5E20' }} />
               <RadialVsRingPanel />
             </div>
+          )}
+          {resolvedTab === 'protection' && hasProt && (
+            <SelectivityPanel onClose={() => setShowProtectionResults(false)} />
           )}
         </div>
       )}

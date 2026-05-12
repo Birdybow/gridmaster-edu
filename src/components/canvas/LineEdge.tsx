@@ -9,6 +9,7 @@ interface LineEdgeData extends Partial<Line> {
   flowCurrentA?: number;
   loadingPercent?: number;
   showFlow?: boolean;
+  protectionStatus?: 'ok' | 'warning' | 'error' | 'present';
 }
 
 function voltageDropColor(pct: number | undefined, lineType: string): string {
@@ -48,6 +49,13 @@ function LineEdgeComponent({
   const stroke = voltageDropColor(data?.voltageDropPct, lineType);
   const strokeDasharray = lineType === 'cable' ? '6 3' : undefined;
   const label = data?.label ?? data?.name;
+
+  const protStatus = data?.protectionStatus;
+  const shieldColor =
+    protStatus === 'ok' ? '#4CAF50' :
+    protStatus === 'warning' ? '#FFB74D' :
+    protStatus === 'error' ? '#EF5350' :
+    protStatus === 'present' ? '#4FC3F7' : null;
 
   const showFlow = data?.showFlow && data?.flowCurrentA !== undefined;
   const currentA = data?.flowCurrentA ?? 0;
@@ -97,8 +105,8 @@ function LineEdgeComponent({
         />
       )}
 
-      {label && (
-        <EdgeLabelRenderer>
+      <EdgeLabelRenderer>
+        {label && (
           <div
             style={{
               position: 'absolute',
@@ -114,8 +122,24 @@ function LineEdgeComponent({
           >
             {label}
           </div>
-        </EdgeLabelRenderer>
-      )}
+        )}
+        {shieldColor && (
+          <div
+            style={{
+              position: 'absolute',
+              transform: `translate(-50%, -50%) translate(${labelX + 28}px,${labelY}px)`,
+              pointerEvents: 'none',
+              fontSize: 12,
+              color: shieldColor,
+              textShadow: `0 0 4px ${shieldColor}`,
+              userSelect: 'none',
+            }}
+            title="Overstrømsvern"
+          >
+            🛡
+          </div>
+        )}
+      </EdgeLabelRenderer>
     </>
   );
 }
