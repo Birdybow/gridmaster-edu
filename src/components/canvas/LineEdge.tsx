@@ -2,6 +2,7 @@ import { memo } from 'react';
 import { BaseEdge, EdgeLabelRenderer, getBezierPath } from 'reactflow';
 import type { EdgeProps } from 'reactflow';
 import type { Line } from '../../types/index.js';
+import { getFlowState, FLOW_COLORS } from '../../utils/flow-color.js';
 
 interface LineEdgeData extends Partial<Line> {
   label?: string;
@@ -9,6 +10,7 @@ interface LineEdgeData extends Partial<Line> {
   flowCurrentA?: number;
   loadingPercent?: number;
   showFlow?: boolean;
+  isOpposing?: boolean;
   protectionStatus?: 'ok' | 'warning' | 'error' | 'present';
   protTripTimeS?: number;
 }
@@ -18,13 +20,6 @@ function voltageDropColor(pct: number | undefined, lineType: string): string {
   if (pct < 5) return '#4CAF50';
   if (pct < 10) return '#FFB74D';
   return '#EF5350';
-}
-
-function flowColor(loadingPct: number | undefined): string {
-  if (loadingPct === undefined) return '#4CAF50';
-  if (loadingPct > 100) return '#EF5350';
-  if (loadingPct > 70) return '#FFB74D';
-  return '#4CAF50';
 }
 
 function LineEdgeComponent({
@@ -61,14 +56,18 @@ function LineEdgeComponent({
 
   const showFlow = data?.showFlow && data?.flowCurrentA !== undefined;
   const currentA = data?.flowCurrentA ?? 0;
-  const loadingPct = data?.loadingPercent;
-  const arrowColor = flowColor(loadingPct);
+  const absA = Math.abs(currentA);
+
+  const flowState = getFlowState({ currentA, isOpposing: data?.isOpposing });
+  const arrowColor = FLOW_COLORS[flowState];
 
   // Speed: faster current = shorter animation duration (capped 0.5s–3s)
-  const absA = Math.abs(currentA);
   const durationS = absA > 0 ? Math.max(0.5, Math.min(3, 300 / absA)) : 2;
   // Reverse direction if current is negative (flows from target to source)
   const animDir = currentA >= 0 ? 'normal' : 'reverse';
+
+  // Reversed flow: dashed red pattern; opposing: solid orange; normal: solid green
+  const flowDasharray = flowState === 'reversed' ? '8 8' : '12 12';
 
   const animId = `flow-${id}`;
 
@@ -97,7 +96,7 @@ function LineEdgeComponent({
           fill="none"
           stroke={arrowColor}
           strokeWidth={3}
-          strokeDasharray="12 12"
+          strokeDasharray={flowDasharray}
           strokeLinecap="round"
           style={{
             animation: `${animId} ${durationS}s linear infinite`,

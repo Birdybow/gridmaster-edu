@@ -5,6 +5,31 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 
 ---
 
+## v14.0.0 / v1.1.0 — 2026-05-13 — Sprint 14: Sikkerhets-fiks + toveis lastflyt-flow
+
+### Del A — Fjern skylagring fra UI
+
+- **S14-00** Git branch `sprint14` opprettet
+- **S14-01** `package.json` bumped til `14.0.0` (produkt: v1.1.0)
+- **S14-02** `Toolbar.tsx` — fjernet "☁ Lagre til sky" og "☁ Åpne fra sky"-knapper, alle cloud-tilstander og dialogen. Importert kun `saveProject`, `loadProject`, `importLegacyGmx`. Sky-funksjonene i `gmx.ts` beholdes urørt for v2.x.
+- **S14-03** `OnboardingTour.tsx` — TOUR_KEY bumped til v14, steg-tekst oppdatert: "lokalt (.gmx)" presisert, sky-referanser fjernet
+- **S14-04** `HelpPage.tsx` — versjonsfooter v13.0.0 → v14.0.0, hurtigtast-tekst presisert til "Lagre lokalt"
+- **S14-05** Verifisert: `saveToCloud`/`loadFromCloud`/`listCloudProjects` kalles ikke fra noe annet sted enn `gmx.ts` (ingen autosave, hints, etc.)
+
+### Del B — Toveis lastflyt-flow med fargekoding
+
+- **S14-08** `src/utils/flow-color.ts` — ny utility: `FlowState` (`normal|opposing|reversed|idle`), `FLOW_COLORS` (grønn/oransje/rød/grå), `getFlowState()`, `getFlowColor()`
+- **S14-09** `LineEdge.tsx` — oppgradert med ny farge-logikk: `normal` (grønn #2E7D32), `opposing` (oransje #F57C00, via `isOpposing`-prop), `reversed` (rød stiplet #C62828), `idle` (grå #90A4AE). `isOpposing` lag til `LineEdgeData`.
+- **S14-10** `package.json` test:e2e-script fikset: cross-env TEMP-override for Playwright på Windows
+
+### Verifikasjon
+
+- `npx tsc -b` — ingen feil
+- Vitest: 260/260 grønne
+- Playwright E2E: 11/11 grønne
+
+---
+
 ## v13.0.0 / v1.0.0 — 2026-05-12 — Sprint 13: PRODUKSJONSKLAR (siste sprint)
 
 ### Lagt til

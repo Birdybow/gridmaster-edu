@@ -106,7 +106,7 @@ const SECTIONS = [
       { name: 'Velg komponent', formula: 'Klikk', note: 'Åpner editor i høyre panel' },
       { name: 'Slett komponent', formula: 'Delete / Backspace', note: 'Sletter valgt element' },
       { name: 'Ny buss', formula: 'ComponentPanel → dra', note: 'Dra fra venstre panel' },
-      { name: 'Lagre', formula: 'Fil → Lagre', note: 'Laster ned .gmx-fil' },
+      { name: 'Lagre lokalt', formula: 'Fil → Lagre .gmx', note: 'Laster ned .gmx-fil til datamaskinen' },
     ],
   },
 ];
@@ -168,7 +168,7 @@ export function HelpPage({ onClose }: HelpPageProps) {
           ))}
 
           <div style={{ borderTop: '1px solid #1E3A5F', paddingTop: 16, color: '#37474F', fontSize: 11, textAlign: 'center' }}>
-            GridMaster Edu v13.0.0 — © 2026 Bård Reinton-Kjellhov — Malakoff Videregående skole / 00TE13I
+            GridMaster Edu v14.0.0 — © 2026 Bård Reinton-Kjellhov — Malakoff Videregående skole / 00TE13I
           </div>
         </div>
       </div>
