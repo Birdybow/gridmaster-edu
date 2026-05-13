@@ -93,7 +93,6 @@ export function NetworkCanvas() {
   const powerFlowResult = useNetworkStore((s) => s.project.results.powerFlow);
   const showFlowDirections = useNetworkStore((s) => s.showFlowDirections);
   const scResults = useNetworkStore((s) => s.project.results.shortCircuit);
-  const ringNetworkResults = useNetworkStore((s) => s.ringNetworkResults);
   const selectedNodeId = useNetworkStore((s) => s.selectedNodeId);
   const selectedEdgeId = useNetworkStore((s) => s.selectedEdgeId);
   const lineDrawingMode = useNetworkStore((s) => s.lineDrawingMode);
@@ -132,30 +131,37 @@ export function NetworkCanvas() {
     [buses, compensators, selectedNodeId],
   );
 
-  // Determine which lines carry current opposing their expected ring direction.
-  // A segment is "opposing" when the NR power flow shows current in the opposite
-  // direction from what the ring analytical model expects (fromBusId → toBusId).
+  // Detect "opposing" lines automatically: a line with reversed NR current that is
+  // part of a ring (an alternative path exists between its endpoints). BFS is cheap
+  // for the small networks GridMaster handles (typically < 20 buses).
   const ringOpposingSet = useMemo(() => {
     const s = new Set<string>();
-    if (!ringNetworkResults || !powerFlowResult?.converged) return s;
-    for (const branch of ringNetworkResults.branches) {
-      const line = lines.find(
-        (l) => (l.fromBusId === branch.fromBusId && l.toBusId === branch.toBusId) ||
-                (l.fromBusId === branch.toBusId && l.toBusId === branch.fromBusId),
-      );
-      if (!line) continue;
+    if (!powerFlowResult?.converged) return s;
+    for (const line of lines) {
       const flr = powerFlowResult.lines.find((r) => r.lineId === line.id);
       if (!flr) continue;
-      // Ring expects current flowing fromBusId → toBusId (positive in that convention).
-      // If the line is stored in the same direction: NR negative → opposing.
-      // If stored in reverse direction: NR positive → opposing.
-      const lineIsForward = line.fromBusId === branch.fromBusId;
       const nrCurrentA = flr.currentKA * 1000;
-      const isOpposing = lineIsForward ? nrCurrentA < -0.1 : nrCurrentA > 0.1;
-      if (isOpposing) s.add(line.id);
+      if (nrCurrentA >= -0.1) continue; // only candidate if current is reversed
+      // BFS: can we reach toBusId from fromBusId without this line?
+      const target = line.toBusId;
+      const visited = new Set<string>();
+      const queue = [line.fromBusId];
+      let found = false;
+      while (queue.length > 0 && !found) {
+        const curr = queue.shift()!;
+        if (curr === target) { found = true; break; }
+        if (visited.has(curr)) continue;
+        visited.add(curr);
+        for (const l of lines) {
+          if (l.id === line.id) continue;
+          if (l.fromBusId === curr && !visited.has(l.toBusId)) queue.push(l.toBusId);
+          if (l.toBusId === curr && !visited.has(l.fromBusId)) queue.push(l.fromBusId);
+        }
+      }
+      if (found) s.add(line.id);
     }
     return s;
-  }, [ringNetworkResults, powerFlowResult, lines]);
+  }, [powerFlowResult, lines]);
 
   const edges: Edge[] = useMemo(
     () => [

@@ -1,3 +1,5 @@
+import { PRODUCT_VERSION } from '../../version.js';
+
 interface HelpPageProps {
   onClose: () => void;
 }
@@ -168,7 +170,7 @@ export function HelpPage({ onClose }: HelpPageProps) {
           ))}
 
           <div style={{ borderTop: '1px solid #1E3A5F', paddingTop: 16, color: '#37474F', fontSize: 11, textAlign: 'center' }}>
-            GridMaster Edu v14.0.0 — © 2026 Bård Reinton-Kjellhov — Malakoff Videregående skole / 00TE13I
+            GridMaster Edu v{PRODUCT_VERSION} — © 2026 Bård Reinton-Kjellhov — Malakoff Videregående skole / 00TE13I
           </div>
         </div>
       </div>
