@@ -5,6 +5,21 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 
 ---
 
+## v14.0.0 / v1.1.0-patch1 — 2026-05-13 — Regresjonsfix etter Sprint 14 merge
+
+### Bug-fixes (produksjonsregresjoner)
+
+- **FIX-01** `RingNetworkPanel.tsx` — `position: fixed` → `position: absolute`, `zIndex: 200` → `40`. Root cause: fixed-posisjonering var viewport-relativ og overlappet EditorPanel (280px høyre side), noe som blokkerte alle klikk-events i linje-editor og LineLibrary-dropdown.
+- **FIX-02** `LineEdge.tsx` — animert `<path>` fikk `pointerEvents: 'none'`. Inline `@keyframes` i SVG `<defs>` erstattet med global `@keyframes flow-dash` i `index.css`. Rydder opp i cross-browser inkonsistens ved dynamisk fjerning av style-tagger.
+- **FIX-03** `ValidationPanel.tsx` — ny dismiss-UX: (×) lukkeknapp øverst til høyre, "Tøm advarsler"-knapp for warnings-only, auto-dismiss av MESHED_NETWORK etter 5 sekunder. State reset når `validationResult` endres (f.eks. ny lastflyt-kjøring).
+
+### Verifikasjon
+
+- `npx tsc -b` — ingen feil
+- Vitest: 275/275 grønne
+
+---
+
 ## v14.0.0 / v1.1.0 — 2026-05-13 — Sprint 14: Sikkerhets-fiks + toveis lastflyt-flow
 
 ### Del A — Fjern skylagring fra UI

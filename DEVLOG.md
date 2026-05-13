@@ -4,6 +4,30 @@ Tekniske beslutninger og begrunnelser. Oppdateres ved hvert viktig valg.
 
 ---
 
+## Regresjonsfix — 2026-05-13 (v1.1.0-patch1)
+
+### BESLUTNING 49: RingNetworkPanel — position:fixed → position:absolute
+
+**Problem:** `RingNetworkPanel` brukte `position: fixed` (viewport-relativ) med `zIndex: 200`, men rendres inne i canvas-diven. Når EditorPanel er åpen (280px høyre panel), overlappet RingNetworkPanel den og blokkerte alle klikk-events — inkludert LineLibrary-dropdown (Bug 1) og andre kontroller i EditorPanel.
+
+**Løsning:** `position: absolute` (canvas-relativ) og `zIndex: 40` (konsistent med andre floating panels). Canvas-diven har `position: relative` og `overflow: hidden`, så panelet holdes korrekt innenfor canvas-området.
+
+**Merk:** Alle andre floating panels (VoltageDropPanel, ShortCircuitPanel, etc.) brukte allerede `position: absolute`. RingNetworkPanel var det eneste unntaket — en arve-feil fra Sprint 6.
+
+### BESLUTNING 50: LineEdge animasjon — pointer-events:none + global @keyframes
+
+**Problem:** Animert `<path>` i LineEdge hadde ingen `pointer-events: none`, noe som interceptet mus-events på kanten. Inline `@keyframes` i SVG `<defs>` ble dynamisk opprettet/fjernet ved state-endringer og har inkonsistent browser-atferd ved fjerning.
+
+**Løsning:** `pointerEvents: 'none'` på animasjonsbane (animations er rent visuell). Global `@keyframes flow-dash` i `index.css` erstatter alle per-edge inline styles.
+
+### BESLUTNING 51: ValidationPanel — dismiss-UX for MESHED_NETWORK
+
+**Problem:** ValidationPanel hadde ingen dismiss-mekanisme. MESHED_NETWORK-advarselen (pre-existing siden Sprint 6) ble permanent synlig i ringnett-topologier og kunne ikke lukkes.
+
+**Løsning:** Lokal `dismissed`-state med useEffect som auto-dismisser MESHED_NETWORK etter 5s. Lukkeknapp (×) + "Tøm advarsler"-knapp lagt til. State reset ved ny `validationResult` slik at feil alltid er synlige etter ny lastflyt-kjøring.
+
+---
+
 ## Sprint 14 — 2026-05-13 (v14.0.0 / v1.1.0)
 
 ### BESLUTNING 46: Skylagring fjernet fra UI — arkitektur beholdt
