@@ -49,15 +49,15 @@ export function RingNetworkPanel({ onClose }: Props) {
   return (
     <div
       style={{
-        position: 'fixed',
-        top: 80,
-        right: 16,
+        position: 'absolute',
+        top: 12,
+        right: 12,
         width: 260,
         background: '#001A00',
         border: '1px solid #1B5E20',
         borderRadius: 8,
         padding: 12,
-        zIndex: 200,
+        zIndex: 40,
         boxShadow: '0 4px 24px rgba(0,0,0,0.7)',
         color: '#E8F0FE',
         fontSize: 12,

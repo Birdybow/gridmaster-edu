@@ -69,21 +69,8 @@ function LineEdgeComponent({
   // Reversed flow: dashed red pattern; opposing: solid orange; normal: solid green
   const flowDasharray = flowState === 'reversed' ? '8 8' : '12 12';
 
-  const animId = `flow-${id}`;
-
   return (
     <>
-      <defs>
-        {showFlow && (
-          <style>{`
-            @keyframes ${animId} {
-              from { stroke-dashoffset: 24; }
-              to   { stroke-dashoffset: 0; }
-            }
-          `}</style>
-        )}
-      </defs>
-
       <BaseEdge
         id={id}
         path={edgePath}
@@ -99,9 +86,10 @@ function LineEdgeComponent({
           strokeDasharray={flowDasharray}
           strokeLinecap="round"
           style={{
-            animation: `${animId} ${durationS}s linear infinite`,
+            animation: `flow-dash ${durationS}s linear infinite`,
             animationDirection: animDir,
             opacity: 0.85,
+            pointerEvents: 'none',
           }}
         />
       )}
