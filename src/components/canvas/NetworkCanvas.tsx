@@ -140,8 +140,9 @@ export function NetworkCanvas() {
     for (const line of lines) {
       const flr = powerFlowResult.lines.find((r) => r.lineId === line.id);
       if (!flr) continue;
-      const nrCurrentA = flr.currentKA * 1000;
-      if (nrCurrentA >= -0.1) continue; // only candidate if current is reversed
+      // currentKA is always a magnitude (≥0); use pFromMW sign to reconstruct direction
+      const signedA = flr.pFromMW >= 0 ? flr.currentKA * 1000 : -(flr.currentKA * 1000);
+      if (signedA >= -0.1) continue; // only candidate if power flows reversed (to→from)
       // BFS: can we reach toBusId from fromBusId without this line?
       const target = line.toBusId;
       const visited = new Set<string>();
@@ -168,7 +169,10 @@ export function NetworkCanvas() {
       ...lines.map((l) => {
         const vdr = voltageDropResults?.find((r) => r.lineId === l.id);
         const flr = powerFlowResult?.lines.find((r) => r.lineId === l.id);
-        const flowA = flr ? flr.currentKA * 1000 : undefined;
+        // currentKA is always ≥0 (magnitude); sign direction from pFromMW
+        const flowA = flr
+          ? (flr.pFromMW >= 0 ? 1 : -1) * flr.currentKA * 1000
+          : undefined;
         // Protection status for shield icon — based on SC sensitivity
         const prot = protections.find((p) => p.protectedLineId === l.id);
         let protStatus: 'ok' | 'warning' | 'error' | 'present' | undefined;
