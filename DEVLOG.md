@@ -4,6 +4,18 @@ Tekniske beslutninger og begrunnelser. Oppdateres ved hvert viktig valg.
 
 ---
 
+## Bug 4-fix — 2026-05-14 (v1.1.0-patch2)
+
+### BESLUTNING 52: currentKA er magnitude — bruk pFromMW for fortegn
+
+**Problem:** `newton-raphson.ts` beregner `currentKA = sqrt(iijR²+iijI²) * iBase / 1000` — alltid positiv magnitude. BFS i `ringOpposingSet` sjekket `nrCurrentA < -0.1`, noe som aldri var sant. Alle linjer ble grønne (normal), aldri oransje (opposing) eller rød (reversed).
+
+**Løsning:** `pFromMW` har korrekt fortegn: >0 = strøm fra→til, <0 = strøm til→fra. Bruk dette til å rekonstruere fortegnet: `signedA = pFromMW >= 0 ? +currentKA*1000 : -currentKA*1000`. Brukes i to steder: BFS-betingelse i `ringOpposingSet`, og `flowA` sendt til LineEdge.
+
+**Konsekvens:** `reversed` (rød stiplet) og `opposing` (oransje) virker nå. `animDir` (pilretning) er også fikset siden den bruker fortegnet av `flowA`.
+
+---
+
 ## Regresjonsfix — 2026-05-13 (v1.1.0-patch1)
 
 ### BESLUTNING 49: RingNetworkPanel — position:fixed → position:absolute

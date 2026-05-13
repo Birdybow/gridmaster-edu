@@ -5,6 +5,19 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 
 ---
 
+## v14.0.0 / v1.1.0-patch2 — 2026-05-14 — Bug 4: opposing/reversed flow aldri trigget
+
+### Bug-fix
+
+- **FIX-04** `NetworkCanvas.tsx` — `currentKA` i NR-resultatet er alltid en magnitude (≥0, aldri negativ). BFS-betingelsen `nrCurrentA < -0.1` var dermed alltid usann → `ringOpposingSet` alltid tom. Fikset ved å bruke `pFromMW`-fortegnet: `signedA = pFromMW >= 0 ? +currentKA*1000 : -currentKA*1000`. Samme fix for `flowA` sendt til LineEdge — sikrer at `reversed`-state (rød stiplet) og pilretning (`animDir`) også er korrekt.
+
+### Verifikasjon
+
+- `npx tsc -b` — ingen feil
+- Vitest: 275/275 grønne
+
+---
+
 ## v14.0.0 / v1.1.0-patch1 — 2026-05-13 — Regresjonsfix etter Sprint 14 merge
 
 ### Bug-fixes (produksjonsregresjoner)
