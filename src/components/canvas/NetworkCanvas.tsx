@@ -39,13 +39,14 @@ function lineToEdge(
   showFlow?: boolean,
   protectionStatus?: 'ok' | 'warning' | 'error' | 'present',
   protTripTimeS?: number,
+  isOpposing?: boolean,
 ): Edge {
   return {
     id: line.id,
     source: line.fromBusId,
     target: line.toBusId,
     type: 'lineEdge',
-    data: { ...line, label: line.name, voltageDropPct, flowCurrentA, loadingPercent, showFlow, protectionStatus, protTripTimeS },
+    data: { ...line, label: line.name, voltageDropPct, flowCurrentA, loadingPercent, showFlow, protectionStatus, protTripTimeS, isOpposing },
     selected: line.id === selectedEdgeId,
   };
 }
@@ -130,6 +131,38 @@ export function NetworkCanvas() {
     [buses, compensators, selectedNodeId],
   );
 
+  // Detect "opposing" lines automatically: a line with reversed NR current that is
+  // part of a ring (an alternative path exists between its endpoints). BFS is cheap
+  // for the small networks GridMaster handles (typically < 20 buses).
+  const ringOpposingSet = useMemo(() => {
+    const s = new Set<string>();
+    if (!powerFlowResult?.converged) return s;
+    for (const line of lines) {
+      const flr = powerFlowResult.lines.find((r) => r.lineId === line.id);
+      if (!flr) continue;
+      const nrCurrentA = flr.currentKA * 1000;
+      if (nrCurrentA >= -0.1) continue; // only candidate if current is reversed
+      // BFS: can we reach toBusId from fromBusId without this line?
+      const target = line.toBusId;
+      const visited = new Set<string>();
+      const queue = [line.fromBusId];
+      let found = false;
+      while (queue.length > 0 && !found) {
+        const curr = queue.shift()!;
+        if (curr === target) { found = true; break; }
+        if (visited.has(curr)) continue;
+        visited.add(curr);
+        for (const l of lines) {
+          if (l.id === line.id) continue;
+          if (l.fromBusId === curr && !visited.has(l.toBusId)) queue.push(l.toBusId);
+          if (l.toBusId === curr && !visited.has(l.fromBusId)) queue.push(l.fromBusId);
+        }
+      }
+      if (found) s.add(line.id);
+    }
+    return s;
+  }, [powerFlowResult, lines]);
+
   const edges: Edge[] = useMemo(
     () => [
       ...lines.map((l) => {
@@ -158,7 +191,7 @@ export function NetworkCanvas() {
             protStatus = 'present';
           }
         }
-        return lineToEdge(l, selectedEdgeId, vdr?.deltaUPercent, flowA, flr?.loadingPercent, showFlowDirections && powerFlowResult?.converged, protStatus, protTripTimeS);
+        return lineToEdge(l, selectedEdgeId, vdr?.deltaUPercent, flowA, flr?.loadingPercent, showFlowDirections && powerFlowResult?.converged, protStatus, protTripTimeS, ringOpposingSet.has(l.id));
       }),
       ...transformers.map((t) => trafoToEdge(t, selectedEdgeId)),
       ...compensators.map((c) => ({
@@ -171,7 +204,7 @@ export function NetworkCanvas() {
         data: {},
       })),
     ],
-    [lines, transformers, compensators, protections, selectedEdgeId, voltageDropResults, powerFlowResult, showFlowDirections, scResults],
+    [lines, transformers, compensators, protections, selectedEdgeId, voltageDropResults, powerFlowResult, showFlowDirections, scResults, ringOpposingSet],
   );
 
   // Handle keyboard: Delete key, Escape

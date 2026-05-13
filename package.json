@@ -1,7 +1,7 @@
 {
   "name": "gridmaster-edu",
   "private": true,
-  "version": "13.0.0",
+  "version": "14.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -9,7 +9,7 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "cross-env TEMP=%USERPROFILE%\\AppData\\Local\\Temp TMP=%USERPROFILE%\\AppData\\Local\\Temp vitest run",
-    "test:e2e": "playwright test"
+    "test:e2e": "cross-env TEMP=%USERPROFILE%\\AppData\\Local\\Temp TMP=%USERPROFILE%\\AppData\\Local\\Temp playwright test"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.105.4",

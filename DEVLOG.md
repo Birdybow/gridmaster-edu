@@ -4,6 +4,32 @@ Tekniske beslutninger og begrunnelser. Oppdateres ved hvert viktig valg.
 
 ---
 
+## Sprint 14 — 2026-05-13 (v14.0.0 / v1.1.0)
+
+### BESLUTNING 46: Skylagring fjernet fra UI — arkitektur beholdt
+
+**Problem:** Supabase-skylagring (Sprint 3.5) er implementert uten brukerautentisering. Alle brukere kan se og endre alle prosjekter (ingen row-level isolation i praksis). Sikkerhetsrisiko for elever.
+
+**Løsning:** Fjerne alle UI-inngangspunkter (toolbar-knapper, dialogs, state-variabler) i Toolbar.tsx. `saveToCloud`, `loadFromCloud`, `listCloudProjects` og `CloudProjectSummary` beholdes i `gmx.ts` og `types/index.ts` for reaktivering i v2.x med autentisering. PL gjør hard reset av Supabase-tabell manuelt.
+
+**Valg:** Ingen advarseltid til brukere — det ligger nesten ingenting i tabellen (bekreftet av PL).
+
+### BESLUTNING 47: getFlowColor — tilstandsmaskin basert på strømsign + isOpposing-flag
+
+**Problem:** Sprint 6 viser animerte strømpiler, men fargen er kun basert på lastprosent (grønn/gul/rød). For toveis lastflyt-flow i ringnett trengs retningsinformasjon.
+
+**Løsning:** `src/utils/flow-color.ts` implementerer en fire-tilstands fargelogikk: `idle` (|I| < 0.1 A) → grå, `reversed` (I < 0) → rød stiplet, `opposing` (isOpposing=true) → oransje, `normal` (I > 0) → grønn. `isOpposing` er et eksplisitt flag i `LineEdgeData` som ringnett-analyse kan sette i v2.x. Animasjonsretning (`animDir`) beholdes fra Sprint 6 slik at strømpilene faktisk beveger seg i riktig retning.
+
+**Topologi-analyse utsatt:** `isOpposing`-deteksjon fra ringnett-topologi krever analyse av strøm-signatur per linje mot forventet retning i ringen. Dette er ikke implementert i Sprint 14 — flagget settes fra utsiden når ringnett-panelet eventuelt eksponerer det. Ingen eskalering nødvendig siden eskalerings-terskelen er > 2 timers arbeid.
+
+### BESLUTNING 48: Playwright TEMP-fix
+
+**Problem:** `npm run test:e2e` feiler med `EPERM: operation not permitted, mkdtemp 'C:\Windows\Temp\...'` på Windows fordi Playwright forsøker å opprette tempfiler i `C:\Windows\Temp` (ingen skrivetilgang uten admin).
+
+**Løsning:** `test:e2e`-script fikset med samme `cross-env TEMP=... TMP=...`-mønster som allerede brukes for Vitest. Playwright installeres med `$env:TEMP` satt eksplisitt i PowerShell-sesjonen.
+
+---
+
 ## Sprint 13 — 2026-05-12 (SISTE SPRINT — v1.0.0 PRODUKSJONSKLAR)
 
 ### BESLUTNING 43: REN-regler — rene funksjoner + prosjektnivå-validator

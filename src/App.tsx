@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { version } from '../package.json';
+import { PRODUCT_VERSION } from './version.js';
 import { Toolbar } from './components/toolbar/Toolbar.js';
 import { NetworkCanvas } from './components/canvas/NetworkCanvas.js';
 import { ResultPanel } from './components/results/ResultPanel.js';
@@ -669,7 +669,7 @@ export default function App() {
       {/* Copyright + version badge */}
       <div className="fixed bottom-2 left-2 z-50 text-xs text-gray-500 opacity-40 select-none pointer-events-none leading-relaxed">
         <div>© 2026 Bård Reinton-Kjellhov</div>
-        <div>v{version}</div>
+        <div>v{PRODUCT_VERSION}</div>
       </div>
     </div>
   );

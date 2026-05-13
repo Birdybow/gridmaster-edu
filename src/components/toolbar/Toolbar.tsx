@@ -1,8 +1,6 @@
 import { useRef, useState } from 'react';
 import { useNetworkStore } from '../../store/useNetworkStore.js';
-import { saveProject, loadProject, importLegacyGmx, saveToCloud, loadFromCloud, listCloudProjects } from '../../io/gmx.js';
-import type { CloudProjectSummary } from '../../types/index.js';
-import { migrateProject } from '../../io/migration.js';
+import { saveProject, loadProject, importLegacyGmx } from '../../io/gmx.js';
 
 interface ToolbarProps {
   onToggleReport?: () => void;
@@ -28,8 +26,6 @@ interface ToolbarProps {
 }
 
 type MigrationBanner = { fromVersion: string; toVersion: string } | null;
-type CloudSaveState = 'idle' | 'input' | 'saving' | 'done' | 'error';
-type CloudLoadState = 'idle' | 'loading' | 'list' | 'error';
 
 export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVoltageDrop, onToggleShortCircuit, onToggleRingNetwork, onToggleProtection, onToggleEarthFault, onToggleNeutralTreatment, onToggleProductionDashboard, onToggleTimeSeries, onToggleFormulaSheet, onToggleScenarioLibrary, onToggleGlossary, onToggleLearningObjectives, onToggleReport, onToggleExport, onTogglePerUnit, onToggleWarnings, onToggleHelp, onRestartTour }: ToolbarProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -39,18 +35,6 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
     useNetworkStore();
   const validationResult = useNetworkStore((s) => s.validationResult);
 
-  // Cloud save state
-  const [cloudSaveState, setCloudSaveState] = useState<CloudSaveState>('idle');
-  const [cloudStudentName, setCloudStudentName] = useState(project.metadata.student ?? '');
-  const [savedCloudId, setSavedCloudId] = useState('');
-  const [cloudSaveError, setCloudSaveError] = useState('');
-
-  // Cloud load state
-  const [cloudLoadState, setCloudLoadState] = useState<CloudLoadState>('idle');
-  const [cloudProjects, setCloudProjects] = useState<CloudProjectSummary[]>([]);
-  const [cloudLoadError, setCloudLoadError] = useState('');
-
-  // Migration banner
   const [migrationBanner, setMigrationBanner] = useState<MigrationBanner>(null);
 
   function handleSave() {
@@ -85,51 +69,6 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
       alert(`Feil ved import: ${String(err)}`);
     }
     e.target.value = '';
-  }
-
-  async function handleCloudSave() {
-    setCloudSaveState('saving');
-    setCloudSaveError('');
-    const patched = {
-      ...project,
-      metadata: { ...project.metadata, student: cloudStudentName },
-    };
-    try {
-      const id = await saveToCloud(patched);
-      setSavedCloudId(id);
-      setCloudSaveState('done');
-    } catch (err) {
-      setCloudSaveError(String(err));
-      setCloudSaveState('error');
-    }
-  }
-
-  async function handleOpenCloudList() {
-    setCloudLoadState('loading');
-    setCloudLoadError('');
-    try {
-      const list = await listCloudProjects();
-      setCloudProjects(list);
-      setCloudLoadState('list');
-    } catch (err) {
-      setCloudLoadError(String(err));
-      setCloudLoadState('error');
-    }
-  }
-
-  async function handleLoadCloudProject(id: string) {
-    try {
-      const p = await loadFromCloud(id);
-      const migResult = migrateProject(p);
-      storeLoad(migResult.project);
-      if (migResult.migrated) {
-        setMigrationBanner({ fromVersion: migResult.fromVersion, toVersion: migResult.toVersion });
-        setTimeout(() => setMigrationBanner(null), 8000);
-      }
-      setCloudLoadState('idle');
-    } catch (err) {
-      alert(`Feil ved lasting: ${String(err)}`);
-    }
   }
 
   return (
@@ -190,24 +129,6 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
             style={{ display: 'none' }}
             onChange={handleLoad}
           />
-
-          <button
-            onClick={() => {
-              setCloudStudentName(project.metadata.student ?? '');
-              setCloudSaveState('input');
-              setCloudSaveError('');
-            }}
-            style={{ ...btnStyle, background: '#0A3B5C', border: '1px solid #1E88E5' }}
-          >
-            ☁ Lagre til sky
-          </button>
-
-          <button
-            onClick={handleOpenCloudList}
-            style={{ ...btnStyle, background: '#0A3B5C', border: '1px solid #1E88E5' }}
-          >
-            ☁ Åpne fra sky
-          </button>
 
           <button
             onClick={() => legacyInputRef.current?.click()}
@@ -403,149 +324,6 @@ export function Toolbar({ onToggleCompensation, onToggleProduction, onToggleVolt
           </div>
         </div>
       </div>
-
-      {/* Cloud save dialog */}
-      {cloudSaveState !== 'idle' && (
-        <div style={overlayStyle}>
-          <div style={dialogStyle}>
-            <div style={{ fontWeight: 700, color: '#4FC3F7', marginBottom: 14, fontSize: 14 }}>
-              ☁ Lagre til sky
-            </div>
-
-            {(cloudSaveState === 'input' || cloudSaveState === 'saving') && (
-              <>
-                <div style={{ color: '#9E9E9E', fontSize: 12, marginBottom: 4 }}>Studentnavn</div>
-                <input
-                  autoFocus
-                  value={cloudStudentName}
-                  onChange={(e) => setCloudStudentName(e.target.value)}
-                  placeholder="Skriv inn studentnavn..."
-                  style={inputStyle}
-                />
-                <div style={{ color: '#607D8B', fontSize: 11, marginBottom: 14 }}>
-                  Prosjekt: {project.metadata.projectName}
-                </div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button
-                    onClick={handleCloudSave}
-                    disabled={cloudSaveState === 'saving' || !cloudStudentName.trim()}
-                    style={{
-                      ...dialogBtnStyle,
-                      background: cloudStudentName.trim() ? '#1565C0' : '#1A2A3A',
-                      opacity: cloudSaveState === 'saving' ? 0.7 : 1,
-                    }}
-                  >
-                    {cloudSaveState === 'saving' ? 'Lagrer...' : 'Lagre'}
-                  </button>
-                  <button
-                    onClick={() => setCloudSaveState('idle')}
-                    style={{ ...dialogBtnStyle, background: '#2A2A2A' }}
-                  >
-                    Avbryt
-                  </button>
-                </div>
-              </>
-            )}
-
-            {cloudSaveState === 'done' && (
-              <>
-                <div style={{ color: '#81C784', fontSize: 13, marginBottom: 8 }}>
-                  ✓ Prosjekt lagret!
-                </div>
-                <div style={{ color: '#607D8B', fontSize: 11, marginBottom: 4 }}>Prosjekt-ID:</div>
-                <div style={{ color: '#CE93D8', fontFamily: 'monospace', fontSize: 11, wordBreak: 'break-all', marginBottom: 14 }}>
-                  {savedCloudId}
-                </div>
-                <button onClick={() => setCloudSaveState('idle')} style={{ ...dialogBtnStyle, background: '#1A5C3A' }}>
-                  Lukk
-                </button>
-              </>
-            )}
-
-            {cloudSaveState === 'error' && (
-              <>
-                <div style={{ color: '#EF9A9A', fontSize: 12, marginBottom: 14 }}>{cloudSaveError}</div>
-                <div style={{ display: 'flex', gap: 8 }}>
-                  <button onClick={() => setCloudSaveState('input')} style={{ ...dialogBtnStyle, background: '#1565C0' }}>
-                    Prøv igjen
-                  </button>
-                  <button onClick={() => setCloudSaveState('idle')} style={{ ...dialogBtnStyle, background: '#2A2A2A' }}>
-                    Avbryt
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Cloud load dialog */}
-      {cloudLoadState !== 'idle' && (
-        <div style={overlayStyle}>
-          <div style={{ ...dialogStyle, width: 480, maxHeight: 440 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-              <div style={{ fontWeight: 700, color: '#4FC3F7', fontSize: 14 }}>
-                ☁ Åpne fra sky
-              </div>
-              <button
-                onClick={() => setCloudLoadState('idle')}
-                style={{ background: 'none', border: 'none', color: '#757575', cursor: 'pointer', fontSize: 16 }}
-              >
-                ✕
-              </button>
-            </div>
-
-            {cloudLoadState === 'loading' && (
-              <div style={{ color: '#9E9E9E', fontSize: 12 }}>Henter prosjekter...</div>
-            )}
-
-            {cloudLoadState === 'error' && (
-              <>
-                <div style={{ color: '#EF9A9A', fontSize: 12, marginBottom: 12 }}>{cloudLoadError}</div>
-                <button onClick={handleOpenCloudList} style={{ ...dialogBtnStyle, background: '#1565C0' }}>
-                  Prøv igjen
-                </button>
-              </>
-            )}
-
-            {cloudLoadState === 'list' && cloudProjects.length === 0 && (
-              <div style={{ color: '#607D8B', fontSize: 12 }}>Ingen prosjekter lagret i skyen ennå.</div>
-            )}
-
-            {cloudLoadState === 'list' && cloudProjects.length > 0 && (
-              <div style={{ overflowY: 'auto', maxHeight: 340 }}>
-                {cloudProjects.map((p) => (
-                  <div
-                    key={p.id}
-                    onClick={() => handleLoadCloudProject(p.id)}
-                    style={{
-                      padding: '8px 10px',
-                      borderRadius: 5,
-                      marginBottom: 4,
-                      cursor: 'pointer',
-                      background: '#1A2A3A',
-                      border: '1px solid #1E3A5F',
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                    }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = '#0F2A45')}
-                    onMouseLeave={(e) => (e.currentTarget.style.background = '#1A2A3A')}
-                  >
-                    <div>
-                      <div style={{ color: '#E8F0FE', fontWeight: 600, fontSize: 12 }}>{p.projectName}</div>
-                      <div style={{ color: '#9E9E9E', fontSize: 11 }}>{p.studentName} · {p.course}</div>
-                    </div>
-                    <div style={{ color: '#607D8B', fontSize: 10, textAlign: 'right' }}>
-                      {new Date(p.updatedAt).toLocaleString('nb-NO')}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
     </>
   );
 }
@@ -570,46 +348,4 @@ const anaBtnStyle: React.CSSProperties = {
   fontSize: 12,
   cursor: 'pointer',
   whiteSpace: 'nowrap',
-};
-
-const overlayStyle: React.CSSProperties = {
-  position: 'fixed',
-  inset: 0,
-  background: 'rgba(0,0,0,0.6)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 100,
-};
-
-const dialogStyle: React.CSSProperties = {
-  background: '#0F1F30',
-  border: '1px solid #1E3A5F',
-  borderRadius: 8,
-  padding: '20px 24px',
-  width: 360,
-  boxShadow: '0 8px 40px rgba(0,0,0,0.8)',
-  color: '#E8F0FE',
-};
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  background: '#1A2A3A',
-  border: '1px solid #374151',
-  borderRadius: 4,
-  color: '#E8F0FE',
-  padding: '6px 10px',
-  fontSize: 13,
-  marginBottom: 10,
-  boxSizing: 'border-box',
-};
-
-const dialogBtnStyle: React.CSSProperties = {
-  color: '#E8F0FE',
-  border: 'none',
-  borderRadius: 5,
-  padding: '6px 16px',
-  fontSize: 13,
-  cursor: 'pointer',
-  fontWeight: 600,
 };

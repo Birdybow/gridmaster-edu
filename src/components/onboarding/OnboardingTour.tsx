@@ -1,7 +1,7 @@
 import { Joyride, STATUS } from 'react-joyride';
 import type { EventData } from 'react-joyride';
 
-const TOUR_KEY = 'gridmaster-tour-shown-v13';
+const TOUR_KEY = 'gridmaster-tour-shown-v14';
 
 const STEPS = [
   {
@@ -14,7 +14,7 @@ const STEPS = [
   {
     target: '[data-tour="toolbar-row1"]',
     title: 'Fil og prosjekt',
-    content: 'Her åpner og lagrer du prosjekter, importerer scenarier og eksporterer resultater som PDF eller CSV.',
+    content: 'Her åpner og lagrer du prosjekter lokalt (.gmx), importerer scenarier og eksporterer resultater som PDF eller CSV.',
     disableBeacon: true,
   },
   {
@@ -44,7 +44,7 @@ const STEPS = [
   {
     target: '[data-tour="toolbar-row1"]',
     title: 'Eksport og rapport',
-    content: 'Generer en ferdig PDF-rapport eller eksporter data til CSV for videre analyse i Excel. Lykke til!',
+    content: 'Generer en ferdig PDF-rapport eller eksporter data til CSV for videre analyse i Excel. Prosjektet lagres lokalt som .gmx-fil. Lykke til!',
     disableBeacon: true,
   },
 ];
