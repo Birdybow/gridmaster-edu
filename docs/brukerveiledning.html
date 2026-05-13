@@ -1,0 +1,1446 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GridMaster Edu — Brukerveiledning v1.0.0</title>
+  <style>
+    /* ─── Grunnstil ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0D1B2A;
+      --bg2:       #0F1F2E;
+      --bg3:       #0A1929;
+      --border:    #1E3A5F;
+      --accent:    #4FC3F7;
+      --accent2:   #90CAF9;
+      --text:      #E8F0FE;
+      --muted:     #90A4AE;
+      --muted2:    #607D8B;
+      --green:     #66BB6A;
+      --yellow:    #FFD54F;
+      --red:       #EF5350;
+      --orange:    #F9A825;
+      --purple:    #CE93D8;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: #f4f6f8;
+      color: #1a2535;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      font-size: 15px;
+      line-height: 1.65;
+    }
+
+    /* ─── Topp-header ────────────────────────────────────────────── */
+    .doc-header {
+      background: linear-gradient(135deg, #0D1B2A 0%, #1565C0 100%);
+      color: #E8F0FE;
+      padding: 48px 40px 36px;
+      position: relative;
+      overflow: hidden;
+    }
+    .doc-header::after {
+      content: '';
+      position: absolute;
+      right: -60px; top: -60px;
+      width: 300px; height: 300px;
+      border-radius: 50%;
+      background: rgba(79, 195, 247, 0.07);
+    }
+    .doc-header h1 {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: #4FC3F7;
+      letter-spacing: -0.5px;
+    }
+    .doc-header .subtitle {
+      font-size: 1.1rem;
+      color: #90A4AE;
+      margin-top: 6px;
+    }
+    .doc-header .meta {
+      margin-top: 20px;
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .meta-badge {
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(79,195,247,0.3);
+      border-radius: 20px;
+      padding: 4px 14px;
+      font-size: 12px;
+      color: #B0BEC5;
+    }
+    .meta-badge strong { color: #4FC3F7; }
+
+    /* ─── Layout ─────────────────────────────────────────────────── */
+    .layout {
+      display: flex;
+      max-width: 1280px;
+      margin: 0 auto;
+      gap: 0;
+    }
+
+    /* ─── Innholdsfortegnelse ────────────────────────────────────── */
+    .toc {
+      width: 260px;
+      min-width: 260px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      background: #1a2535;
+      color: #B0BEC5;
+      padding: 24px 16px;
+      font-size: 13px;
+    }
+    .toc h2 {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #4FC3F7;
+      margin-bottom: 16px;
+    }
+    .toc ol {
+      list-style: none;
+      padding: 0;
+    }
+    .toc ol li { margin-bottom: 2px; }
+    .toc ol li a {
+      display: block;
+      padding: 5px 10px;
+      border-radius: 5px;
+      color: #90A4AE;
+      text-decoration: none;
+      transition: all 0.15s;
+    }
+    .toc ol li a:hover {
+      background: rgba(79,195,247,0.1);
+      color: #4FC3F7;
+    }
+    .toc ol li.sub > a {
+      padding-left: 22px;
+      font-size: 12px;
+      color: #607D8B;
+    }
+    .toc-section {
+      margin-top: 14px;
+      border-top: 1px solid #243040;
+      padding-top: 12px;
+    }
+
+    /* ─── Hoveddel ───────────────────────────────────────────────── */
+    .content {
+      flex: 1;
+      min-width: 0;
+      padding: 40px 48px;
+      background: #fff;
+    }
+
+    /* ─── Seksjoner ──────────────────────────────────────────────── */
+    .section {
+      margin-bottom: 64px;
+      scroll-margin-top: 24px;
+    }
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid #e3eaf2;
+    }
+    .section-num {
+      background: #1565C0;
+      color: #fff;
+      width: 32px; height: 32px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 800;
+      font-size: 13px;
+      flex-shrink: 0;
+    }
+    .section h2 {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #0D3B66;
+    }
+    .section h3 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #1565C0;
+      margin: 28px 0 12px;
+    }
+    .section h4 {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #1E3A5F;
+      margin: 18px 0 8px;
+    }
+    .section p { margin-bottom: 14px; color: #2c3e50; }
+
+    /* ─── Figur / screenshot-plassholder ─────────────────────────── */
+    figure {
+      margin: 24px 0;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #d0dce8;
+      background: #f8fafc;
+    }
+    figure img {
+      width: 100%;
+      display: block;
+    }
+    .screenshot-placeholder {
+      background: linear-gradient(135deg, #0D1B2A 0%, #0F2A45 100%);
+      color: #4FC3F7;
+      padding: 32px 24px;
+      text-align: center;
+      font-size: 13px;
+      border: 2px dashed #1E3A5F;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    .screenshot-placeholder .ph-icon { font-size: 2rem; margin-bottom: 8px; }
+    .screenshot-placeholder .ph-label { color: #90A4AE; font-size: 11px; margin-top: 4px; }
+    figcaption {
+      padding: 8px 14px;
+      font-size: 12px;
+      color: #607D8B;
+      background: #f0f4f8;
+      border-top: 1px solid #d0dce8;
+    }
+
+    /* ─── Callout-bokser ─────────────────────────────────────────── */
+    .callout {
+      border-radius: 8px;
+      padding: 14px 18px;
+      margin: 20px 0;
+      font-size: 14px;
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+    .callout-icon { font-size: 1.2rem; flex-shrink: 0; margin-top: 1px; }
+    .callout-body { flex: 1; }
+    .callout-body strong { display: block; margin-bottom: 4px; font-size: 13px; }
+    .callout.info    { background: #e3f2fd; border-left: 4px solid #1565C0; }
+    .callout.tip     { background: #e8f5e9; border-left: 4px solid #2e7d32; }
+    .callout.warning { background: #fff8e1; border-left: 4px solid #f9a825; }
+    .callout.danger  { background: #ffebee; border-left: 4px solid #c62828; }
+
+    /* ─── Steg-liste (numbered steps) ───────────────────────────── */
+    .steps { list-style: none; padding: 0; margin: 16px 0; counter-reset: step; }
+    .steps li {
+      counter-increment: step;
+      display: flex; gap: 14px;
+      margin-bottom: 14px;
+      align-items: flex-start;
+    }
+    .steps li::before {
+      content: counter(step);
+      background: #1565C0;
+      color: #fff;
+      width: 26px; height: 26px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 700;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .steps li .step-body { flex: 1; }
+    .steps li .step-body strong { color: #0D3B66; }
+
+    /* ─── Knapp-referanse ────────────────────────────────────────── */
+    .btn-ref {
+      display: inline-block;
+      background: #0D3B66;
+      color: #E8F0FE;
+      border: 1px solid #1565C0;
+      border-radius: 5px;
+      padding: 2px 9px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: 'Segoe UI', sans-serif;
+      white-space: nowrap;
+    }
+    .btn-ref.green  { background: #1a3a1a; border-color: #2e7d32; color: #a5d6a7; }
+    .btn-ref.red    { background: #1a0000; border-color: #b71c1c; color: #ef9a9a; }
+    .btn-ref.yellow { background: #1a1500; border-color: #f9a825; color: #ffe082; }
+    .btn-ref.purple { background: #3a1a5c; border-color: #9c27b0; color: #ce93d8; }
+    .btn-ref.teal   { background: #001a1a; border-color: #00796b; color: #80cbc4; }
+
+    /* ─── Tabeller ───────────────────────────────────────────────── */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0;
+      font-size: 13px;
+    }
+    th {
+      background: #0D3B66;
+      color: #E8F0FE;
+      padding: 9px 12px;
+      text-align: left;
+      font-weight: 600;
+    }
+    td { padding: 8px 12px; border-bottom: 1px solid #e3eaf2; vertical-align: top; }
+    tr:nth-child(even) td { background: #f8fafc; }
+    tr:hover td { background: #eef4fb; }
+
+    /* ─── Formler ────────────────────────────────────────────────── */
+    .formula-block {
+      background: #0D1B2A;
+      border: 1px solid #1E3A5F;
+      border-radius: 8px;
+      padding: 14px 20px;
+      margin: 14px 0;
+      font-family: 'Consolas', monospace;
+      font-size: 14px;
+      color: #FFD54F;
+    }
+    .formula-block .formula-name {
+      font-size: 11px;
+      color: #607D8B;
+      font-family: 'Segoe UI', sans-serif;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 6px;
+    }
+    .formula-block .formula-note {
+      font-size: 11px;
+      color: #607D8B;
+      font-family: 'Segoe UI', sans-serif;
+      margin-top: 6px;
+    }
+
+    /* ─── Kode-blokk ─────────────────────────────────────────────── */
+    code {
+      background: #e3eaf2;
+      padding: 1px 5px;
+      border-radius: 3px;
+      font-family: 'Consolas', monospace;
+      font-size: 0.88em;
+      color: #1565C0;
+    }
+
+    /* ─── Hurtigreferanse-tabell ─────────────────────────────────── */
+    .qref-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin: 16px 0;
+    }
+    .qref-card {
+      background: #f8fafc;
+      border: 1px solid #d0dce8;
+      border-radius: 8px;
+      padding: 12px 14px;
+    }
+    .qref-card h4 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: #1565C0;
+      margin: 0 0 8px 0;
+    }
+    .qref-card dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; }
+    .qref-card dt { font-weight: 600; color: #1a2535; font-size: 12px; }
+    .qref-card dd { color: #546e7a; font-size: 12px; }
+
+    /* ─── Print ──────────────────────────────────────────────────── */
+    @media print {
+      .toc { display: none; }
+      .layout { display: block; }
+      .content { padding: 20px; }
+      .section { break-inside: avoid; }
+      .doc-header { background: #0D1B2A !important; -webkit-print-color-adjust: exact; }
+    }
+
+    /* ─── Responsiv ──────────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .toc { display: none; }
+      .content { padding: 24px 20px; }
+      .qref-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════ TOPP-HEADER ════════════════════ -->
+<div class="doc-header">
+  <h1>GridMaster Edu</h1>
+  <p class="subtitle">Brukerveiledning og manual</p>
+  <div class="meta">
+    <span class="meta-badge"><strong>Versjon</strong> v1.0.0</span>
+    <span class="meta-badge"><strong>Dato</strong> Mai 2026</span>
+    <span class="meta-badge"><strong>Målgruppe</strong> Elektrostudenter / elever</span>
+    <span class="meta-badge"><strong>URL</strong> gridmaster-edu.vercel.app</span>
+    <span class="meta-badge"><strong>Forfatter</strong> Bård Reinton-Kjellhov</span>
+  </div>
+</div>
+
+<!-- ════════════════════ LAYOUT ════════════════════ -->
+<div class="layout">
+
+  <!-- ─── INNHOLDSFORTEGNELSE ─── -->
+  <nav class="toc">
+    <h2>Innhold</h2>
+    <ol>
+      <li><a href="#s1">1. Introduksjon</a></li>
+      <li><a href="#s2">2. Kom i gang</a></li>
+      <li class="sub"><a href="#s2-1">2.1 Grensesnitt-oversikt</a></li>
+      <li class="sub"><a href="#s2-2">2.2 Omvisningstur</a></li>
+      <li class="toc-section"></li>
+      <li><a href="#s3">3. Bygge et kraftnett</a></li>
+      <li class="sub"><a href="#s3-1">3.1 Buss</a></li>
+      <li class="sub"><a href="#s3-2">3.2 Linje</a></li>
+      <li class="sub"><a href="#s3-3">3.3 Transformator</a></li>
+      <li class="sub"><a href="#s3-4">3.4 Generator</a></li>
+      <li class="sub"><a href="#s3-5">3.5 Kondensator</a></li>
+      <li class="toc-section"></li>
+      <li><a href="#s4">4. Lastflyt</a></li>
+      <li><a href="#s5">5. Spenningsfall</a></li>
+      <li><a href="#s6">6. Kortslutning</a></li>
+      <li><a href="#s7">7. Ringnett</a></li>
+      <li><a href="#s8">8. Vernkoordinering</a></li>
+      <li><a href="#s9">9. Reaktiv kompensering</a></li>
+      <li><a href="#s10">10. Kraftproduksjon</a></li>
+      <li><a href="#s11">11. Jordfeil og nøytral</a></li>
+      <li class="toc-section"></li>
+      <li><a href="#s12">12. Pedagogiske verktøy</a></li>
+      <li><a href="#s13">13. Per-unit og eksport</a></li>
+      <li><a href="#s14">14. Lagring og sky</a></li>
+      <li><a href="#s15">15. REN-advarselssystem</a></li>
+      <li class="toc-section"></li>
+      <li><a href="#s16">16. Hurtigreferanse</a></li>
+    </ol>
+  </nav>
+
+  <!-- ─── HOVEDDEL ─── -->
+  <main class="content">
+
+    <!-- ════════════════ 1. INTRODUKSJON ════════════════ -->
+    <section class="section" id="s1">
+      <div class="section-header">
+        <div class="section-num">1</div>
+        <h2>Introduksjon</h2>
+      </div>
+
+      <p>
+        <strong>GridMaster Edu</strong> er et nettleserbasert simuleringsverktøy for kraftsystem-analyse,
+        utviklet som et pedagogisk hjelpemiddel for elever og studenter i elektrofag. Programmet lar deg
+        bygge virtuelle kraftnett og utføre alle sentrale beregninger du møter i pensum — fra enkel
+        lastflyt til kortslutning etter IEC 60909 og vernkoordinering.
+      </p>
+      <p>
+        Programmet kjøres direkte i nettleseren — ingen installasjon nødvendig.
+        Prosjekter lagres lokalt som <code>.gmx</code>-filer på din maskin.
+      </p>
+
+      <h3>Hva kan GridMaster gjøre?</h3>
+      <table>
+        <thead>
+          <tr><th>Modul</th><th>Hva den beregner</th><th>Standard</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><strong>Lastflyt</strong></td><td>Busspenninger, strømmer, tap (Newton-Raphson)</td><td>IEC 60364</td></tr>
+          <tr><td><strong>Spenningsfall</strong></td><td>ΔU% per linje, grenseverdier</td><td>REN blad 6002</td></tr>
+          <tr><td><strong>Kortslutning</strong></td><td>Ik3p, Ik2p, ip (støtfaktor), bidrag per kilde</td><td>IEC 60909</td></tr>
+          <tr><td><strong>Ringnett</strong></td><td>Strømdeling, tap-sammenligning radielt/ring</td><td>—</td></tr>
+          <tr><td><strong>Vernkoordinering</strong></td><td>Utløsningstid IDMT-kurver, selektivitetsmatrise</td><td>IEC 60255-151</td></tr>
+          <tr><td><strong>Reaktiv kompensering</strong></td><td>Qkomp for ønsket cosφ, effekttriangel</td><td>—</td></tr>
+          <tr><td><strong>Kraftproduksjon</strong></td><td>Sol, vind, vann, kjernekraft — MW, MWh/år, CO₂</td><td>—</td></tr>
+          <tr><td><strong>Jordfeil</strong></td><td>Jordfeilstrøm IT/TN/Petersen</td><td>IEC 60364-4-41</td></tr>
+          <tr><td><strong>Tidsserie</strong></td><td>24-timers last/produksjonsbalanse</td><td>—</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Systemkrav</h3>
+      <table>
+        <thead><tr><th>Krav</th><th>Anbefalt</th></tr></thead>
+        <tbody>
+          <tr><td>Nettleser</td><td>Chrome 110+, Firefox 115+, Edge 110+</td></tr>
+          <tr><td>Internett</td><td>Kreves for første lasting. Fungerer ellers offline etter første besøk.</td></tr>
+          <tr><td>Skjermoppløsning</td><td>1280 × 800 px eller større anbefalt</td></tr>
+          <tr><td>Installasjon</td><td>Ingen — kjøres direkte på <a href="https://gridmaster-edu.vercel.app" target="_blank">gridmaster-edu.vercel.app</a></td></tr>
+        </tbody>
+      </table>
+
+      <figure id="fig-01">
+        <img src="bilder/01-fullskjerm.png" alt="GridMaster Edu fullskjerm-oversikt" />
+        <figcaption>Figur 1 — GridMaster Edu ved oppstart. Mørk bakgrunn (dark mode), dobbel verktøyrad øverst, komponentpanel til venstre og nettverkscanvas i midten.</figcaption>
+      </figure>
+    </section>
+
+    <!-- ════════════════ 2. KOM I GANG ════════════════ -->
+    <section class="section" id="s2">
+      <div class="section-header">
+        <div class="section-num">2</div>
+        <h2>Kom i gang</h2>
+      </div>
+
+      <p>
+        Åpne nettleseren og gå til <strong>gridmaster-edu.vercel.app</strong>. Første gang du besøker siden
+        starter en automatisk omvisningstur som guider deg gjennom grensesnittet. Du kan
+        alltid starte omvisningen på nytt ved å klikke <span class="btn-ref">Vis omvisning</span>.
+      </p>
+
+      <h3 id="s2-1">2.1 Grensesnitt-oversikt</h3>
+      <p>Grensesnittet er delt i fire hoveddeler:</p>
+
+      <figure id="fig-02">
+        <img src="bilder/01-fullskjerm.png" alt="GridMaster Edu grensesnitt-oversikt" />
+        <figcaption>Figur 2 — Grensesnittet: (1) Verktøyrad øverst med to rader, (2) Komponentpanel til venstre, (3) Nettverkscanvas i midten, (4) Editor-panel til høyre, (5) Resultatpanel i bunnen.</figcaption>
+      </figure>
+
+      <table>
+        <thead><tr><th>#</th><th>Sone</th><th>Funksjon</th></tr></thead>
+        <tbody>
+          <tr><td><strong>1</strong></td><td>Verktøyrad — Rad 1</td><td>Fil-operasjoner, prosjektnavn, REN-sjekk, hjelp</td></tr>
+          <tr><td><strong>2</strong></td><td>Verktøyrad — Rad 2</td><td>Alle analyse-moduler og pedagogiske verktøy</td></tr>
+          <tr><td><strong>3</strong></td><td>Komponentpanel (venstre)</td><td>Dra komponenter inn på canvas: Buss, Linje, Transformator, Kondensator</td></tr>
+          <tr><td><strong>4</strong></td><td>Nettverkscanvas (midten)</td><td>Tegn og konfigurer kraftnettet</td></tr>
+          <tr><td><strong>5</strong></td><td>Editor-panel (høyre)</td><td>Vises når du klikker en komponent — editorfelt for valgt element</td></tr>
+          <tr><td><strong>6</strong></td><td>Resultat-panel (bunn)</td><td>Tabeller med beregningsresultater, faner per modul</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Verktøyrad rad 1 — Fil og prosjekt</h3>
+
+      <figure id="fig-03">
+        <img src="bilder/01-fullskjerm.png" alt="Verktøyrad rad 1" />
+        <figcaption>Figur 3 — Øverst i verktøyraden: logo, prosjektnavn (S1: Enkel radial), fil-knapper og hjelp-knapper til høyre.</figcaption>
+      </figure>
+
+      <table>
+        <thead><tr><th>Knapp</th><th>Funksjon</th></tr></thead>
+        <tbody>
+          <tr><td><span class="btn-ref">Nytt</span></td><td>Tøm canvas og start nytt prosjekt. Spør om bekreftelse.</td></tr>
+          <tr><td><span class="btn-ref">Lagre .gmx</span></td><td>Last ned prosjektet som <code>.gmx</code>-fil (JSON-format) til din datamaskin.</td></tr>
+          <tr><td><span class="btn-ref">Åpne .gmx</span></td><td>Åpne en lagret <code>.gmx</code>-fil. Gamle versjoner migreres automatisk.</td></tr>
+          <tr><td><span class="btn-ref">Importer</span></td><td>Importer eldre JSON-format (legacy <code>.gmx</code>). Konverteres automatisk.</td></tr>
+          <tr><td><span class="btn-ref yellow">⚠ REN</span></td><td>Åpne REN-advarselspanelet — sjekker om nettet ditt overholder norske elektrotekniske normer.</td></tr>
+          <tr><td><span class="btn-ref">? Hjelp</span></td><td>Åpne innebygd hjelp med formler, REN-regler, fasitsvar og hurtigtaster.</td></tr>
+          <tr><td><span class="btn-ref">Vis omvisning</span></td><td>Start den guidede omvisningen på nytt.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Verktøyrad rad 2 — Analyse-verktøy</h3>
+
+      <figure id="fig-04">
+        <img src="bilder/01-fullskjerm.png" alt="Verktøyrad rad 2 — analyse-knapper" />
+        <figcaption>Figur 4 — Rad 2 med fargekodede analyse-knapper: Lastflyt (blå), Kompensering (lilla), Produksjon/Ringnett (grønn), Kortslutning (rød), Vern (gul), og pedagogiske verktøy til høyre.</figcaption>
+      </figure>
+
+      <table>
+        <thead><tr><th>Knapp</th><th>Krav for aktivering</th><th>Hva åpnes</th></tr></thead>
+        <tbody>
+          <tr><td><span class="btn-ref">Lastflyt</span></td><td>Minst én buss</td><td>Kjører Newton-Raphson, viser resultater i bunn-panel</td></tr>
+          <tr><td><span class="btn-ref purple">Kompensering</span></td><td>Minst én buss</td><td>Flytende panel til høyre</td></tr>
+          <tr><td><span class="btn-ref green">⚡ Produksjon</span></td><td>Minst én generator</td><td>Produksjonssammendrag i bunn</td></tr>
+          <tr><td><span class="btn-ref green">ΔU Spenning</span></td><td>Minst én linje</td><td>Flytende spenningsfall-panel</td></tr>
+          <tr><td><span class="btn-ref red">⚡ Kortslutning</span></td><td>Minst 2 busser</td><td>Flytende kortslutnings-panel</td></tr>
+          <tr><td><span class="btn-ref green">⭕ Ringnett</span></td><td>Minst 3 busser</td><td>Flytende ringnett-panel</td></tr>
+          <tr><td><span class="btn-ref yellow">🛡 Vern</span></td><td>Minst én linje</td><td>Vernhierarki-panel (klikk linje for editor)</td></tr>
+          <tr><td><span class="btn-ref green">☀ Dashboard</span></td><td>Minst én generator</td><td>Produksjonsdashboard (MW, MWh, CO₂)</td></tr>
+          <tr><td><span class="btn-ref teal">⏱ Tidsserie</span></td><td>Alltid tilgjengelig</td><td>24-timers last/produksjon-simulering</td></tr>
+          <tr><td><span class="btn-ref green">⏚ Jordfeil</span></td><td>Minst én buss</td><td>Jordfeilstrøm-kalkulator</td></tr>
+          <tr><td><span class="btn-ref">∿ Nøytral</span></td><td>Alltid tilgjengelig</td><td>IT/TN/Petersen-sammenligning</td></tr>
+          <tr><td><span class="btn-ref purple">📚 Scenarioer</span></td><td>Alltid tilgjengelig</td><td>Last inn ferdigbygde eksempelnett</td></tr>
+          <tr><td><span class="btn-ref yellow">📐 Formelark</span></td><td>Alltid tilgjengelig</td><td>Alle nøkkelformler samlet</td></tr>
+          <tr><td><span class="btn-ref teal">📖 Ordliste</span></td><td>Alltid tilgjengelig</td><td>Søkbar fagordliste (25+ begreper)</td></tr>
+          <tr><td><span class="btn-ref green">🎓 Læringsmål</span></td><td>Alltid tilgjengelig</td><td>Hva du lærer av hvert tema</td></tr>
+          <tr><td><span class="btn-ref teal">∿ Per-unit</span></td><td>Alltid tilgjengelig</td><td>Per-unit normalisering av alle resultater</td></tr>
+          <tr><td><span class="btn-ref green">📊 CSV</span></td><td>Alltid tilgjengelig</td><td>Eksporter resultater som regneark</td></tr>
+          <tr><td><span class="btn-ref">📄 Rapport</span></td><td>Alltid tilgjengelig</td><td>Generer fullstendig PDF-rapport</td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="s2-2">2.2 Omvisningstur</h3>
+      <p>
+        Første gang du åpner GridMaster Edu starter en interaktiv omvisningstur automatisk.
+        Turen viser deg de viktigste delene av grensesnittet steg for steg med tooltip-bobler.
+      </p>
+
+      <figure id="fig-22">
+        <img src="bilder/01-fullskjerm.png" alt="GridMaster Edu grensesnitt" />
+        <figcaption>Figur 5 — Omvisningen starter automatisk og guider deg gjennom de viktigste delene av grensesnittet med tooltip-bobler. Klikk «Vis omvisning» øverst til høyre for å starte den på nytt.</figcaption>
+      </figure>
+
+      <div class="callout tip">
+        <span class="callout-icon">💡</span>
+        <div class="callout-body">
+          <strong>Tip</strong>
+          Du kan starte omvisningen på nytt når som helst ved å klikke <span class="btn-ref">Vis omvisning</span> i øverste verktøyrad.
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════ 3. BYGGE ET KRAFTNETT ════════════════ -->
+    <section class="section" id="s3">
+      <div class="section-header">
+        <div class="section-num">3</div>
+        <h2>Bygge et kraftnett</h2>
+      </div>
+
+      <p>
+        Et kraftnett i GridMaster består av <strong>busser</strong> (noder), <strong>linjer</strong> og
+        <strong>transformatorer</strong> (kanter), og eventuelt <strong>generatorer</strong> og
+        <strong>kondensatorer</strong> knyttet til busser. Komponentpanelet til venstre brukes til å
+        legge til nye elementer.
+      </p>
+
+      <figure id="fig-05">
+        <img src="bilder/04-lastflyt.png" alt="Kraftnett med lastflyt-resultater" />
+        <figcaption>Figur 6 — Et 4-buss nett (Slack, Vannkraft, Vindpark, Last) med lastflyt kjørt. Linjene er merket med retning og navn. Bunnpanelet viser buss- og linjeresultater.</figcaption>
+      </figure>
+
+      <h3 id="s3-1">3.1 Buss (node)</h3>
+      <p>
+        En buss representerer et elektrisk knutepunkt — for eksempel et fordelingspunkt,
+        en generator-tilknytning eller en laststasjon.
+      </p>
+
+      <ol class="steps">
+        <li><div class="step-body"><strong>Dra en buss</strong> fra venstre komponentpanel og slipp den på canvaset.</div></li>
+        <li><div class="step-body"><strong>Klikk på bussen</strong> for å åpne editor-panelet til høyre.</div></li>
+        <li><div class="step-body"><strong>Sett parametere</strong> i editor-panelet (se tabell under).</div></li>
+      </ol>
+
+      <figure id="fig-06">
+        <img src="bilder/03-buss-editor.png" alt="Buss-editor høyre panel" />
+        <figcaption>Figur 7 — Buss-editor for Slack-buss. Viser felt for navn, busstype (Slack/PV/PQ), spenningsnivå (22 kV), V satt (1.0 p.u.), Generator P og verndata (bryterevne). Klikk «+ Legg til generator» for å koble en generator til bussen.</figcaption>
+      </figure>
+
+      <table>
+        <thead><tr><th>Parameter</th><th>Enhet</th><th>Beskrivelse</th></tr></thead>
+        <tbody>
+          <tr><td>Navn</td><td>—</td><td>Valgfritt navn, vises på canvas</td></tr>
+          <tr><td>Type</td><td>—</td><td><strong>PQ:</strong> lastbuss (P og Q gitt), <strong>PV:</strong> generatorbuss (P og V gitt), <strong>Slack:</strong> referansebuss (V=1.0 pu, δ=0°)</td></tr>
+          <tr><td>Spenning (V)</td><td>p.u.</td><td>Busspenning i per-unit (1.0 = nominell)</td></tr>
+          <tr><td>Vinkel (δ)</td><td>grader</td><td>Fasevinkelen (kun for slack/PV)</td></tr>
+          <tr><td>Aktiv last (P)</td><td>MW</td><td>Aktiv effekt forbrukt på bussen</td></tr>
+          <tr><td>Reaktiv last (Q)</td><td>MVAr</td><td>Reaktiv effekt forbrukt på bussen</td></tr>
+          <tr><td>Spenningsnivå</td><td>kV</td><td>Nominell systemspenning (brukt i spenningsfall og kortslutning)</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout info">
+        <span class="callout-icon">ℹ</span>
+        <div class="callout-body">
+          <strong>Bustyper forklart</strong>
+          Hvert nett må ha <em>nøyaktig én</em> Slack-buss. Slack-bussen er referansepunktet som
+          balanserer effekt-feil i beregningene. Generatorer kobles til PV-busser, og forbrukere
+          til PQ-busser.
+        </div>
+      </div>
+
+      <h3 id="s3-2">3.2 Linje</h3>
+      <p>
+        En linje representerer en elektrisk forbindelse mellom to busser — kabel eller luftlinje.
+      </p>
+
+      <ol class="steps">
+        <li><div class="step-body"><strong>Dra en linje</strong> fra komponentpanelet, eller hold musepekeren over en buss til et tilkoblingspunkt vises, og dra derfra til en annen buss.</div></li>
+        <li><div class="step-body"><strong>Klikk på linjen</strong> for å åpne linje-editoren til høyre.</div></li>
+        <li><div class="step-body"><strong>Sett R, X og B</strong> (motstand, reaktans og susceptans), eller velg kabeltype fra linjebiblioteket.</div></li>
+      </ol>
+
+      <figure id="fig-07">
+        <img src="bilder/01-fullskjerm.png" alt="Linje-editor høyre panel" />
+        <figcaption>Figur 8 — Linje-editor (høyre panel) for en valgt linje. Feltene viser Navn, Linjebibliotek (velg standardkabel), Lengde (km), Motstand R (Ω/km), Reaktans X (Ω/km) og Kapasitans B. Knappen «+ Legg til overstrømsvern» kobler vern til linjen.</figcaption>
+      </figure>
+
+      <table>
+        <thead><tr><th>Parameter</th><th>Enhet</th><th>Beskrivelse</th></tr></thead>
+        <tbody>
+          <tr><td>R (motstand)</td><td>Ω/km</td><td>Resistans per km. Gir effekttap og spenningsfall.</td></tr>
+          <tr><td>X (reaktans)</td><td>Ω/km</td><td>Reaktiv impedans per km.</td></tr>
+          <tr><td>B (susceptans)</td><td>S/km</td><td>Shunt-kapasitans — viktig for lange linjer (pi-modell).</td></tr>
+          <tr><td>Lengde</td><td>km</td><td>Linjens lengde. Brukes til å beregne total impedans.</td></tr>
+          <tr><td>Nominell strøm (Iz)</td><td>A</td><td>Kabelens termiske grense. Sjekkes mot REN.</td></tr>
+          <tr><td>Kabeltype</td><td>—</td><td>Velg fra linjebiblioteket for automatisk å fylle inn R, X, B, Iz.</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout tip">
+        <span class="callout-icon">💡</span>
+        <div class="callout-body">
+          <strong>Linjebiblioteket</strong>
+          Klikk «Linjebibliotek» i linje-editoren for å velge blant vanlige norske kabeltyper
+          (PFSP, FXLPE, AL o.fl.) med forhåndsutfylte parametere.
+        </div>
+      </div>
+
+      <h3 id="s3-3">3.3 Transformator</h3>
+      <p>
+        En transformator kobler to busser med ulikt spenningsnivå og er tegnet som en kantforbindelse
+        med transformatorsymbol. Klikk på transformatoren for å editere parametere.
+      </p>
+      <table>
+        <thead><tr><th>Parameter</th><th>Enhet</th><th>Beskrivelse</th></tr></thead>
+        <tbody>
+          <tr><td>Omsetningstall</td><td>—</td><td>Forholdet mellom primær- og sekundærspenning (f.eks. 132/22 kV)</td></tr>
+          <tr><td>Serieimpedans (uk%)</td><td>%</td><td>Kortslutningsimpedans i prosent av nominell impedans</td></tr>
+          <tr><td>Nominell effekt</td><td>MVA</td><td>Transformatorens kapasitet</td></tr>
+          <tr><td>Tapfaktor</td><td>kW</td><td>Jerntap og kobbertap</td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="s3-4">3.4 Generator</h3>
+      <p>
+        Generatorer knyttes til PV-busser eller Slack-busser og representerer kraftkilder i nettet.
+        Klikk på en PV- eller Slack-buss; generator-editoren vises automatisk under buss-editoren.
+      </p>
+      <table>
+        <thead><tr><th>Parameter</th><th>Enhet</th><th>Beskrivelse</th></tr></thead>
+        <tbody>
+          <tr><td>Spenningssetning (Vset)</td><td>p.u.</td><td>Ønsket busspenning som generatoren holder</td></tr>
+          <tr><td>Aktiv effekt (P)</td><td>MW</td><td>Generatorens aktive effektinjeksjon</td></tr>
+          <tr><td>Produksjonstype</td><td>—</td><td>Sol, vind, vann, kjernekraft — aktiverer produksjonsmodulen</td></tr>
+          <tr><td>Intern impedans</td><td>p.u.</td><td>Generatorens synkrone reaktans — brukt i kortslutningsberegning</td></tr>
+        </tbody>
+      </table>
+
+      <h3 id="s3-5">3.5 Kondensator (kompensator)</h3>
+      <p>
+        En kondensatorenhet kobles til en buss og leverer reaktiv effekt for å heve effektfaktor og
+        redusere spenningsfall. Den vises som en liten node merket «C» på canvaset.
+      </p>
+      <ol class="steps">
+        <li><div class="step-body">Dra <strong>Kondensator</strong> fra venstre panel og slipp den på eller nær en buss.</div></li>
+        <li><div class="step-body">Klikk kondensatornoden for å åpne kondensator-editoren til høyre.</div></li>
+        <li><div class="step-body">Sett <strong>Q (MVAr)</strong> og <strong>trinn</strong> om ønskelig.</div></li>
+      </ol>
+
+      <h3>Slette komponenter</h3>
+      <p>
+        Klikk på en komponent for å velge den, trykk deretter <code>Delete</code> eller <code>Backspace</code>.
+        Du kan også lukke editor-panelet med ✕-knappen øverst til høyre i panelet.
+      </p>
+
+      <h3>Scenariobiblioteket — ferdigbygde nett</h3>
+      <p>
+        Vil du komme raskt i gang? Klikk <span class="btn-ref purple">📚 Scenarioer</span> i verktøyraden
+        for å velge blant ferdigkonfigurerte eksempelnett. Disse dekker pensum-oppgaver fra enkel radial
+        til ringnett og komplekse distribusjonsnett.
+      </p>
+    </section>
+
+    <!-- ════════════════ 4. LASTFLYT ════════════════ -->
+    <section class="section" id="s4">
+      <div class="section-header">
+        <div class="section-num">4</div>
+        <h2>Lastflyt (Newton-Raphson)</h2>
+      </div>
+
+      <p>
+        Lastflytanalyse beregner spenning, fasevinkel, strøm og effektflyt i alle deler av nettet
+        under stasjonær drift. GridMaster bruker <strong>Newton-Raphson-metoden</strong> med YBus-matrise.
+      </p>
+
+      <h3>Utføre en lastflytberegning</h3>
+      <ol class="steps">
+        <li><div class="step-body">Bygg et nett med minst én Slack-buss, én PQ-buss og én linje mellom dem.</div></li>
+        <li><div class="step-body">Klikk <span class="btn-ref">Lastflyt</span> i rad 2 av verktøyraden.</div></li>
+        <li><div class="step-body">Beregningen kjøres (vanligvis under ett sekund). Et <strong>grønt</strong> «Lastflyt»-merke viser konvergens. Rødt viser at beregningen ikke konvergerte.</div></li>
+        <li><div class="step-body">Resultat-panelet åpnes automatisk nederst med fanene <em>Lastflyt</em>.</div></li>
+      </ol>
+
+      <figure id="fig-08">
+        <img src="bilder/04-lastflyt.png" alt="Lastflyt-resultater bunnpanel" />
+        <figcaption>Figur 9 — Lastflyt konvergert på 3 iterasjoner. Busstabell (venstre): V (p.u.), δ (°), P (MW), Q (MVAr) — grønn = spenning OK. Linjetabell (høyre): I (A), tap (kW) og belastning (%). Totaltap: 0.399 MW / 0.464 MVAr.</figcaption>
+      </figure>
+
+      <h3>Tolke resultatene</h3>
+      <table>
+        <thead><tr><th>Kolonne</th><th>Enhet</th><th>Hva det betyr</th></tr></thead>
+        <tbody>
+          <tr><td>Buss</td><td>—</td><td>Bussnavn og type (Slack/PV/PQ)</td></tr>
+          <tr><td>V</td><td>p.u.</td><td>Busspenning normalisert mot nominell. 1.0 = nominell. Grønn: 0.95–1.05 p.u. Rød: utenfor.</td></tr>
+          <tr><td>δ</td><td>grader</td><td>Fasevinkelen i forhold til Slack-bussen (= 0°)</td></tr>
+          <tr><td>P</td><td>MW</td><td>Aktiv effektbalanse på bussen (positiv = injeksjon)</td></tr>
+          <tr><td>Q</td><td>MVAr</td><td>Reaktiv effektbalanse (positiv = injeksjon)</td></tr>
+          <tr><td>I</td><td>A eller p.u.</td><td>Strøm i linjer tilkoblet bussen</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Strømpiler — fargelegende</h3>
+      <p>
+        Etter konvergert lastflyt kan du aktivere animerte strømpiler via
+        <span class="btn-ref green">⭕ Ringnett</span> → «Vis strømpiler på canvas».
+        Pilene er fargekodet etter retning og ringnett-status:
+      </p>
+      <table>
+        <thead><tr><th>Farge</th><th>Tilstand</th><th>Betydning</th></tr></thead>
+        <tbody>
+          <tr><td><span style="color:#2E7D32;font-weight:700;">●</span> Grønn</td><td>Normal</td><td>Strøm flyter i forventet retning (kilde → last)</td></tr>
+          <tr><td><span style="color:#F57C00;font-weight:700;">●</span> Oransje</td><td>Motgående (opposing)</td><td>Ringnett: strøm fra uventet retning — møtepunkt-effekt</td></tr>
+          <tr><td><span style="color:#C62828;font-weight:700;">●</span> Rød stiplet</td><td>Reversert</td><td>Strøm flyter motsatt den lagrede linjeretningen</td></tr>
+          <tr><td><span style="color:#90A4AE;font-weight:700;">●</span> Grå</td><td>Ledig</td><td>Nær null strøm (&lt; 0.1 A)</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Newton-Raphson — algoritmen kort forklart</h3>
+      <div class="formula-block">
+        <div class="formula-name">Lastflytligninger (aktiv og reaktiv)</div>
+        P_i = V_i · Σ_k [ V_k · (G_ik · cos(δ_i − δ_k) + B_ik · sin(δ_i − δ_k)) ]<br>
+        Q_i = V_i · Σ_k [ V_k · (G_ik · sin(δ_i − δ_k) − B_ik · cos(δ_i − δ_k)) ]
+        <div class="formula-note">Itererer til |ΔP|, |ΔQ| &lt; 10⁻⁶ p.u. (konvergenskriterium). Maksimalt 50 iterasjoner.</div>
+      </div>
+
+      <h3>Iterasjonslogg</h3>
+      <p>
+        Klikk <strong>▼ Vis iterasjonslogg</strong> under resultat-tabellen for å se hvordan
+        mismatch (ΔP, ΔQ) avtar for hvert Newton-Raphson-steg. Nyttig for å forstå konvergens-atferd.
+      </p>
+
+      <div class="callout warning">
+        <span class="callout-icon">⚠</span>
+        <div class="callout-body">
+          <strong>Konvergerer ikke?</strong>
+          Hvis «Lastflyt»-knappen viser rødt, kan årsaken være: manglende Slack-buss,
+          topologiske feil (buss uten tilkobling), eller ekstremt høye laster.
+          Sjekk valideringspanelet for feilmeldinger.
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════ 5. SPENNINGSFALL ════════════════ -->
+    <section class="section" id="s5">
+      <div class="section-header">
+        <div class="section-num">5</div>
+        <h2>Spenningsfallsberegning (ΔU)</h2>
+      </div>
+
+      <p>
+        Spenningsfall angir hvor mye spenningen synker langs en kabel eller linje.
+        For høyt spenningsfall (over 10%) kan føre til at utstyr fungerer dårlig.
+        GridMaster beregner ΔU% for alle linjer og fargemarkerer brudd på REN-grenser.
+      </p>
+
+      <h3>Åpne spenningsfall-panelet</h3>
+      <p>Klikk <span class="btn-ref green">ΔU Spenning</span> i verktøyrad 2. Et flytende panel åpnes øverst til høyre på canvaset.</p>
+
+      <figure id="fig-11">
+        <img src="bilder/06-formelark-spenning.png" alt="Spenningsfall-resultater" />
+        <figcaption>Figur 10 — Spenningsfall-fanen i bunnpanelet. Tre linjer vises: Hydro→Slack (ΔU = 4.84% — gul advarsel), Vind→Slack (2.93% — grønn OK), Slack→Last (2.42% — grønn OK). Kolonner: Fra/Til, lengde, modell (Enkel), ΔU [V], ΔU [%], U_mot [kV], Status.</figcaption>
+      </figure>
+
+      <h3>Formler</h3>
+      <div class="formula-block">
+        <div class="formula-name">Enkel formel (linjer &lt; 50 km — REN blad 6002)</div>
+        ΔU% = (√3 · I · (R·cosφ + X·sinφ) · L / U_n) × 100
+        <div class="formula-note">I = strøm [A], R = motstand [Ω/km], X = reaktans [Ω/km], L = lengde [km], U_n = nominell spenning [V]</div>
+      </div>
+      <div class="formula-block">
+        <div class="formula-name">Pi-modell (linjer ≥ 50 km)</div>
+        Bruker pi-ekvivalentkrets med shunt-kapasitans (B). Mer nøyaktig for lange linjer.
+        <div class="formula-note">Modellen velges automatisk basert på linjeLengde.</div>
+      </div>
+
+      <h3>Grenseverdier (REN blad 6002 §4.1)</h3>
+      <table>
+        <thead><tr><th>ΔU%</th><th>Status</th><th>Tiltak</th></tr></thead>
+        <tbody>
+          <tr><td>&lt; 4 %</td><td style="color:#2e7d32;font-weight:700">✓ OK</td><td>Ingen tiltak nødvendig</td></tr>
+          <tr><td>4–10 %</td><td style="color:#f9a825;font-weight:700">⚠ Advarsel</td><td>Vurder større kabeltvsnitt eller kompensering</td></tr>
+          <tr><td>≥ 10 %</td><td style="color:#c62828;font-weight:700">✗ Feil</td><td>Ikke tillatt. Redesign nødvendig.</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Linjesammenligning</h3>
+      <p>
+        Panelet viser alle linjer i nettet rangert etter ΔU%. Bruk dette til å identifisere
+        hvilken linje som er flaskehalsen.
+      </p>
+    </section>
+
+    <!-- ════════════════ 6. KORTSLUTNING ════════════════ -->
+    <section class="section" id="s6">
+      <div class="section-header">
+        <div class="section-num">6</div>
+        <h2>Kortslutningsberegning (IEC 60909)</h2>
+      </div>
+
+      <p>
+        Kortslutningsberegning brukes til å dimensjonere verninnstillinger og bryterevne.
+        GridMaster beregner kortslutningsstrømmer etter <strong>IEC 60909</strong>-standarden
+        ved hjelp av Thévenin-ekvivalenter.
+      </p>
+
+      <h3>Åpne kortslutnings-panelet</h3>
+      <p>Klikk <span class="btn-ref red">⚡ Kortslutning</span> i verktøyrad 2.</p>
+
+      <figure id="fig-10">
+        <img src="bilder/05-kortslutning.png" alt="Kortslutningsberegning IEC 60909" />
+        <figcaption>Figur 11 — Kortslutningsberegning (IEC 60909) for feilsted Slack (11 kV). Resultater: I″k3p maks = 3.176 kA, I″k2p = 2.750 kA, ip støtstrøm = 7.459 kA. Bidrag per kilde: Vannkraftverk 58.3%, Vindpark 41.7%. Den røde gløden på Slack-bussen i canvas markerer aktivt feilsted.</figcaption>
+      </figure>
+
+      <h3>Parametere</h3>
+      <table>
+        <thead><tr><th>Parameter</th><th>Verdi</th><th>Bruk</th></tr></thead>
+        <tbody>
+          <tr><td>Spenningsfaktor c</td><td>1.10 (maks) / 0.95 (min)</td><td>Brukes til å dimensjonere maks/min kortslutningsstrøm</td></tr>
+          <tr><td>Feil-buss</td><td>Velg fra liste</td><td>Bussnoden der kortslutningen inntreffer</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Resultater og formler</h3>
+      <div class="formula-block">
+        <div class="formula-name">Trefaset kortslutningsstrøm (IEC 60909 ligning 29)</div>
+        I''_k3p = c · U_n / (√3 · |Z_k|)
+        <div class="formula-note">c = 1.10 for maksimal beregning. Z_k = Thévenin-impedans sett fra feilstedet.</div>
+      </div>
+      <div class="formula-block">
+        <div class="formula-name">Tofaset kortslutningsstrøm</div>
+        I''_k2p = I''_k3p · (√3 / 2) ≈ 0.866 · I''_k3p
+      </div>
+      <div class="formula-block">
+        <div class="formula-name">Støtfaktor (peak-strøm)</div>
+        i_p = κ · √2 · I''_k3p,   der κ = 1.02 + 0.98 · e^(−3R/X)
+        <div class="formula-note">Typisk κ = 1.5–1.8 for norske distribusjonsnett.</div>
+      </div>
+
+      <h3>Bidragsmatrise</h3>
+      <p>
+        Bidragsmatrisen viser prosentvis bidrag til kortslutningsstrømmen fra hvert nettverks-element
+        (generatorer, nettimpedans). Nyttig for å forstå hvilke kilder som dominerer feilstrømmen.
+      </p>
+
+      <div class="callout info">
+        <span class="callout-icon">ℹ</span>
+        <div class="callout-body">
+          <strong>Fasitsvar</strong>
+          For et enkelt 3-buss radialnettverk (standardscenario): Ik3p ≈ 1.252 kA, Ik2p ≈ 1.084 kA, ip ≈ 2.557 kA (κ ≈ 1.448).
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════ 7. RINGNETT ════════════════ -->
+    <section class="section" id="s7">
+      <div class="section-header">
+        <div class="section-num">7</div>
+        <h2>Ringnett og strømdeling</h2>
+      </div>
+
+      <p>
+        Et ringnett (loop-nett) forsyner laster fra to sider, noe som gir <strong>N-1 redundans</strong> —
+        én linje kan kobles ut uten forsyningsbrudd. GridMaster beregner strømdeling og sammenligner
+        tap i radielt vs. ringnett.
+      </p>
+
+      <h3>Åpne ringnett-panelet</h3>
+      <p>Klikk <span class="btn-ref green">⭕ Ringnett</span>. Krever minst 3 busser. Et flytende panel åpnes.</p>
+
+
+      <h3>Strømdelingsformel (symmetrisk ringnett)</h3>
+      <div class="formula-block">
+        <div class="formula-name">Strøm fra kilde A (proporsjonalt med avstand til B)</div>
+        I_A = Σ(Last_i · d_iB) / d_total
+        <div class="formula-note">d_iB = avstand fra last i til kilde B. Strømdeling er omvendt proporsjonal med impedans.</div>
+      </div>
+
+      <h3>Radielt vs. ring — sammenligning</h3>
+      <p>
+        Bunnpanelet viser to kolonner side om side: tap i radieltkonfigurasjon og tap i ringkonfigurasjon.
+        For et symmetrisk nett med like laster er tap-reduksjonen typisk 75%.
+      </p>
+      <div class="callout info">
+        <span class="callout-icon">ℹ</span>
+        <div class="callout-body">
+          <strong>Fasitsvar (symmetrisk 2-kildenett)</strong>
+          I_A = I_B = 83 A. Tap i radialnett = 82.6 kW, ringnett = 20.6 kW → reduksjon ≈ 75%.
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════ 8. VERNKOORDINERING ════════════════ -->
+    <section class="section" id="s8">
+      <div class="section-header">
+        <div class="section-num">8</div>
+        <h2>Vernkoordinering</h2>
+      </div>
+
+      <p>
+        Vernkoordinering sikrer at vern løser ut riktig ved feil — nærmeste vern løser ut først,
+        slik at minst mulig av nettet mister forsyning. GridMaster beregner utløsningstider basert
+        på IDMT-kurver (IEC 60255-151) og viser en selektivitetsmatrise.
+      </p>
+
+      <h3>Plassere et vern</h3>
+      <ol class="steps">
+        <li><div class="step-body"><strong>Klikk på en linje</strong> i canvaset for å velge den.</div></li>
+        <li><div class="step-body">Klikk <span class="btn-ref yellow">🛡 Vern</span> i verktøyrad 2. Vern-editoren dukker opp i høyre panel.</div></li>
+        <li><div class="step-body">Sett karakteristikk-type, TMS og Is i vern-editoren.</div></li>
+      </ol>
+
+
+      <h3>IDMT-karakteristikker</h3>
+      <table>
+        <thead><tr><th>Type</th><th>Kode</th><th>Formel t(s)</th><th>Bruk</th></tr></thead>
+        <tbody>
+          <tr><td>Normal Invers</td><td>SI</td><td>TMS · 0.14 / ((I/Is)^0.02 − 1)</td><td>Standard, de fleste distribusjonsanlegg</td></tr>
+          <tr><td>Very Inverse</td><td>VI</td><td>TMS · 13.5 / ((I/Is) − 1)</td><td>Langt nett, store variasjoner</td></tr>
+          <tr><td>Extremely Inverse</td><td>EI</td><td>TMS · 80 / ((I/Is)² − 1)</td><td>Motorvern, raske feil</td></tr>
+          <tr><td>Definite Time</td><td>DT</td><td>TMS (konstant tid)</td><td>Busstilknytning, enkel koordinering</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Vernparametere</h3>
+      <table>
+        <thead><tr><th>Parameter</th><th>Enhet</th><th>Beskrivelse</th></tr></thead>
+        <tbody>
+          <tr><td>Is (strømsetting)</td><td>A</td><td>Strøm der vernet begynner å telle ned mot utløsning</td></tr>
+          <tr><td>TMS (tids-multiplikator)</td><td>—</td><td>Skalerer IDMT-kurven. Høy TMS = tregere utløsning. Typisk 0.05–1.2.</td></tr>
+          <tr><td>Karakteristikk</td><td>—</td><td>SI / VI / EI / DT — bestemmer kurveform</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Selektivitetsregel (REN blad 7002 §5.1)</h3>
+      <div class="formula-block">
+        <div class="formula-name">Tidsdifferanse mellom vernpar</div>
+        Δt = t_oppstrøms − t_nedstrøms ≥ 200 ms
+        <div class="formula-note">Oppstrøms vern må holde (ikke løse ut) mens nedstrøms vern løser. Grønne celler i matrisen = OK.</div>
+      </div>
+    </section>
+
+    <!-- ════════════════ 9. REAKTIV KOMPENSERING ════════════════ -->
+    <section class="section" id="s9">
+      <div class="section-header">
+        <div class="section-num">9</div>
+        <h2>Reaktiv kompensering</h2>
+      </div>
+
+      <p>
+        Reaktiv kompensering brukes til å forbedre effektfaktoren (cosφ) i nettet.
+        Lav cosφ gir høy reaktiv strøm, økt spenningsfall og tap. En kondensatorbank
+        leverer reaktiv effekt lokalt og frigjør kapasitet i kabler og transformatorer.
+      </p>
+
+      <h3>Åpne kompenserings-panelet</h3>
+      <p>Klikk <span class="btn-ref purple">Kompensering</span> i verktøyrad 2. Et flytende panel åpnes til høyre.</p>
+
+      <figure id="fig-09">
+        <img src="bilder/08-kompensering.png" alt="Fasekompensering panel med effekttriangel" />
+        <figcaption>Figur 14 — Fasekompensering-panelet. P = 8.00 MW, Q = 4.00 MVAr, cosφ₁ = 0.894. Ønsket cosφ₂ = 0.98 (skyver). Beregnet Q_komp = 2.376 MVAr fordelt på 3 trinn. Strømreduksjon 8.7%, tap-reduksjon 16.7%.</figcaption>
+      </figure>
+
+      <h3>Formel</h3>
+      <div class="formula-block">
+        <div class="formula-name">Nødvendig kondensatorytelse</div>
+        Q_komp = P · (tan φ₁ − tan φ₂)
+        <div class="formula-note">P = aktiv effekt [kW eller MW], φ₁ = nåværende fasevinkel, φ₂ = ønsket fasevinkel. Fasitsvar: cosφ 0.85 → 0.95 gir Q_komp ≈ 0.991 MVAr.</div>
+      </div>
+
+      <h3>Effekttriangelet</h3>
+      <p>
+        Panelet viser et interaktivt effekttriangel med tre sider:
+      </p>
+      <ul style="margin: 0 0 14px 24px; color: #2c3e50;">
+        <li><strong>P (aktiv effekt)</strong> — den horisontale siden [MW]</li>
+        <li><strong>Q (reaktiv effekt)</strong> — den vertikale siden [MVAr]</li>
+        <li><strong>S (tilsynelatende effekt)</strong> — hypotenusen [MVA]</li>
+      </ul>
+      <p>
+        Juster «Mål-cosφ» i panelet og les av nødvendig Q_komp direkte.
+      </p>
+    </section>
+
+    <!-- ════════════════ 10. KRAFTPRODUKSJON ════════════════ -->
+    <section class="section" id="s10">
+      <div class="section-header">
+        <div class="section-num">10</div>
+        <h2>Kraftproduksjon</h2>
+      </div>
+
+      <p>
+        Produksjonsmodulen lar deg konfigurere ulike kraftkilder og beregne MW-kapasitet,
+        årlig energiproduksjon (MWh) og CO₂-ekvivalenter.
+      </p>
+
+      <h3>Produksjonstyper</h3>
+      <table>
+        <thead><tr><th>Type</th><th>Ikon</th><th>Nøkkelparametere</th><th>Formel</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Vannkraft</strong></td><td>💧</td><td>Fallhøyde H [m], vannføring Q [m³/s], virkningsgrad η</td><td>P = ρ·g·η·H·Q / 10⁶ [MW]</td></tr>
+          <tr><td><strong>Vindkraft</strong></td><td>🌬</td><td>Installert effekt [MW], kapasitetsfaktor CF</td><td>E_år = P_inst · CF · 8760 [MWh]</td></tr>
+          <tr><td><strong>Solkraft</strong></td><td>☀</td><td>Areal [m²], solinnstråling [kWh/m²/år], virkningsgrad η</td><td>P = A · G · η / 1000 [kW]</td></tr>
+          <tr><td><strong>Kjernekraft</strong></td><td>⚛</td><td>Nominell effekt [MWe], belastningsfaktor</td><td>E_år = P · BF · 8760 [MWh]</td></tr>
+        </tbody>
+      </table>
+
+      <figure id="fig-15">
+        <img src="bilder/01-fullskjerm.png" alt="Produksjonsoversikt bunnpanel" />
+        <figcaption>Figur 15 — Produksjons-fanen i bunnpanelet. Viser Vannkraftverk (Francis-turbin) med beregnet P = 90.25 MW mot satt P = 5.00 MW — avviket (+85.25) viser at beregnet produksjon er langt høyere enn den manuelt satte verdien. Klikk «Beregn alle» for å oppdatere.</figcaption>
+      </figure>
+
+      <h3>Produksjonsdashboard</h3>
+      <p>Klikk <span class="btn-ref green">☀ Dashboard</span> for en samlet oversikt over alle produksjonsenheter i nettet:</p>
+      <ul style="margin: 0 0 14px 24px; color: #2c3e50;">
+        <li>Total installert effekt [MW]</li>
+        <li>Estimert årsproduksjon [MWh/år]</li>
+        <li>CO₂-besparelse vs. kullkraft [tonn CO₂/år]</li>
+        <li>Mix-diagram per teknologi</li>
+      </ul>
+
+      <h3>Tidsserie-simulering (24 timer)</h3>
+      <p>Klikk <span class="btn-ref teal">⏱ Tidsserie</span> for å simulere 24-timers drift:</p>
+      <ul style="margin: 0 0 14px 24px; color: #2c3e50;">
+        <li><strong>Lastprofil</strong> — typisk husholdningsprofil (morgen- og kveldspikk)</li>
+        <li><strong>Produksjonsprofil</strong> — sol og vind varierer over dagen</li>
+        <li><strong>Effektbalanse</strong> — nettoverskudd (grønt) eller underskudd (rødt) per time</li>
+      </ul>
+      <div class="callout info">
+        <span class="callout-icon">ℹ</span>
+        <div class="callout-body">
+          <strong>Fasitsvar tidsserie</strong>
+          Kl. 12:00 (middag): nettoverskudd −1.552 MW (sol-produksjon > forbruk).
+          Kl. 03:00 (natt): underskudd +2.2 MW (ingen sol, lav vind).
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════ 11. JORDFEIL OG NØYTRAL ════════════════ -->
+    <section class="section" id="s11">
+      <div class="section-header">
+        <div class="section-num">11</div>
+        <h2>Jordfeil og nøytralbehandling</h2>
+      </div>
+
+      <p>
+        Jordfeil oppstår når en fase kortsluttes mot jord. Konsekvensene avhenger sterkt av
+        hvordan nøytrallederne er behandlet i nettet.
+      </p>
+
+      <h3>Jordfeil-kalkulatoren</h3>
+      <p>Klikk <span class="btn-ref green">⏚ Jordfeil</span>. Panelet lar deg velge nettype og beregne jordfeilstrøm:</p>
+
+
+      <table>
+        <thead><tr><th>Nettype</th><th>Nøytralbehandling</th><th>Jordfeilstrøm</th><th>Typisk bruk</th></tr></thead>
+        <tbody>
+          <tr><td><strong>IT-nett</strong></td><td>Isolert nøytral</td><td>Liten (kapasitiv, 1–50 A)</td><td>Industri, sykehus — driften kan fortsette ved første feil</td></tr>
+          <tr><td><strong>TN-nett</strong></td><td>Jordet nøytral</td><td>Stor (kortslutnings-størrelse)</td><td>Bygninger — vernet løser ut raskt</td></tr>
+          <tr><td><strong>Petersen-spole</strong></td><td>Resonansjording</td><td>Tilnærmet null (kompensert)</td><td>Distribusjonsnett — bueslukking ved friluftsfeil</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Petersen-spoleformel</h3>
+      <div class="formula-block">
+        <div class="formula-name">Resonansbetingelse for Petersen-spole</div>
+        L_P = 1 / (3 · ω² · C₀)
+        <div class="formula-note">C₀ = kapasitans til jord per fase [F]. ω = 2πf = 314 rad/s (50 Hz). Kompenserer nøyaktig kapasitiv jordfeilstrøm.</div>
+      </div>
+
+      <h3>Nøytralbehandlings-sammenligning</h3>
+      <p>Klikk <span class="btn-ref">∿ Nøytral</span> for en side-ved-side sammenligning av alle tre netttyper med beregnet jordfeilstrøm, overpenningsfaktor og anbefalinger.</p>
+
+      <div class="callout tip">
+        <span class="callout-icon">💡</span>
+        <div class="callout-body">
+          <strong>REN-grenser for jordmotstand</strong>
+          IT-nett og Petersen: R_jord ≤ 100 Ω. TN-nett: R_jord ≤ 50 Ω. (REN blad 9001 §3.2)
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════ 12. PEDAGOGISKE VERKTØY ════════════════ -->
+    <section class="section" id="s12">
+      <div class="section-header">
+        <div class="section-num">12</div>
+        <h2>Pedagogiske verktøy</h2>
+      </div>
+
+      <p>
+        GridMaster Edu inkluderer en rekke verktøy som støtter læringen.
+        Alle er tilgjengelige fra rad 2 i verktøyraden.
+      </p>
+
+      <h3>📐 Formelark</h3>
+      <p>Klikk <span class="btn-ref yellow">📐 Formelark</span> for en samlet oversikt over alle viktige formler gruppert per tema: lastflyt, spenningsfall, kortslutning, kompensering, ringnett og vern.</p>
+
+      <figure id="fig-17">
+        <img src="bilder/06-formelark-spenning.png" alt="Formelark GridMaster Edu" />
+        <figcaption>Figur 17 — Formelarket med faner per tema (Lastflyt, ΔU Spenningsfall, Kortslutning, Vern, Vannkraft, Vind...). Hvert tema viser formler med navn, matematisk uttrykk (gul monospace-font) og enhet/merknad. Bunnpanelet viser spenningsfall-resultater simultant.</figcaption>
+      </figure>
+
+      <h3>📖 Fagordliste</h3>
+      <p>
+        Klikk <span class="btn-ref teal">📖 Ordliste</span> for en søkbar liste med 25+ elektrofagbegreper.
+        Hvert begrep vises med norsk navn, engelsk oversettelse, symbol og full definisjon.
+        Filtrer etter kategori: Lastflyt, Kortslutning, Vern, Spenning, Kompensering, Jordfeil, Produksjon, Nett.
+      </p>
+
+      <h3>🎓 Læringsmål</h3>
+      <p>
+        Klikk <span class="btn-ref green">🎓 Læringsmål</span> for å se hvilke kompetansemål
+        (fra læreplanen) som dekkes av hvert tema i GridMaster. Nyttig som forberedelse til prøver.
+      </p>
+
+      <h3>📚 Scenariobibliotek</h3>
+      <p>
+        Klikk <span class="btn-ref purple">📚 Scenarioer</span> for å hente ferdigbygde eksempelnett.
+        Scenariene dekker typiske pensum-oppgaver med kjente fasitsvar:
+      </p>
+      <ul style="margin: 0 0 14px 24px; color: #2c3e50;">
+        <li>3-buss radialnettverk (NR lastflyt)</li>
+        <li>Ringnett med to kilder</li>
+        <li>Kortslutning IEC 60909</li>
+        <li>Vernkoordinering (tre vernpar)</li>
+        <li>Kompensering cosφ 0.85 → 0.95</li>
+      </ul>
+
+      <figure>
+        <img src="bilder/07-hjelp.png" alt="Hjelp-siden GridMaster Edu" />
+        <figcaption>Figur 17 — Hjelp-siden (åpnes med «? Hjelp»). Inneholder formler, REN-regler, fasitsvar og hurtigtaster — alt på ett sted. Fargekodede formler i gul monospace-font.</figcaption>
+      </figure>
+
+      <h3>💡 Hint-systemet</h3>
+      <p>
+        Et kontekstuelt hint-system dukker opp automatisk når du åpner en modul for første gang.
+        Hintet forklarer formål, foreslår neste steg og lenker til relevant del av formelarket.
+      </p>
+    </section>
+
+    <!-- ════════════════ 13. PER-UNIT OG EKSPORT ════════════════ -->
+    <section class="section" id="s13">
+      <div class="section-header">
+        <div class="section-num">13</div>
+        <h2>Per-unit og eksport</h2>
+      </div>
+
+      <h3>∿ Per-unit visning</h3>
+      <p>
+        <em>Per-unit</em> (p.u.) er et normaliseringssystem der alle størrelser oppgis som
+        brøk av valgte basisverdier. Dette forenkler beregninger i nett med flere spenningsnivåer.
+      </p>
+      <p>Klikk <span class="btn-ref teal">∿ Per-unit</span> for å:</p>
+      <ul style="margin: 0 0 14px 24px; color: #2c3e50;">
+        <li>Velge basis: S_base [MVA] og U_base [kV]</li>
+        <li>Se alle lastflyt-resultater normalisert i p.u.</li>
+        <li>Sammenligne på tvers av spenningsnivåer</li>
+      </ul>
+
+      <h3>📊 CSV-eksport</h3>
+      <p>Klikk <span class="btn-ref green">📊 CSV</span> for å laste ned resultater som regneark. Følgende tabeller kan eksporteres:</p>
+      <ul style="margin: 0 0 14px 24px; color: #2c3e50;">
+        <li>Lastflyt: bussenspentninger, strømmer, tap</li>
+        <li>Spenningsfall: ΔU% per linje</li>
+        <li>Kortslutning: Ik3p, Ik2p, ip per buss</li>
+        <li>Vernkoordinering: utløsningstider</li>
+        <li>Produksjon: MW, MWh/år per kilde</li>
+      </ul>
+
+      <h3>📄 PDF-rapport</h3>
+      <p>Klikk <span class="btn-ref">📄 Rapport</span> for å generere en fullstendig prosjektrapport:</p>
+
+
+      <p>Rapporten inneholder:</p>
+      <ul style="margin: 0 0 14px 24px; color: #2c3e50;">
+        <li>Prosjektnavn, studentnavn, kurs og dato</li>
+        <li>Nettopologi-sammendrag</li>
+        <li>Lastflyt-resultater (buss- og linjetabell)</li>
+        <li>Aktive beregningsresultater (spenningsfall, kortslutning, osv.)</li>
+        <li>REN-sjekk-status</li>
+      </ul>
+    </section>
+
+    <!-- ════════════════ 14. LAGRING ════════════════ -->
+    <section class="section" id="s14">
+      <div class="section-header">
+        <div class="section-num">14</div>
+        <h2>Prosjektlagring</h2>
+      </div>
+
+      <p>
+        GridMaster lagrer prosjekter lokalt som <code>.gmx</code>-filer på din datamaskin.
+        Ingen data sendes til serveren.
+      </p>
+
+      <h3>Lokal lagring (.gmx-format)</h3>
+      <ol class="steps">
+        <li><div class="step-body">Klikk <span class="btn-ref">Lagre .gmx</span>. Nettleseren laster ned en fil med navn <code>prosjektnavn.gmx</code>.</div></li>
+        <li><div class="step-body">For å åpne igjen: klikk <span class="btn-ref">Åpne .gmx</span> og velg filen.</div></li>
+        <li><div class="step-body">Eldre versjoner av <code>.gmx</code>-format migreres automatisk. Et grønt banner bekrefter migrasjonen og ber deg lagre på nytt.</div></li>
+      </ol>
+      <div class="callout info">
+        <span class="callout-icon">ℹ</span>
+        <div class="callout-body">
+          <strong>.gmx-formatet</strong>
+          Er egentlig JSON med filendelsen <code>.gmx</code>. Du kan åpne filen i en teksteditor
+          for å se all data. Aksepterer også rene <code>.json</code>-filer.
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════ 15. REN-ADVARSELSSYSTEM ════════════════ -->
+    <section class="section" id="s15">
+      <div class="section-header">
+        <div class="section-num">15</div>
+        <h2>REN-advarselssystem</h2>
+      </div>
+
+      <p>
+        REN (Norsk Elektroteknisk Norm) er regelverket for elektriske anlegg i Norge.
+        GridMaster sjekker automatisk om nettet ditt oppfyller de viktigste REN-kravene
+        og varsler deg via advarsels-panelet.
+      </p>
+
+      <h3>Åpne REN-panelet</h3>
+      <p>Klikk <span class="btn-ref yellow">⚠ REN</span> øverst til høyre. Panelet viser alle aktive advarsler.</p>
+
+
+      <h3>Sjekkliste — hva som kontrolleres</h3>
+      <table>
+        <thead><tr><th>REN-krav</th><th>Blad</th><th>Grense</th></tr></thead>
+        <tbody>
+          <tr><td>Kabeldimensjonering</td><td>4004 §3.3</td><td>I_b ≤ I_n ≤ I_z (belastning ≤ vernrating ≤ kabelkapasitet)</td></tr>
+          <tr><td>Spenningsfall</td><td>6002 §4.1</td><td>ΔU% &lt; 4% (grønn), 4–10% (gul), ≥10% (rød)</td></tr>
+          <tr><td>Kortslutningsvern</td><td>7002 §2.2</td><td>I_k3p ≥ 2 × I_a (sikker utløsning innen 5 sekunder)</td></tr>
+          <tr><td>Selektivitet</td><td>7002 §5.1</td><td>Δt ≥ 200 ms mellom vernpar</td></tr>
+          <tr><td>Jordmotstand (IT/Petersen)</td><td>9001 §3.2</td><td>R_jord ≤ 100 Ω</td></tr>
+          <tr><td>Jordmotstand (TN)</td><td>9001 §3.2</td><td>R_jord ≤ 50 Ω</td></tr>
+        </tbody>
+      </table>
+
+      <div class="callout info">
+        <span class="callout-icon">ℹ</span>
+        <div class="callout-body">
+          <strong>Kortslutningsvern-formelen</strong>
+          REN krever at I_k3p (trefaset kortslutningsstrøm) er minst 2 ganger I_a (øyeblikkstrøm for type C-vern = 10 × I_n).
+          Faktoren 2 gir sikkerhetsmargin for utløsning innen 5 sekunder.
+        </div>
+      </div>
+    </section>
+
+    <!-- ════════════════ 16. HURTIGREFERANSE ════════════════ -->
+    <section class="section" id="s16">
+      <div class="section-header">
+        <div class="section-num">16</div>
+        <h2>Hurtigreferanse</h2>
+      </div>
+
+      <h3>Tastatursnarveger</h3>
+      <table>
+        <thead><tr><th>Tast/handling</th><th>Effekt</th></tr></thead>
+        <tbody>
+          <tr><td><code>Musehjul</code></td><td>Zoom inn/ut på canvas</td></tr>
+          <tr><td><code>Venstreklikk + dra</code></td><td>Flytt canvas (pan)</td></tr>
+          <tr><td><code>Klikk på komponent</code></td><td>Velg og åpne editor til høyre</td></tr>
+          <tr><td><code>Delete</code> / <code>Backspace</code></td><td>Slett valgt komponent</td></tr>
+          <tr><td><code>Esc</code></td><td>Lukk åpne paneler / avbryt dra-operasjon</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Alle formler på én side</h3>
+
+      <div class="qref-grid">
+        <div class="qref-card">
+          <h4>Lastflyt (Newton-Raphson)</h4>
+          <dl>
+            <dt>P_i =</dt><dd>V_i·Σ Vk·(Gik·cosΔδ + Bik·sinΔδ)</dd>
+            <dt>Konvergens:</dt><dd>|ΔP|, |ΔQ| &lt; 10⁻⁶ p.u.</dd>
+          </dl>
+        </div>
+        <div class="qref-card">
+          <h4>Spenningsfall</h4>
+          <dl>
+            <dt>ΔU% =</dt><dd>(√3·I·(R·cosφ+X·sinφ)·L / Un) × 100</dd>
+            <dt>Grenser:</dt><dd>&lt;4% OK, 4–10% advarsel, ≥10% feil</dd>
+          </dl>
+        </div>
+        <div class="qref-card">
+          <h4>Kortslutning (IEC 60909)</h4>
+          <dl>
+            <dt>I''k3p =</dt><dd>c·Un / (√3·|Zk|)</dd>
+            <dt>I''k2p =</dt><dd>I''k3p · (√3/2)</dd>
+            <dt>ip =</dt><dd>κ·√2·I''k3p</dd>
+          </dl>
+        </div>
+        <div class="qref-card">
+          <h4>Kompensering</h4>
+          <dl>
+            <dt>Qkomp =</dt><dd>P·(tanφ₁ − tanφ₂)</dd>
+          </dl>
+        </div>
+        <div class="qref-card">
+          <h4>Ringnett (strømdeling)</h4>
+          <dl>
+            <dt>I_A =</dt><dd>Σ(Last_i · d_iB) / d_total</dd>
+            <dt>I_B =</dt><dd>I_total − I_A</dd>
+          </dl>
+        </div>
+        <div class="qref-card">
+          <h4>Vernkoordinering (IDMT)</h4>
+          <dl>
+            <dt>SI (NI):</dt><dd>TMS·0.14 / ((I/Is)^0.02−1)</dd>
+            <dt>VI:</dt><dd>TMS·13.5 / ((I/Is)−1)</dd>
+            <dt>Selektivitet:</dt><dd>Δt ≥ 200 ms</dd>
+          </dl>
+        </div>
+        <div class="qref-card">
+          <h4>Vannkraft</h4>
+          <dl>
+            <dt>P =</dt><dd>ρ·g·η·H·Q / 10⁶ [MW]</dd>
+            <dt>Fasitsvar:</dt><dd>H=200m, Q=50m³/s, η=0.92 → P≈90.25 MW</dd>
+          </dl>
+        </div>
+        <div class="qref-card">
+          <h4>Petersen-spole</h4>
+          <dl>
+            <dt>L_P =</dt><dd>1 / (3·ω²·C₀)</dd>
+            <dt>I_jord (IT) =</dt><dd>U_n·3·ω·C₀ / √3</dd>
+          </dl>
+        </div>
+      </div>
+
+      <h3>Fasitsvar (standardscenarier)</h3>
+      <table>
+        <thead><tr><th>Oppgave</th><th>Svar</th><th>Merknad</th></tr></thead>
+        <tbody>
+          <tr><td>NR lastflyt — 3-buss radial</td><td>I = 148 A, ΔU = 4.76%</td><td>Standardscenario</td></tr>
+          <tr><td>Fasekompensering</td><td>Q_komp ≈ 0.991 MVAr</td><td>cosφ 0.85 → 0.95</td></tr>
+          <tr><td>Vannkraft (Francis)</td><td>P = 90.252 MW</td><td>H=200m, Q=50m³/s, η=0.92</td></tr>
+          <tr><td>Kortslutning I''k3p</td><td>1.252 kA</td><td>IEC 60909, c=1.10</td></tr>
+          <tr><td>Kortslutning I''k2p</td><td>1.084 kA</td><td>= I''k3p × √3/2</td></tr>
+          <tr><td>Støtfaktor ip</td><td>2.557 kA</td><td>κ ≈ 1.448</td></tr>
+          <tr><td>Ringnett I_A = I_B</td><td>83 A (symmetrisk)</td><td>Tap-reduksjon ≈ 75%</td></tr>
+          <tr><td>Vern SI t(s)</td><td>0.429 s</td><td>TMS=0.1, Is=100A, I=500A</td></tr>
+          <tr><td>Vern VI t(s)</td><td>0.338 s</td><td>Standard very inverse</td></tr>
+          <tr><td>Tidsserie kl.12</td><td>−1.552 MW</td><td>Nettoverskudd middag (sol)</td></tr>
+          <tr><td>Tidsserie kl.03</td><td>+2.2 MW</td><td>Underskudd natt</td></tr>
+        </tbody>
+      </table>
+
+      <h3>Vanlige feil og løsninger</h3>
+      <table>
+        <thead><tr><th>Problem</th><th>Mulig årsak</th><th>Løsning</th></tr></thead>
+        <tbody>
+          <tr><td>Lastflyt konvergerer ikke</td><td>Manglende Slack-buss, øy (isolert buss), for stor last</td><td>Sjekk valideringspanelet (Validering-banner vises). Sørg for én Slack-buss.</td></tr>
+          <tr><td>Knapp er grå / ikke klikkbar</td><td>Mangler nødvendig nettopologi (se rad 2-tabellen)</td><td>Bygg nettet til kravet er oppfylt (f.eks. kortslutning krever 2+ busser)</td></tr>
+          <tr><td>Fil lastes ikke inn</td><td>Gammel versjon av .gmx-format</td><td>Prøv «Importer» i stedet. Migrasjonsbanner bekrefter konvertering.</td></tr>
+          <tr><td>REN-advarsel for spenningsfall</td><td>ΔU% over 4% på én eller flere linjer</td><td>Øk kabeltverrsnitt (lavere R), forku nettlegg, eller legg til kondensatorkompensering</td></tr>
+          <tr><td>Selektivitetsfeil (rødt i matrise)</td><td>Δt mellom vernpar &lt; 200 ms</td><td>Øk TMS for oppstrøms vern eller senk TMS for nedstrøms</td></tr>
+        </tbody>
+      </table>
+
+    </section>
+
+  </main>
+</div>
+
+<!-- ════════════════ BUNNTEKST ════════════════ -->
+<footer style="background:#1a2535;color:#546e7a;padding:24px 40px;font-size:12px;text-align:center;border-top:1px solid #243040;">
+  <p>GridMaster Edu v1.0.0 — © 2026 Bård Reinton-Kjellhov — Malakoff Videregående Skole / 00TE13I</p>
+  <p style="margin-top:6px">Brukerveiledning produsert mai 2026 · gridmaster-edu.vercel.app</p>
+</footer>
+
+</body>
+</html>

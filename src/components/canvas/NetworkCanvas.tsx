@@ -39,13 +39,14 @@ function lineToEdge(
   showFlow?: boolean,
   protectionStatus?: 'ok' | 'warning' | 'error' | 'present',
   protTripTimeS?: number,
+  isOpposing?: boolean,
 ): Edge {
   return {
     id: line.id,
     source: line.fromBusId,
     target: line.toBusId,
     type: 'lineEdge',
-    data: { ...line, label: line.name, voltageDropPct, flowCurrentA, loadingPercent, showFlow, protectionStatus, protTripTimeS },
+    data: { ...line, label: line.name, voltageDropPct, flowCurrentA, loadingPercent, showFlow, protectionStatus, protTripTimeS, isOpposing },
     selected: line.id === selectedEdgeId,
   };
 }
@@ -92,6 +93,7 @@ export function NetworkCanvas() {
   const powerFlowResult = useNetworkStore((s) => s.project.results.powerFlow);
   const showFlowDirections = useNetworkStore((s) => s.showFlowDirections);
   const scResults = useNetworkStore((s) => s.project.results.shortCircuit);
+  const ringNetworkResults = useNetworkStore((s) => s.ringNetworkResults);
   const selectedNodeId = useNetworkStore((s) => s.selectedNodeId);
   const selectedEdgeId = useNetworkStore((s) => s.selectedEdgeId);
   const lineDrawingMode = useNetworkStore((s) => s.lineDrawingMode);
@@ -130,6 +132,31 @@ export function NetworkCanvas() {
     [buses, compensators, selectedNodeId],
   );
 
+  // Determine which lines carry current opposing their expected ring direction.
+  // A segment is "opposing" when the NR power flow shows current in the opposite
+  // direction from what the ring analytical model expects (fromBusId → toBusId).
+  const ringOpposingSet = useMemo(() => {
+    const s = new Set<string>();
+    if (!ringNetworkResults || !powerFlowResult?.converged) return s;
+    for (const branch of ringNetworkResults.branches) {
+      const line = lines.find(
+        (l) => (l.fromBusId === branch.fromBusId && l.toBusId === branch.toBusId) ||
+                (l.fromBusId === branch.toBusId && l.toBusId === branch.fromBusId),
+      );
+      if (!line) continue;
+      const flr = powerFlowResult.lines.find((r) => r.lineId === line.id);
+      if (!flr) continue;
+      // Ring expects current flowing fromBusId → toBusId (positive in that convention).
+      // If the line is stored in the same direction: NR negative → opposing.
+      // If stored in reverse direction: NR positive → opposing.
+      const lineIsForward = line.fromBusId === branch.fromBusId;
+      const nrCurrentA = flr.currentKA * 1000;
+      const isOpposing = lineIsForward ? nrCurrentA < -0.1 : nrCurrentA > 0.1;
+      if (isOpposing) s.add(line.id);
+    }
+    return s;
+  }, [ringNetworkResults, powerFlowResult, lines]);
+
   const edges: Edge[] = useMemo(
     () => [
       ...lines.map((l) => {
@@ -158,7 +185,7 @@ export function NetworkCanvas() {
             protStatus = 'present';
           }
         }
-        return lineToEdge(l, selectedEdgeId, vdr?.deltaUPercent, flowA, flr?.loadingPercent, showFlowDirections && powerFlowResult?.converged, protStatus, protTripTimeS);
+        return lineToEdge(l, selectedEdgeId, vdr?.deltaUPercent, flowA, flr?.loadingPercent, showFlowDirections && powerFlowResult?.converged, protStatus, protTripTimeS, ringOpposingSet.has(l.id));
       }),
       ...transformers.map((t) => trafoToEdge(t, selectedEdgeId)),
       ...compensators.map((c) => ({
@@ -171,7 +198,7 @@ export function NetworkCanvas() {
         data: {},
       })),
     ],
-    [lines, transformers, compensators, protections, selectedEdgeId, voltageDropResults, powerFlowResult, showFlowDirections, scResults],
+    [lines, transformers, compensators, protections, selectedEdgeId, voltageDropResults, powerFlowResult, showFlowDirections, scResults, ringOpposingSet],
   );
 
   // Handle keyboard: Delete key, Escape

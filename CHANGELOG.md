@@ -15,18 +15,32 @@ Format: v[Sprint].[Revisjon].[Hotfix]
 - **S14-03** `OnboardingTour.tsx` — TOUR_KEY bumped til v14, steg-tekst oppdatert: "lokalt (.gmx)" presisert, sky-referanser fjernet
 - **S14-04** `HelpPage.tsx` — versjonsfooter v13.0.0 → v14.0.0, hurtigtast-tekst presisert til "Lagre lokalt"
 - **S14-05** Verifisert: `saveToCloud`/`loadFromCloud`/`listCloudProjects` kalles ikke fra noe annet sted enn `gmx.ts` (ingen autosave, hints, etc.)
+- **S14-06** Supabase `projects`-tabell tømt (TRUNCATE) av PL — eksisterende rader slettet manuelt
 
-### Del B — Toveis lastflyt-flow med fargekoding
+### Del B — Toveis lastflyt-flow med fargekoding (fullstendig)
+
+### Del B — Toveis lastflyt-flow med fargekoding (fullstendig)
 
 - **S14-08** `src/utils/flow-color.ts` — ny utility: `FlowState` (`normal|opposing|reversed|idle`), `FLOW_COLORS` (grønn/oransje/rød/grå), `getFlowState()`, `getFlowColor()`
-- **S14-09** `LineEdge.tsx` — oppgradert med ny farge-logikk: `normal` (grønn #2E7D32), `opposing` (oransje #F57C00, via `isOpposing`-prop), `reversed` (rød stiplet #C62828), `idle` (grå #90A4AE). `isOpposing` lag til `LineEdgeData`.
+- **S14-09** `LineEdge.tsx` — oppgradert med ny farge-logikk: `normal` (grønn #2E7D32), `opposing` (oransje #F57C00, via `isOpposing`-prop), `reversed` (rød stiplet #C62828), `idle` (grå #90A4AE). `isOpposing` lagt til `LineEdgeData`.
 - **S14-10** `package.json` test:e2e-script fikset: cross-env TEMP-override for Playwright på Windows
+- **S14-11** `NetworkCanvas.tsx` — `ringOpposingSet` useMemo: sammenligner ring-analytisk forventet retning med NR-strømretning per linje. `lineToEdge` fikk `isOpposing`-parameter. Orange strømpiler aktiveres automatisk ved ringnett + lastflyt-mismatch.
+- **S14-12** `src/utils/flow-color.test.ts` — 15 Vitest-tester for `getFlowState`, `FLOW_COLORS`, `getFlowColor`
+- **S14-13** `tests/e2e-flow-direction.spec.ts` — 4 Playwright E2E-tester: ringnett-knapp, sky-knapper fjernet, lastflyt-knapp synlig
+
+### Brukerveiledning (docs/brukerveiledning.html)
+
+- **S14-BV-1** Seksjon 1 (intro): Fjernet sky-referanse, presisert lokal lagring
+- **S14-BV-2** Seksjon 1 (systemkrav): Internett-rad: fjernet "Kreves for skylagring og"
+- **S14-BV-3** Seksjon 2 (toolbar-tabell): Fjernet ☁ Lagre til sky og ☁ Åpne fra sky-rader
+- **S14-BV-4** Seksjon 4 (lastflyt): Ny fargelegende-tabell for strømpiler (normal/opposing/reversed/idle)
+- **S14-BV-5** Seksjon 14 (lagring): Fjernet "Skylagring (Supabase)"-underseksjon, ny enkel tekst
 
 ### Verifikasjon
 
 - `npx tsc -b` — ingen feil
-- Vitest: 260/260 grønne
-- Playwright E2E: 11/11 grønne
+- Vitest: 275/275 grønne (15 nye flow-color-tester)
+- Playwright E2E: 15/15 grønne (4 nye flow-direction-tester)
 
 ---
 
